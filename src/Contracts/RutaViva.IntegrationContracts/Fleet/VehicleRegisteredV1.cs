@@ -6,5 +6,7 @@ public sealed record VehicleRegisteredV1(Guid VehicleId, string Plate, string? V
 {
     public const string EventName = "VehicleRegistered";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.FleetVehicle;
 }

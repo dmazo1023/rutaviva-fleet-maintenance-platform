@@ -6,5 +6,7 @@ public sealed record MaintenanceRoutineRegisteredV1(RoutineSnapshot Routine, Dat
 {
     public const string EventName = "MaintenanceRoutineRegistered";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.MaintenanceRoutine;
 }

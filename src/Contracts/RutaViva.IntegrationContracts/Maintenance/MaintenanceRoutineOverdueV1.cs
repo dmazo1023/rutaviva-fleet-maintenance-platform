@@ -6,5 +6,7 @@ public sealed record MaintenanceRoutineOverdueV1(RoutineSnapshot Routine, string
 {
     public const string EventName = "MaintenanceRoutineOverdue";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.MaintenanceRoutine;
 }

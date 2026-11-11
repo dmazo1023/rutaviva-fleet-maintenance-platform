@@ -6,5 +6,7 @@ public sealed record VehicleStatusChangedV1(Guid VehicleId, string Plate, Guid C
 {
     public const string EventName = "VehicleStatusChanged";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.FleetVehicle;
 }

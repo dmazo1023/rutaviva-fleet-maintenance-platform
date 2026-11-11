@@ -6,5 +6,7 @@ public sealed record ServiceOrderCompletedV1(ServiceOrderSnapshot Order, long Se
 {
     public const string EventName = "ServiceOrderCompleted";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.ServiceOrdersServiceOrder;
 }

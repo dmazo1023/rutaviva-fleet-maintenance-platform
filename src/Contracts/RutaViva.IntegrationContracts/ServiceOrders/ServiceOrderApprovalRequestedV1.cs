@@ -6,5 +6,7 @@ public sealed record ServiceOrderApprovalRequestedV1(ServiceOrderSnapshot Order,
 {
     public const string EventName = "ServiceOrderApprovalRequested";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.ServiceOrdersServiceOrder;
 }

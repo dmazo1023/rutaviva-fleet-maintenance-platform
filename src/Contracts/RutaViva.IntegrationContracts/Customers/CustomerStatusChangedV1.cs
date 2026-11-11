@@ -6,5 +6,7 @@ public sealed record CustomerStatusChangedV1(Guid CustomerId, string Status, Dat
 {
     public const string EventName = "CustomerStatusChanged";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.CustomersCustomer;
 }

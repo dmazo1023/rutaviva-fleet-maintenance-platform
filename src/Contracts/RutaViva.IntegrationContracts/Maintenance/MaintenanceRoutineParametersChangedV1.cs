@@ -6,5 +6,7 @@ public sealed record MaintenanceRoutineParametersChangedV1(RoutineSnapshot Routi
 {
     public const string EventName = "MaintenanceRoutineParametersChanged";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.MaintenanceRoutine;
 }

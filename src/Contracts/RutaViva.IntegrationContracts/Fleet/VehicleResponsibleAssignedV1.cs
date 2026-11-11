@@ -6,5 +6,7 @@ public sealed record VehicleResponsibleAssignedV1(Guid VehicleId, Guid? Responsi
 {
     public const string EventName = "VehicleResponsibleAssigned";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.FleetVehicle;
 }

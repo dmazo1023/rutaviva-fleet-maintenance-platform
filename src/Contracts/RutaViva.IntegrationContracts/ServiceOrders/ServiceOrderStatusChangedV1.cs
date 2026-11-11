@@ -6,5 +6,7 @@ public sealed record ServiceOrderStatusChangedV1(ServiceOrderSnapshot Order, str
 {
     public const string EventName = "ServiceOrderStatusChanged";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.ServiceOrdersServiceOrder;
 }

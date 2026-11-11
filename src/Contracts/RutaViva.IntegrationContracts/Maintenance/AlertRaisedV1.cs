@@ -6,5 +6,7 @@ public sealed record AlertRaisedV1(Guid AlertId, Guid VehicleId, string Plate, G
 {
     public const string EventName = "AlertRaised";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.MaintenanceAlert;
 }

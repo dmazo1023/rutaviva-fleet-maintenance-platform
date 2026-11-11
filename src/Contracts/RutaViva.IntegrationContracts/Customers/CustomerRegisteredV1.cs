@@ -6,5 +6,7 @@ public sealed record CustomerRegisteredV1(Guid CustomerId, string TaxId, string 
 {
     public const string EventName = "CustomerRegistered";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.CustomersCustomer;
 }

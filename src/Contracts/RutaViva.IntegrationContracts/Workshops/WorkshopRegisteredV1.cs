@@ -6,5 +6,7 @@ public sealed record WorkshopRegisteredV1(Guid WorkshopId, string TaxId, string 
 {
     public const string EventName = "WorkshopRegistered";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.WorkshopsWorkshop;
 }

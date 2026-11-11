@@ -6,5 +6,7 @@ public sealed record AlertStatusChangedV1(Guid AlertId, Guid VehicleId, string P
 {
     public const string EventName = "AlertStatusChanged";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.MaintenanceAlert;
 }

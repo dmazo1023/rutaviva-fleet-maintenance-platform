@@ -6,5 +6,7 @@ public sealed record ServiceOrderLinesChangedV1(ServiceOrderSnapshot Order, IRea
 {
     public const string EventName = "ServiceOrderLinesChanged";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.ServiceOrdersServiceOrder;
 }

@@ -6,5 +6,7 @@ public sealed record OdometerReadingRecordedV1(Guid VehicleId, string Plate, Gui
 {
     public const string EventName = "OdometerReadingRecorded";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.MaintenanceRoutine;
 }

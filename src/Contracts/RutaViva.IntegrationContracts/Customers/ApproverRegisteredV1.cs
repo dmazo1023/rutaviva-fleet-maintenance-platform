@@ -6,5 +6,7 @@ public sealed record ApproverRegisteredV1(Guid ApproverId, Guid CustomerId, stri
 {
     public const string EventName = "ApproverRegistered";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.CustomersCustomer;
 }

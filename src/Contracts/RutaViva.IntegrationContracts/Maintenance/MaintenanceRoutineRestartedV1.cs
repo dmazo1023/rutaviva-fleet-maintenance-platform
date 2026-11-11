@@ -6,5 +6,7 @@ public sealed record MaintenanceRoutineRestartedV1(RoutineSnapshot Routine, Guid
 {
     public const string EventName = "MaintenanceRoutineRestarted";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.MaintenanceRoutine;
 }

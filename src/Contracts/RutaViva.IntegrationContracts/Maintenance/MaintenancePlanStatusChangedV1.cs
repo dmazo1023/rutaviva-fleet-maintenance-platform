@@ -6,5 +6,7 @@ public sealed record MaintenancePlanStatusChangedV1(Guid VehicleId, string Plate
 {
     public const string EventName = "MaintenancePlanStatusChanged";
 
+    public const int Version = 1;
+
     public const string Stream = Streams.MaintenanceRoutine;
 }
