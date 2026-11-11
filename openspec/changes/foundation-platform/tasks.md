@@ -20,14 +20,14 @@
 
 ## 4. Infraestructura de persistencia y Outbox
 
-- [ ] 4.1 `ApplyRutaVivaConventions` (enums por nombre `varchar(20)`, `datetimeoffset(0)`, `decimal(18,2)`, `IHasRowVersion`), `OutboxMessage` + `OutboxMessageConfiguration`, `EventCheckpoint` + `EventCheckpointConfiguration` (design D-05). Verificar con prueba de modelo EF (`IModel`) que las columnas tienen los tipos esperados
-- [ ] 4.2 `EfUnitOfWork<TContext>` con traducción de `DbUpdateConcurrencyException` a `Concurrency.Conflict` y estrategia de ejecución. Verificar con prueba de integración (BD desechable `SqlServerTestDatabase`, ADR-0027) de dos guardados concurrentes que devuelve `ErrorType.Conflict`
+- [x] 4.1 `ApplyRutaVivaConventions` (enums por nombre `varchar(20)`, `datetimeoffset(0)`, `decimal(18,2)`, `IHasRowVersion`), `OutboxMessage` + `OutboxMessageConfiguration`, `EventCheckpoint` + `EventCheckpointConfiguration` (design D-05). Verificar con prueba de modelo EF (`IModel`) que las columnas tienen los tipos esperados
+- [x] 4.2 `EfUnitOfWork<TContext>` con traducción de `DbUpdateConcurrencyException` a `Concurrency.Conflict` y estrategia de ejecución. Verificar con prueba de integración (BD desechable `SqlServerTestDatabase`, ADR-0027) de dos guardados concurrentes que devuelve `ErrorType.Conflict`
 - [ ] 4.3 `DomainEventsToOutboxInterceptor` (design D-04): handlers internos, mappers a integración, Outbox y tope de 5 vueltas. Verificar con pruebas de integración: evento con efecto interno confirmado juntos; transacción fallida sin filas en Outbox; ciclo infinito devuelve error
-- [ ] 4.4 `OutboxIntegrationEventPublisher : IIntegrationEventPublisher` (escribe en el Outbox de la unidad de trabajo actual) y `EfEventCheckpointStore<TContext>`. Verificar con prueba de integración: un `Enqueue` sin `SaveChangesAsync` no deja filas y con `SaveChangesAsync` deja una
+- [x] 4.4 `OutboxIntegrationEventPublisher : IIntegrationEventPublisher` (escribe en el Outbox de la unidad de trabajo actual) y `EfEventCheckpointStore<TContext>`. Verificar con prueba de integración: un `Enqueue` sin `SaveChangesAsync` no deja filas y con `SaveChangesAsync` deja una
 
 ## 5. Servicio EventBus
 
-- [ ] 5.1 `src/Platform/EventBus/RutaViva.EventBus.Application`: validación del envelope, `PublishEventCommand`, `GetEventsQuery`, `ReportFailureCommand` y puerto `IEventStore` (design D-06). Verificar con pruebas unitarias en `tests/Platform/RutaViva.EventBus.Application.UnitTests` de la validación del envelope (`type` con formato `rutaviva.{service}.{EventName}.v{n}`)
+- [x] 5.1 `src/Platform/EventBus/RutaViva.EventBus.Application`: validación del envelope, `PublishEventCommand`, `GetEventsQuery`, `ReportFailureCommand` y puerto `IEventStore` (design D-06). Verificar con pruebas unitarias en `tests/Platform/RutaViva.EventBus.Application.UnitTests` de la validación del envelope (`type` con formato `rutaviva.{service}.{EventName}.v{n}`)
 - [ ] 5.2 `src/Platform/EventBus/RutaViva.EventBus.Infrastructure`: `EventBusDbContext` (schema `eventbus`: `Events`, `DeadLetters`), migración inicial y `SingleWriterEventStore` con idempotencia por `MessageId`. Verificar con pruebas de integración en `tests/Platform/RutaViva.EventBus.Hub.IntegrationTests`: duplicado devuelve el mismo offset; 50 publicaciones paralelas dan offsets consecutivos
 - [ ] 5.3 `src/Platform/EventBus/RutaViva.EventBus.Hub`: `EventsHub` en `/internal/hubs/events` con los 5 métodos y el aviso `EventsAvailable` al grupo `stream:{name}`. Verificar con prueba de integración `WebApplicationFactory` + cliente SignalR: un suscriptor de `fleet.vehicle` recibe el aviso y uno de otro stream no
 
@@ -39,9 +39,9 @@
 
 ## 7. API común y gobierno de arquitectura
 
-- [ ] 7.1 `RutaViva.BuildingBlocks.Api`: `ResultExtensions.ToHttpResult`, `CorrelationIdMiddleware`, `IEndpointModule` + `MapEndpointModules`, configuración JSON (enums como texto sin enteros). Verificar con pruebas `WebApplicationFactory` sobre una API mínima de prueba: 400/404/409/422 con `code`, eco de `X-Correlation-Id` y `400` ante enum desconocido
-- [ ] 7.2 `tests/RutaViva.Architecture.Tests`: regla de dependencia por capa, aislamiento entre servicios, Application sin AspNetCore/EF/CsvHelper/ClosedXML, sin *setters* públicos en entidades, enums que empiezan en 1 (spec `architecture-governance`) y convención de nombres de ADR-0026 IMP-002 (sufijos por carpeta de `src/` y sin `Common`/`Shared`/`Utils`/`Core`). Las reglas se parametrizan por la lista de servicios para no repetirlas. Verificar con `dotnet test` en verde y con una violación temporal que hace fallar cada regla
-- [ ] 7.3 `tests/RutaViva.IntegrationContracts.Tests`: `ContractSnapshot` (helper propio, ADR-0027: serializa con las opciones JSON de la solución y compara con `Snapshots/{Evento}.approved.json`; si el archivo no existe lo crea y la prueba falla) y una prueba parametrizada por cada evento `V1` dentro del envelope, descubiertos por reflexión sobre el ensamblado `RutaViva.IntegrationContracts`. Los `.approved.json` se versionan. Verificar con `dotnet test` y renombrando un campo para ver el fallo
+- [x] 7.1 `RutaViva.BuildingBlocks.Api`: `ResultExtensions.ToHttpResult`, `CorrelationIdMiddleware`, `IEndpointModule` + `MapEndpointModules`, configuración JSON (enums como texto sin enteros). Verificar con pruebas `WebApplicationFactory` sobre una API mínima de prueba: 400/404/409/422 con `code`, eco de `X-Correlation-Id` y `400` ante enum desconocido
+- [x] 7.2 `tests/RutaViva.Architecture.Tests`: regla de dependencia por capa, aislamiento entre servicios, Application sin AspNetCore/EF/CsvHelper/ClosedXML, sin *setters* públicos en entidades, enums que empiezan en 1 (spec `architecture-governance`) y convención de nombres de ADR-0026 IMP-002 (sufijos por carpeta de `src/` y sin `Common`/`Shared`/`Utils`/`Core`). Las reglas se parametrizan por la lista de servicios para no repetirlas. Verificar con `dotnet test` en verde y con una violación temporal que hace fallar cada regla
+- [x] 7.3 `tests/RutaViva.IntegrationContracts.Tests`: `ContractSnapshot` (helper propio, ADR-0027: serializa con las opciones JSON de la solución y compara con `Snapshots/{Evento}.approved.json`; si el archivo no existe lo crea y la prueba falla) y una prueba parametrizada por cada evento `V1` dentro del envelope, descubiertos por reflexión sobre el ensamblado `RutaViva.IntegrationContracts`. Los `.approved.json` se versionan. Verificar con `dotnet test` y renombrando un campo para ver el fallo
 
 ## 8. Base de datos local y documentación
 
@@ -50,5 +50,5 @@
 
 ## 9. Hosting (Recortable)
 
-- [ ] 9.1 (Recortable) `RutaViva.ServiceDefaults`: OpenTelemetry, `/health` con chequeo de SQL Server y `/alive`. Verificar con prueba `WebApplicationFactory`: `/health` = 503 con la BD caída y `/alive` = 200
+- [x] 9.1 (Recortable) `RutaViva.ServiceDefaults`: OpenTelemetry, `/health` con chequeo de SQL Server y `/alive`. Verificar con prueba `WebApplicationFactory`: `/health` = 503 con la BD caída y `/alive` = 200
 - [ ] 9.2 (Recortable) `RutaViva.AppHost` con SQL Server como `AddConnectionString("rutaviva-sql")`, parámetros secretos y el EventBus registrado. Verificar con `dotnet run --project src/Platform/RutaViva.AppHost` y el dashboard mostrando el EventBus sano

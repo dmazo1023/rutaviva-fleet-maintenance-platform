@@ -1,0 +1,25 @@
+{
+  "specversion": "1.0",
+  "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  "source": "rutaviva.tests",
+  "type": "AlertStatusChanged",
+  "subject": "sample-subject",
+  "time": "2026-03-15T10:00:00+00:00",
+  "datacontenttype": "application/json",
+  "traceparent": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
+  "data": {
+    "alertId": "66666666-6666-6666-6666-666666666666",
+    "vehicleId": "11111111-1111-1111-1111-111111111111",
+    "plate": "ABC123",
+    "customerId": "22222222-2222-2222-2222-222222222222",
+    "routineId": "55555555-5555-5555-5555-555555555555",
+    "type": "DueSoon",
+    "triggeredBy": "Odometer",
+    "status": "Resolved",
+    "acknowledgedAt": "2026-03-15T09:58:00+00:00",
+    "acknowledgedBy": "ana.torres",
+    "resolvedAt": "2026-03-15T09:59:00+00:00",
+    "resolutionReason": "ServiceCompleted",
+    "occurredAt": "2026-03-15T10:00:00+00:00"
+  }
+}

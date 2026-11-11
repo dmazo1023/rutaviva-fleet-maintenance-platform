@@ -1,0 +1,103 @@
+{
+  "wave": "2",
+  "verified": [
+    "4.1",
+    "4.2",
+    "4.4",
+    "5.1",
+    "7.2",
+    "7.3",
+    "9.1"
+  ],
+  "escalated": [
+    {
+      "taskId": "7.1",
+      "reason": "Functionally the task is covered. ResultExtensions.ToHttpResult maps 400/404/409/422 to ProblemDetails with the `code` extension. CorrelationIdMiddleware echoes or generates X-Correlation-Id. IEndpointModule and MapEndpointModules are present. The JSON enum converter has allowIntegerValues false. The tests cover 400/404/409/422 with application/problem+json and code, echo and generation of the header, and 400 for an unknown enum and for an integer enum. No previous content is deleted. It fails on one style rule, which says text literals must be private constants. tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Api/ApiTestHost.cs line 24 has an inline literal in `throw new InvalidOperationException(\"Host not started.\")`. Move it to a private const. With that fixed the task would pass.",
+      "attempts": 0,
+      "contextExhausted": false
+    }
+  ],
+  "unaccounted": [],
+  "handoff": {
+    "exports": {},
+    "decisions": []
+  },
+  "implemented": [
+    {
+      "agent": "F",
+      "status": "complete",
+      "notes": "",
+      "files": []
+    },
+    {
+      "agent": "H",
+      "status": "complete",
+      "notes": "",
+      "files": []
+    },
+    {
+      "agent": "I",
+      "status": "complete",
+      "notes": "",
+      "files": []
+    },
+    {
+      "agent": "J",
+      "status": "complete",
+      "notes": "",
+      "files": []
+    },
+    {
+      "agent": "P",
+      "status": "complete",
+      "notes": "",
+      "files": []
+    }
+  ],
+  "history": [
+    {
+      "round": 0,
+      "gate": {
+        "passed": true,
+        "failedCheck": null
+      }
+    },
+    {
+      "round": 0,
+      "verdict": [
+        {
+          "taskId": "4.1",
+          "passed": true
+        },
+        {
+          "taskId": "4.2",
+          "passed": true
+        },
+        {
+          "taskId": "4.4",
+          "passed": true
+        },
+        {
+          "taskId": "5.1",
+          "passed": true
+        },
+        {
+          "taskId": "7.1",
+          "passed": false
+        },
+        {
+          "taskId": "7.2",
+          "passed": true
+        },
+        {
+          "taskId": "7.3",
+          "passed": true
+        },
+        {
+          "taskId": "9.1",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

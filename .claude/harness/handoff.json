@@ -27,6 +27,40 @@
         "IClock assumed in namespace RutaViva.BuildingBlocks.Application.Abstractions; if agent C uses another namespace, fix the using in my 3 files.",
         "SystemClock requires a TimeProvider in its constructor (register TimeProvider.System in DI)."
       ]
+    },
+    "2": {
+      "runId": "wf_5b757d35-2d0",
+      "exports": {
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence (ns RutaViva.BuildingBlocks.Infrastructure.Persistence)": "interface IHasRowVersion { byte[] RowVersion { get; } }; static class RutaVivaModelBuilderExtensions { static ModelBuilder ApplyRutaVivaConventions(this ModelBuilder) }; sealed class EfUnitOfWork<TContext>(TContext context) : IUnitOfWork where TContext : DbContext; static class ConcurrencyErrors { static readonly Error Conflict }",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/OutboxMessage.cs": "sealed class OutboxMessage(Guid id, string stream, string eventType, string subject, string payload, DateTimeOffset occurredAt) { Id, Stream, EventType, Subject, Payload, OccurredAt, ProcessedAt?, Attempts, LastError? (private set); MarkProcessed(DateTimeOffset); RegisterFailure(string) }; sealed class OutboxMessageConfiguration(string schema) : IEntityTypeConfiguration<OutboxMessage>",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/EventCheckpoint.cs": "sealed class EventCheckpoint(string subscriberName, long lastOffset, DateTimeOffset updatedAt) { MoveTo(long, DateTimeOffset) }; sealed class EventCheckpointConfiguration(string schema)",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/IntegrationEventEnvelopeFactory.cs": "sealed class IntegrationEventEnvelopeFactory(IClock clock, IntegrationEventSettings settings) { IntegrationEventEnvelope Create(IIntegrationEvent integrationEvent, string subject) }; sealed record IntegrationEventSettings { required string ServiceName { get; init; } }; static class IntegrationEventJson { static readonly JsonSerializerOptions Options (Web) }",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/OutboxMessageFactory.cs": "sealed class OutboxMessageFactory(IntegrationEventEnvelopeFactory envelopeFactory) { OutboxMessage Create(IIntegrationEvent integrationEvent, string subject) }",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/OutboxIntegrationEventPublisher.cs": "sealed class OutboxIntegrationEventPublisher(DbContext context, OutboxMessageFactory messageFactory) : IIntegrationEventPublisher; sealed class EfEventCheckpointStore<TContext>(TContext context, IClock clock) : IEventCheckpointStore where TContext : DbContext",
+        "src/Platform/EventBus/RutaViva.EventBus.Application/Abstractions/IEventStore.cs": "namespace RutaViva.EventBus.Application.Abstractions; interface IEventStore { Task<long> AppendAsync(string stream, IntegrationEventEnvelope envelope, CancellationToken ct); Task<IReadOnlyList<EventRecord>> ReadAsync(IReadOnlyCollection<string> streams, long afterOffset, int max, CancellationToken ct); Task<long> GetLatestOffsetAsync(CancellationToken ct); Task AddDeadLetterAsync(string subscriberName, long offset, string error, CancellationToken ct); }",
+        "src/Platform/EventBus/RutaViva.EventBus.Application/Publishing/PublishEventCommand.cs": "record PublishEventCommand(string Stream, IntegrationEventEnvelope Envelope) : ICommand<long>; PublishEventCommandHandler(IEventStore) : ICommandHandler<PublishEventCommand,long>  [ns ...Application.Publishing]",
+        "src/Platform/EventBus/RutaViva.EventBus.Application/Queries/GetEventsQuery.cs": "record GetEventsQuery(IReadOnlyCollection<string> Streams, long AfterOffset, int Max) : IQuery<IReadOnlyList<EventRecord>>; const MaxPageSize=100; GetEventsQueryHandler; GetLatestOffsetQuery : IQuery<long>; GetLatestOffsetQueryHandler  [ns ...Application.Queries]",
+        "src/Platform/EventBus/RutaViva.EventBus.Application/Failures/ReportFailureCommand.cs": "record ReportFailureCommand(string Subscriber, long Offset, string Error) : ICommand<bool>; ReportFailureCommandHandler  [ns ...Application.Failures]",
+        "src/Platform/EventBus/RutaViva.EventBus.Application/EventBusErrors.cs": "static class EventBusErrors (ns RutaViva.EventBus.Application) with static Error properties; EnvelopeValidator.Validate(IntegrationEventEnvelope?) : Result  [ns ...Application.Validation]",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Api": "namespace RutaViva.BuildingBlocks.Api.Results: static ResultExtensions { IResult ToHttpResult(this Result); IResult ToHttpResult<T>(this Result<T>) }\nnamespace RutaViva.BuildingBlocks.Api.Correlation: sealed CorrelationIdMiddleware { const string HeaderName = \"X-Correlation-Id\"; Task InvokeAsync(HttpContext) }; static CorrelationIdApplicationBuilderExtensions { IApplicationBuilder UseCorrelationId(this IApplicationBuilder) }\nnamespace RutaViva.BuildingBlocks.Api.Endpoints: interface IEndpointModule { void MapEndpoints(IEndpointRouteBuilder app) }; static EndpointModuleExtensions { IEndpointRouteBuilder MapEndpointModules(this IEndpointRouteBuilder, Assembly) }\nnamespace RutaViva.BuildingBlocks.Api.Serialization: static JsonServiceCollectionExtensions { IServiceCollection AddApiJsonConventions(this IServiceCollection) }",
+        "tests/RutaViva.Architecture.Tests/ArchitectureAssemblies.cs": "public static class ArchitectureAssemblies { TheoryData<string> All, Layered, Domain, Application; Assembly Load(string); string LayerOf(string); string ComponentPrefixOf(string) }",
+        "tests/RutaViva.IntegrationContracts.Tests/ContractSnapshot.cs": "internal static class ContractSnapshot { JsonSerializerOptions Options; string Serialize(object); void Verify(string eventName, string actualJson) }",
+        "src/Platform/RutaViva.ServiceDefaults/ServiceDefaultsExtensions.cs": "public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder; public static WebApplication MapDefaultEndpoints(this WebApplication app)",
+        "src/Platform/RutaViva.ServiceDefaults/SqlServerHealthCheck.cs": "public sealed class SqlServerHealthCheck(IConfiguration configuration) : IHealthCheck"
+      },
+      "decisions": [
+        "IHasRowVersion lives in Infrastructure.Persistence (not Domain): aggregates implementing it need a reference to Infrastructure; ask orchestrator if it should move to Domain.",
+        "Task 4.3 interceptor should call OutboxMessageFactory.Create(event, subject) and add it to the context; stream/EventName are read from the event's const fields.",
+        "Publisher takes plain DbContext (DI must map DbContext to the service context); EfEventCheckpointStore.SaveAsync only stages, the unit of work commits.",
+        "ReportFailureCommand returns ICommand<bool> (true on success) because BuildingBlocks has no Unit type.",
+        "Handlers are plain classes without DI registration; Hub/composition must register them (or use AddCommandHandlers) and the IEventStore.",
+        "Handlers also validate stream/streams non-empty, offsets >= 0, max >= 1; error text is truncated to 2000 chars.",
+        "Services must call services.AddApiJsonConventions() and app.UseCorrelationId() explicitly; they are not wired automatically.",
+        "ToHttpResult on a successful Result returns 204 NoContent; on Result<T> returns 200 Ok(value). ProblemDetails title is the ErrorType name.",
+        "IEndpointModule implementations need a public parameterless constructor (Activator.CreateInstance).",
+        "Future services are added by appending assembly names to ArchitectureAssemblies.AssemblyNames; the layer, isolation, setter, enum and naming rules pick them up by suffix.",
+        "Snapshot comparison is semantic (JsonNode.DeepEquals), so formatting differences in the .approved.json files do not fail the test."
+      ]
     }
   }
 }

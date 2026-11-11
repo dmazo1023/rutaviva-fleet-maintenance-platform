@@ -1,0 +1,15 @@
+{
+  "specversion": "1.0",
+  "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  "source": "rutaviva.tests",
+  "type": "VehicleResponsibleAssigned",
+  "subject": "sample-subject",
+  "time": "2026-03-15T10:00:00+00:00",
+  "datacontenttype": "application/json",
+  "traceparent": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
+  "data": {
+    "vehicleId": "11111111-1111-1111-1111-111111111111",
+    "responsibleApproverId": "44444444-4444-4444-4444-444444444444",
+    "occurredAt": "2026-03-15T10:00:00+00:00"
+  }
+}
