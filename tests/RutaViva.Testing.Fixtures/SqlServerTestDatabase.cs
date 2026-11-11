@@ -11,6 +11,7 @@ public sealed class SqlServerTestDatabase : IAsyncLifetime
     private const string DatabasePrefix = "RutaViva_Tests_";
     private const string MasterDatabase = "master";
     private const string GuidFormat = "N";
+    private const int AdministrativeCommandTimeoutSeconds = 300;
     private const int StaleAfterHours = 2;
     private const string StaleQuery = "SELECT name FROM sys.databases WHERE name LIKE 'RutaViva[_]Tests[_]%' AND create_date < DATEADD(HOUR, -@hours, GETDATE())";
     private const string HoursParameter = "@hours";
@@ -43,7 +44,7 @@ public sealed class SqlServerTestDatabase : IAsyncLifetime
         where TContext : DbContext
     {
         DbContextOptions<TContext> options = new DbContextOptionsBuilder<TContext>()
-            .UseSqlServer(ConnectionString)
+            .UseSqlServer(ConnectionString, sql => sql.CommandTimeout(AdministrativeCommandTimeoutSeconds))
             .Options;
         TContext context = (TContext)Activator.CreateInstance(typeof(TContext), options)!;
         await PrepareSchemaAsync(context, cancellationToken);
@@ -97,7 +98,7 @@ public sealed class SqlServerTestDatabase : IAsyncLifetime
     {
         await using SqlConnection connection = new(_masterConnectionString);
         await connection.OpenAsync(cancellationToken);
-        await using SqlCommand command = new(commandText, connection);
+        await using SqlCommand command = new(commandText, connection) { CommandTimeout = AdministrativeCommandTimeoutSeconds };
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 }

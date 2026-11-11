@@ -115,6 +115,7 @@ Un `DbContext` por servicio (`CustomersDbContext`, `WorkshopsDbContext`, `FleetD
 |---|---|---|---|
 | C-N1 | `BulkRegistrationHandler<TRow, TCommand>`, `IBulkExecutionScope` y `DryRunUnitOfWork` | `RutaViva.BuildingBlocks.Application` (`foundation-platform`) | Maintenance (`routines/bulk`) repite el mismo algoritmo; en BuildingBlocks evita un quinto copy-paste. Si no se acepta, cada servicio lo implementa en su Application y se acepta la duplicación |
 | C-N2 | Código de error `Bulk.DuplicateInBatch` | `RutaViva.IntegrationContracts` o `BuildingBlocks.Application` | Lo usan los 5 endpoints masivos y DataImport lo muestra |
+| C-N1 / C-N2 | **Resuelto por el orquestador (tarea 1.1):** `BulkRegistrationHandler<TRow, TCommand>`, `IBulkExecutionScope`, `BulkExecutionScope.For(dryRun)` y `DryRunUnitOfWork` ya existen en `RutaViva.BuildingBlocks.Application.Bulk` y `Bulk.DuplicateInBatch` en `RutaViva.IntegrationContracts.Bulk.BulkErrorCodes`; los tres servicios los reutilizan. Consecuencia: los commands de registro (`RegisterCustomerCommand`, `AddApproverCommand`, `RegisterWorkshopCommand`, `RegisterVehicleCommand`) son `ICommand<Guid>` | Sin copy-paste de la carga masiva |
 | C-N3 | `VehicleWorkshopAssigned` no tiene productor | Registro de `foundation-platform` | Ningún caso de uso reasigna el taller (reto: fuera de alcance). **Resuelto por el orquestador:** se quitó del registro y de sus consumidores (YAGNI; elegir el taller está fuera del alcance del reto) |
 
 ## Risks / Trade-offs

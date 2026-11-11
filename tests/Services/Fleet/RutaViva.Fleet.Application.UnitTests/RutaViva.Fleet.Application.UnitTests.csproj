@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="NSubstitute" />
+    <ProjectReference Include="../../../../src/Services/Fleet/RutaViva.Fleet.Application/RutaViva.Fleet.Application.csproj" />
+    <ProjectReference Include="../../../RutaViva.Testing.Fixtures/RutaViva.Testing.Fixtures.csproj" />
+  </ItemGroup>
+</Project>

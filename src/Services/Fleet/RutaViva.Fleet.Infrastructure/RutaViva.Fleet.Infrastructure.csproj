@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <ProjectReference Include="../RutaViva.Fleet.Application/RutaViva.Fleet.Application.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/RutaViva.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/RutaViva.BuildingBlocks.EventBus.Client.csproj" />
+  </ItemGroup>
+</Project>

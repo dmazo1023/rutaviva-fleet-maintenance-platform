@@ -1,7 +1,7 @@
 ## 1. Prerrequisitos y estructura
 
-- [ ] 1.1 Confirmar con el orquestador la decisión sobre los contratos C-N1 y C-N2 de `design.md` (BuildingBlocks o local por servicio) y registrar la respuesta en `design.md`. Verificar con la sección "Contratos nuevos requeridos" actualizada
-- [ ] 1.2 Crear los 12 proyectos `src/Services/{Customers,Workshops,Fleet}/RutaViva.{Service}.{Domain,Application,Infrastructure,Api}` y los proyectos de prueba `tests/Services/{Service}/RutaViva.{Service}.{Domain.UnitTests,IntegrationTests}` con sus referencias permitidas, y agregarlos a `RutaViva.slnx`. Verificar con `dotnet build RutaViva.slnx` y con `tests/RutaViva.Architecture.Tests` en verde
+- [x] 1.1 Confirmar con el orquestador la decisión sobre los contratos C-N1 y C-N2 de `design.md` (BuildingBlocks o local por servicio) y registrar la respuesta en `design.md`. Verificar con la sección "Contratos nuevos requeridos" actualizada
+- [x] 1.2 Crear los 12 proyectos `src/Services/{Customers,Workshops,Fleet}/RutaViva.{Service}.{Domain,Application,Infrastructure,Api}` y los proyectos de prueba `tests/Services/{Service}/RutaViva.{Service}.{Domain.UnitTests,IntegrationTests}` con sus referencias permitidas, y agregarlos a `RutaViva.slnx`. Verificar con `dotnet build RutaViva.slnx` y con `tests/RutaViva.Architecture.Tests` en verde
 
 ## 2. Contratos de dominio (antes que las implementaciones)
 
@@ -40,14 +40,14 @@
 ## 7. Fleet: carga masiva
 
 - [ ] 7.1 `VehicleBulkRegistrationHandler` (NIT → dueño y taller, correo → responsable con `Vehicle.ResponsibleNotFound` y `Vehicle.ResponsibleAmbiguous`) y `POST /api/v1/fleet/vehicles/bulk`. Verificar con prueba de integración: los 10 vehículos de `samples/import/vehiculos.csv` resultan `Valid` y publican 10 `VehicleRegistered`
-- [ ] 7.2 Escenarios de `samples/import/con-errores/vehiculos.csv` como prueba de integración en simulación: `RVA105` y la primera `RVA106` `Valid`; segunda `RVA106` `Bulk.DuplicateInBatch`; `TAN204` `Vehicle.OwnerNotFound`; `TAN205` `Vehicle.WorkshopNotFound`; `EVA308` `Vehicle.ResponsibleNotFound`; `RVA101` `Skipped`; `RV-107`, 1890, −500, marca vacía y VIN corto `Invalid`. Verificar con `dotnet test --filter Category=Integration` y sin filas nuevas en `fleet.Vehicles`
+- [ ] 7.2 (Recortada por plazo; fuera del alcance aprobado) Escenarios de `samples/import/con-errores/vehiculos.csv` como prueba de integración en simulación: `RVA105` y la primera `RVA106` `Valid`; segunda `RVA106` `Bulk.DuplicateInBatch`; `TAN204` `Vehicle.OwnerNotFound`; `TAN205` `Vehicle.WorkshopNotFound`; `EVA308` `Vehicle.ResponsibleNotFound`; `RVA101` `Skipped`; `RV-107`, 1890, −500, marca vacía y VIN corto `Invalid`. Verificar con `dotnet test --filter Category=Integration` y sin filas nuevas en `fleet.Vehicles`
 
 ## 8. Verificación de punta a punta del change
 
-- [ ] 8.1 Prueba de integración con Customers, Workshops, Fleet y EventBus en proceso: cargar talleres, clientes, aprobadores y vehículos de `samples/import/` en ese orden y comprobar que Fleet tiene las 3 réplicas pobladas y 10 vehículos `Active`. Verificar con `dotnet test tests/Services/Fleet/RutaViva.Fleet.Api.IntegrationTests`
-- [ ] 8.2 Desactivar `RVA104` dos veces y reactivarlo: exactamente dos `VehicleStatusChanged` en `eventbus.Events` (Inactive, Active). Verificar con la misma suite
+- [ ] 8.1 (Recortada por plazo; fuera del alcance aprobado) Prueba de integración con Customers, Workshops, Fleet y EventBus en proceso: cargar talleres, clientes, aprobadores y vehículos de `samples/import/` en ese orden y comprobar que Fleet tiene las 3 réplicas pobladas y 10 vehículos `Active`. Verificar con `dotnet test tests/Services/Fleet/RutaViva.Fleet.Api.IntegrationTests`
+- [ ] 8.2 (Recortada por plazo; fuera del alcance aprobado) Desactivar `RVA104` dos veces y reactivarlo: exactamente dos `VehicleStatusChanged` en `eventbus.Events` (Inactive, Active). Verificar con la misma suite
 
 ## 9. Recortables
 
-- [ ] 9.1 (Recortable) Endpoints de estado de Customers: `PATCH /api/v1/customers/{id}/status` y `PATCH /api/v1/customers/{id}/approvers/{approverId}/status`. Verificar con pruebas `WebApplicationFactory`: `204` y un solo `ApproverStatusChanged` al inactivar dos veces
-- [ ] 9.2 (Recortable) Endpoint de estado de Workshops: `PATCH /api/v1/workshops/{id}/status`. Verificar con prueba `WebApplicationFactory`: `204` y un solo `WorkshopStatusChanged` al inactivar dos veces
+- [ ] 9.1 (Recortada por plazo; fuera del alcance aprobado) Endpoints de estado de Customers: `PATCH /api/v1/customers/{id}/status` y `PATCH /api/v1/customers/{id}/approvers/{approverId}/status`. Verificar con pruebas `WebApplicationFactory`: `204` y un solo `ApproverStatusChanged` al inactivar dos veces
+- [ ] 9.2 (Recortada por plazo; fuera del alcance aprobado) Endpoint de estado de Workshops: `PATCH /api/v1/workshops/{id}/status`. Verificar con prueba `WebApplicationFactory`: `204` y un solo `WorkshopStatusChanged` al inactivar dos veces

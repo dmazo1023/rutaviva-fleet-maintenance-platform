@@ -19,11 +19,29 @@
     <Project Path="src/Platform/EventBus/RutaViva.EventBus.Infrastructure/RutaViva.EventBus.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/Customers/">
+    <Project Path="src/Services/Customers/RutaViva.Customers.Api/RutaViva.Customers.Api.csproj" />
+    <Project Path="src/Services/Customers/RutaViva.Customers.Application/RutaViva.Customers.Application.csproj" />
+    <Project Path="src/Services/Customers/RutaViva.Customers.Domain/RutaViva.Customers.Domain.csproj" />
+    <Project Path="src/Services/Customers/RutaViva.Customers.Infrastructure/RutaViva.Customers.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Fleet/">
+    <Project Path="src/Services/Fleet/RutaViva.Fleet.Api/RutaViva.Fleet.Api.csproj" />
+    <Project Path="src/Services/Fleet/RutaViva.Fleet.Application/RutaViva.Fleet.Application.csproj" />
+    <Project Path="src/Services/Fleet/RutaViva.Fleet.Domain/RutaViva.Fleet.Domain.csproj" />
+    <Project Path="src/Services/Fleet/RutaViva.Fleet.Infrastructure/RutaViva.Fleet.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/Services/Maintenance/">
     <Project Path="src/Services/Maintenance/RutaViva.Maintenance.Api/RutaViva.Maintenance.Api.csproj" />
     <Project Path="src/Services/Maintenance/RutaViva.Maintenance.Application/RutaViva.Maintenance.Application.csproj" />
     <Project Path="src/Services/Maintenance/RutaViva.Maintenance.Domain/RutaViva.Maintenance.Domain.csproj" />
     <Project Path="src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/RutaViva.Maintenance.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Workshops/">
+    <Project Path="src/Services/Workshops/RutaViva.Workshops.Api/RutaViva.Workshops.Api.csproj" />
+    <Project Path="src/Services/Workshops/RutaViva.Workshops.Application/RutaViva.Workshops.Application.csproj" />
+    <Project Path="src/Services/Workshops/RutaViva.Workshops.Domain/RutaViva.Workshops.Domain.csproj" />
+    <Project Path="src/Services/Workshops/RutaViva.Workshops.Infrastructure/RutaViva.Workshops.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/RutaViva.Architecture.Tests/RutaViva.Architecture.Tests.csproj" />
@@ -39,9 +57,24 @@
     <Project Path="tests/Platform/RutaViva.EventBus.Hub.IntegrationTests/RutaViva.EventBus.Hub.IntegrationTests.csproj" />
   </Folder>
   <Folder Name="/tests/Services/" />
+  <Folder Name="/tests/Services/Customers/">
+    <Project Path="tests/Services/Customers/RutaViva.Customers.Application.UnitTests/RutaViva.Customers.Application.UnitTests.csproj" />
+    <Project Path="tests/Services/Customers/RutaViva.Customers.Domain.UnitTests/RutaViva.Customers.Domain.UnitTests.csproj" />
+    <Project Path="tests/Services/Customers/RutaViva.Customers.IntegrationTests/RutaViva.Customers.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Services/Fleet/">
+    <Project Path="tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/RutaViva.Fleet.Application.UnitTests.csproj" />
+    <Project Path="tests/Services/Fleet/RutaViva.Fleet.Domain.UnitTests/RutaViva.Fleet.Domain.UnitTests.csproj" />
+    <Project Path="tests/Services/Fleet/RutaViva.Fleet.IntegrationTests/RutaViva.Fleet.IntegrationTests.csproj" />
+  </Folder>
   <Folder Name="/tests/Services/Maintenance/">
     <Project Path="tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/RutaViva.Maintenance.Application.UnitTests.csproj" />
     <Project Path="tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/RutaViva.Maintenance.Domain.UnitTests.csproj" />
     <Project Path="tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/RutaViva.Maintenance.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Services/Workshops/">
+    <Project Path="tests/Services/Workshops/RutaViva.Workshops.Application.UnitTests/RutaViva.Workshops.Application.UnitTests.csproj" />
+    <Project Path="tests/Services/Workshops/RutaViva.Workshops.Domain.UnitTests/RutaViva.Workshops.Domain.UnitTests.csproj" />
+    <Project Path="tests/Services/Workshops/RutaViva.Workshops.IntegrationTests/RutaViva.Workshops.IntegrationTests.csproj" />
   </Folder>
 </Solution>

@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../../../../src/Services/Customers/RutaViva.Customers.Domain/RutaViva.Customers.Domain.csproj" />
+    <ProjectReference Include="../../../RutaViva.Testing.Fixtures/RutaViva.Testing.Fixtures.csproj" />
+  </ItemGroup>
+</Project>
