@@ -1,14 +1,111 @@
 {
-  "agents": [
-    { "id": "5.P", "tasks": 1, "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/", "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Messaging/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Publishing/", "tests/RutaViva.IntegrationContracts.Tests/Types/"],
-      "read": ["src/Contracts/RutaViva.IntegrationContracts/IntegrationEventDescriptor.cs", "src/Contracts/RutaViva.IntegrationContracts/IntegrationEventType.cs", {"label": "Messaging + Publishing actuales", "lines": 520}], "writeLines": 550, "skills": 1 },
-    { "id": "5.S", "tasks": 1, "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/"],
-      "read": ["src/Contracts/RutaViva.IntegrationContracts/IntegrationEventDescriptor.cs", "src/Contracts/RutaViva.IntegrationContracts/IntegrationEventType.cs", {"label": "Subscribing actual", "lines": 700}], "writeLines": 500, "skills": 1 },
-    { "id": "5.A", "tasks": 1, "files": ["tests/RutaViva.Architecture.Tests/"],
-      "read": [{"label": "Architecture.Tests actual", "lines": 600}, "docs/adr/adr-0026-proc-naming-conventions.md"], "writeLines": 400, "skills": 1 },
-    { "id": "5.E", "tasks": 1, "files": ["src/Platform/EventBus/", "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Decorators/", "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/DependencyInjection/", "tests/Platform/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/"],
-      "read": [{"label": "EventBus Application/Infra/Hub + decoradores", "lines": 900}], "writeLines": 650, "skills": 1 },
-    { "id": "5.D", "tasks": 1, "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Primitives/", "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/DomainEvents/", "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/", "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/DependencyInjection/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/DomainEvents/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/"],
-      "read": [{"label": "Primitives + DomainEvents + Persistence", "lines": 700}], "writeLines": 500, "skills": 1 }
-  ]
+ "agents": [
+  {
+   "id": "5.P",
+   "tasks": 1,
+   "files": [
+    "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/",
+    "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/",
+    "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Messaging/",
+    "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Publishing/",
+    "tests/RutaViva.IntegrationContracts.Tests/Types/"
+   ],
+   "read": [
+    "src/Contracts/RutaViva.IntegrationContracts/IntegrationEventDescriptor.cs",
+    "src/Contracts/RutaViva.IntegrationContracts/IntegrationEventType.cs",
+    {
+     "label": "Messaging + Publishing actuales",
+     "lines": 520
+    }
+   ],
+   "writeLines": 550,
+   "skills": 1
+  },
+  {
+   "id": "5.S",
+   "tasks": 1,
+   "files": [
+    "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/",
+    "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/"
+   ],
+   "read": [
+    "src/Contracts/RutaViva.IntegrationContracts/IntegrationEventDescriptor.cs",
+    "src/Contracts/RutaViva.IntegrationContracts/IntegrationEventType.cs",
+    {
+     "label": "Subscribing actual",
+     "lines": 700
+    }
+   ],
+   "writeLines": 500,
+   "skills": 1
+  },
+  {
+   "id": "5.A",
+   "tasks": 2,
+   "files": [
+    "tests/RutaViva.Architecture.Tests/",
+    "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Decorators/",
+    "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/DependencyInjection/",
+    "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/"
+   ],
+   "read": [
+    {
+     "label": "Architecture.Tests actual",
+     "lines": 336
+    },
+    "docs/adr/adr-0026-proc-naming-conventions.md",
+    {
+     "label": "decoradores de comandos y DI",
+     "lines": 114
+    },
+    {
+     "label": "pruebas de decoradores",
+     "lines": 150
+    }
+   ],
+   "writeLines": 650,
+   "skills": 1
+  },
+  {
+   "id": "5.E",
+   "tasks": 1,
+   "files": [
+    "src/Platform/EventBus/",
+    "tests/Platform/"
+   ],
+   "read": [
+    {
+     "label": "EventBus Application/Infra/Hub",
+     "lines": 620
+    },
+    {
+     "label": "pruebas EventBus",
+     "lines": 250
+    }
+   ],
+   "writeLines": 500,
+   "skills": 1
+  },
+  {
+   "id": "5.D",
+   "tasks": 1,
+   "files": [
+    "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Primitives/",
+    "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/DomainEvents/",
+    "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/",
+    "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/DependencyInjection/",
+    "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/DomainEvents/",
+    "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/",
+    "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/"
+   ],
+   "read": [
+    {
+     "label": "Primitives + DomainEvents + Persistence",
+     "lines": 700
+    }
+   ],
+   "writeLines": 500,
+   "skills": 1
+  }
+ ]
 }
