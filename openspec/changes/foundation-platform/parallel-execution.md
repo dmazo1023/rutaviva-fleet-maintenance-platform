@@ -91,7 +91,7 @@ Pruebas de la línea base (valor de `--baseline`): 0. Cada ola usa como línea b
 | B | `impl-contracts` | 2.3, 2.4 | `src/Contracts/RutaViva.IntegrationContracts/` | — | 49 044 (verde) | Ola 0 | Media |
 | C | `impl-application` | 2.2, 3.1, 3.3 | `src/BuildingBlocks/RutaViva.BuildingBlocks.Application/`, `tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/` | `Result`, `Error` (A, nombre fijo); `IIntegrationEvent`, `EventMetadata`, `Bulk*` (B, nombre fijo) | 56 596 (verde) | Ola 0 | Alta |
 | D | `impl-sql` | 8.1 | `deploy/local/sql/` | — | 27 136 (verde) | Ola 0 | Baja |
-| E | `impl-infra` | 3.2 | `src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Time/`, `tests/RutaViva.Testing.Common/`, `tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Infrastructure/`, `tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Testing/` | `IClock` (C, nombre fijo) | 39 348 (verde) | Ola 0 | Media |
+| E | `impl-infra` | 3.2 | `src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Time/`, `tests/RutaViva.Testing.Fixtures/`, `tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Infrastructure/`, `tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Testing/` | `IClock` (C, nombre fijo) | 39 348 (verde) | Ola 0 | Media |
 
 - C es el agente con más carga y está en la ruta crítica.
 - **Compuerta 1:** `verify-wave.sh` completo + `wave-verifier`.

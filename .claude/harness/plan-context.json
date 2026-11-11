@@ -4,7 +4,7 @@
       "id": "2.F",
       "tasks": 3,
       "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/", "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Messaging/"],
-      "read": ["openspec/changes/foundation-platform/design.md#L118-L174", "tests/RutaViva.Testing.Common/SqlServerTestDatabase.cs"],
+      "read": ["openspec/changes/foundation-platform/design.md#L118-L174", "tests/RutaViva.Testing.Fixtures/SqlServerTestDatabase.cs"],
       "writeLines": 650,
       "skills": 1
     },

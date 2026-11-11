@@ -6,7 +6,7 @@ src/BuildingBlocks/RutaViva.BuildingBlocks.Application/
 tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/
 deploy/local/sql/
 src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Time/
-tests/RutaViva.Testing.Common/
+tests/RutaViva.Testing.Fixtures/
 tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Infrastructure/
 tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Testing/
 src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/

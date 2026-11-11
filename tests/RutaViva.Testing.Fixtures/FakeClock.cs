@@ -1,6 +1,6 @@
 using RutaViva.BuildingBlocks.Application.Abstractions;
 
-namespace RutaViva.Testing.Common;
+namespace RutaViva.Testing.Fixtures;
 
 public sealed class FakeClock(DateTimeOffset initialUtcNow) : IClock
 {

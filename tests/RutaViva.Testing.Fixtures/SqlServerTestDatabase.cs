@@ -2,7 +2,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace RutaViva.Testing.Common;
+namespace RutaViva.Testing.Fixtures;
 
 public sealed class SqlServerTestDatabase : IAsyncLifetime
 {

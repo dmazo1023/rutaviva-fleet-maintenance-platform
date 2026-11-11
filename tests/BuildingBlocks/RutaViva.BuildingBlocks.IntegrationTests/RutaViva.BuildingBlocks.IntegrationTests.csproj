@@ -11,7 +11,7 @@
     <ProjectReference Include="..\..\..\src\BuildingBlocks\RutaViva.BuildingBlocks.Api\RutaViva.BuildingBlocks.Api.csproj" />
     <ProjectReference Include="..\..\..\src\Contracts\RutaViva.IntegrationContracts\RutaViva.IntegrationContracts.csproj" />
     <ProjectReference Include="..\..\..\src\Platform\EventBus\RutaViva.EventBus.Hub\RutaViva.EventBus.Hub.csproj" />
-    <ProjectReference Include="..\..\RutaViva.Testing.Common\RutaViva.Testing.Common.csproj" />
+    <ProjectReference Include="..\..\RutaViva.Testing.Fixtures\RutaViva.Testing.Fixtures.csproj" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Platform\RutaViva.ServiceDefaults\RutaViva.ServiceDefaults.csproj" />

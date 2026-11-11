@@ -2,6 +2,6 @@
   <ItemGroup>
     <PackageReference Include="NSubstitute" />
     <ProjectReference Include="..\..\..\src\Platform\EventBus\RutaViva.EventBus.Application\RutaViva.EventBus.Application.csproj" />
-    <ProjectReference Include="..\..\RutaViva.Testing.Common\RutaViva.Testing.Common.csproj" />
+    <ProjectReference Include="..\..\RutaViva.Testing.Fixtures\RutaViva.Testing.Fixtures.csproj" />
   </ItemGroup>
 </Project>

@@ -26,7 +26,7 @@ superseded_by: ""
 
 ## Decisión
 
-Las pruebas de integración usarán **el SQL Server local con una base de datos desechable por fixture**, detrás de una única abstracción en `tests/RutaViva.Testing.Common`:
+Las pruebas de integración usarán **el SQL Server local con una base de datos desechable por fixture**, detrás de una única abstracción en `tests/RutaViva.Testing.Fixtures`:
 
 - `SqlServerTestDatabase : IAsyncLifetime` crea `RutaViva_Tests_{guid}` al iniciar, expone su cadena de conexión, aplica las migraciones del `DbContext` bajo prueba y la elimina al terminar (`ALTER DATABASE … SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE …`).
 - La cadena base se lee de la variable de entorno `RUTAVIVA_TEST_SQL`. Su valor por defecto es `Server=localhost;Database=master;Trusted_Connection=True;TrustServerCertificate=True;`.

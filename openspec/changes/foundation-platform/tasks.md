@@ -15,7 +15,7 @@
 ## 3. Aplicación transversal
 
 - [x] 3.1 `ValidationCommandHandlerDecorator` y `LoggingCommandHandlerDecorator` con registro por Scrutor (`AddCommandHandlers(Assembly)`). Verificar con pruebas unitarias: un command inválido devuelve `ErrorType.Validation` sin invocar el handler, y el log incluye el nombre del command
-- [x] 3.2 `SystemClock : IClock` con `TodayIn(TimeZoneInfo)` y, en `tests/RutaViva.Testing.Common`, `FakeClock` y `SqlServerTestDatabase` (ADR-0027: BD `RutaViva_Tests_{guid}` en el SQL local, cadena de `RUTAVIVA_TEST_SQL`, limpieza de huérfanas). Verificar con prueba unitaria de `TodayIn` en `America/Bogota` cerca de la medianoche UTC y con una prueba de integración que crea, usa y borra la BD
+- [x] 3.2 `SystemClock : IClock` con `TodayIn(TimeZoneInfo)` y, en `tests/RutaViva.Testing.Fixtures`, `FakeClock` y `SqlServerTestDatabase` (ADR-0027: BD `RutaViva_Tests_{guid}` en el SQL local, cadena de `RUTAVIVA_TEST_SQL`, limpieza de huérfanas). Verificar con prueba unitaria de `TodayIn` en `America/Bogota` cerca de la medianoche UTC y con una prueba de integración que crea, usa y borra la BD
 - [x] 3.3 `BulkRegistrationHandler<TRow, TCommand>`, `IBulkExecutionScope` y `DryRunUnitOfWork` (design D-03, Template Method + Null Object). Verificar con pruebas unitarias sobre un command de prueba: fila existente = `Skipped`, fila repetida en el lote = `Invalid` con `Bulk.DuplicateInBatch`, `dryRun=true` no llama a `SaveChangesAsync` y `dryRun=false` confirma cada fila por separado
 
 ## 4. Infraestructura de persistencia y Outbox

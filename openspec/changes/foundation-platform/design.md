@@ -68,7 +68,7 @@ tests/
   RutaViva.Architecture.Tests/
   RutaViva.IntegrationContracts.Tests/
   RutaViva.Acceptance.Tests/
-  RutaViva.Testing.Common/
+  RutaViva.Testing.Fixtures/
   BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/
   Gateways/RutaViva.ApiGateway.IntegrationTests/
   Platform/RutaViva.EventBus.Application.UnitTests/
@@ -370,7 +370,7 @@ Pedidos de los changes incorporados a este registro (el detalle está en la secc
 
 - [El EventBus es punto único de fallo] → Outbox en los productores y checkpoint en los suscriptores: nada se pierde, solo se retrasa (ADR-0024 POS-002).
 - [Bucle de eventos de dominio infinito] → Máximo de 5 vueltas en el interceptor, con error explícito.
-- [Docker no está disponible en el equipo de desarrollo ni en el de la sustentación] → ADR-0027: las pruebas de integración usan `SqlServerTestDatabase` (`tests/RutaViva.Testing.Common`), que crea una BD `RutaViva_Tests_{guid}` en el SQL Server local, aplica las migraciones y la borra al terminar. La cadena base se lee de la variable `RUTAVIVA_TEST_SQL` con valor por defecto `Server=localhost;Database=master;Trusted_Connection=True;TrustServerCertificate=True;`. Se marcan con `Trait("Category","Integration")`.
+- [Docker no está disponible en el equipo de desarrollo ni en el de la sustentación] → ADR-0027: las pruebas de integración usan `SqlServerTestDatabase` (`tests/RutaViva.Testing.Fixtures`), que crea una BD `RutaViva_Tests_{guid}` en el SQL Server local, aplica las migraciones y la borra al terminar. La cadena base se lee de la variable `RUTAVIVA_TEST_SQL` con valor por defecto `Server=localhost;Database=master;Trusted_Connection=True;TrustServerCertificate=True;`. Se marcan con `Trait("Category","Integration")`.
 - [BuildingBlocks acopla versiones] → Aceptado en un único repositorio (ADR-0010 NEG-003).
 
 ## Migration Plan

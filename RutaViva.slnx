@@ -21,7 +21,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/RutaViva.Architecture.Tests/RutaViva.Architecture.Tests.csproj" />
     <Project Path="tests/RutaViva.IntegrationContracts.Tests/RutaViva.IntegrationContracts.Tests.csproj" />
-    <Project Path="tests/RutaViva.Testing.Common/RutaViva.Testing.Common.csproj" />
+    <Project Path="tests/RutaViva.Testing.Fixtures/RutaViva.Testing.Fixtures.csproj" />
   </Folder>
   <Folder Name="/tests/BuildingBlocks/">
     <Project Path="tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/RutaViva.BuildingBlocks.IntegrationTests.csproj" />

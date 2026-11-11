@@ -8,6 +8,6 @@
     <ProjectReference Include="..\..\..\src\BuildingBlocks\RutaViva.BuildingBlocks.EventBus.Client\RutaViva.BuildingBlocks.EventBus.Client.csproj" />
     <ProjectReference Include="..\..\..\src\BuildingBlocks\RutaViva.BuildingBlocks.Api\RutaViva.BuildingBlocks.Api.csproj" />
     <ProjectReference Include="..\..\..\src\Contracts\RutaViva.IntegrationContracts\RutaViva.IntegrationContracts.csproj" />
-    <ProjectReference Include="..\..\RutaViva.Testing.Common\RutaViva.Testing.Common.csproj" />
+    <ProjectReference Include="..\..\RutaViva.Testing.Fixtures\RutaViva.Testing.Fixtures.csproj" />
   </ItemGroup>
 </Project>

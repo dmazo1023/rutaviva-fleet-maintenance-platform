@@ -1,5 +1,5 @@
 using Microsoft.Data.SqlClient;
-using RutaViva.Testing.Common;
+using RutaViva.Testing.Fixtures;
 
 namespace RutaViva.BuildingBlocks.IntegrationTests.Testing;
 
