@@ -5,6 +5,8 @@ namespace RutaViva.BuildingBlocks.Infrastructure.Persistence;
 
 public static class RutaVivaModelBuilderExtensions
 {
+    public const string RowVersionPropertyName = "RowVersion";
+
     private const int EnumMaxLength = 20;
     private const int DateTimeOffsetPrecision = 0;
     private const int DecimalPrecision = 18;
@@ -29,12 +31,12 @@ public static class RutaVivaModelBuilderExtensions
             return;
         }
 
-        if (!typeof(IHasRowVersion).IsAssignableFrom(entityType.ClrType))
+        if (!AggregateRootTypes.IsAggregateRoot(entityType.ClrType))
         {
             return;
         }
 
-        modelBuilder.Entity(entityType.ClrType).Property(nameof(IHasRowVersion.RowVersion)).IsRowVersion();
+        modelBuilder.Entity(entityType.ClrType).Property<byte[]>(RowVersionPropertyName).IsRowVersion();
     }
 
     private static void ApplyPropertyConventions(IMutableEntityType entityType)

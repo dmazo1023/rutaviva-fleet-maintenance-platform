@@ -1,6 +1,7 @@
 # Modelo de datos — RutaViva (SQL Server)
 
 > Decisión de topología: [ADR-0013](../adr/adr-0013-data-sqlserver-schema-per-service.md). Parámetros: [ADR-0019](../adr/adr-0019-data-business-parameters-in-database.md). Estados de activación: [ADR-0020](../adr/adr-0020-arch-activation-states-suspension-cascade.md).
+> Autenticación en local: [ADR-0028](../adr/adr-0028-data-local-windows-authentication.md). Lecturas de odómetro: [ADR-0025](../adr/adr-0025-data-odometer-reading-log.md). Mensajería: [ADR-0024](../adr/adr-0024-int-eventbus-signalr-sql-log.md).
 > Script de referencia: [`database/rutaviva-reference-schema.sql`](database/rutaviva-reference-schema.sql). La fuente de verdad de la implementación son las migraciones de EF Core de cada servicio.
 
 ---
@@ -10,14 +11,15 @@
 | # | Principio | Cómo se aplica |
 |---|---|---|
 | P-01 | **Un schema = un dueño** | Cada servicio accede solo a su schema con su propio usuario. No hay FK ni `JOIN` entre schemas |
-| P-02 | **La tabla sigue al agregado** | Las raíces llevan `RowVersion`. Las entidades internas (rutinas, aprobadores, líneas e historial) cuelgan de su raíz con FK y `ON DELETE CASCADE` |
-| P-03 | **Referencias entre contextos por ID, sin FK** | La validación usa réplicas locales (`*References`) alimentadas por Kafka |
+| P-02 | **La tabla sigue al agregado** | Las raíces llevan `RowVersion` (rowversion como **propiedad sombra** de EF Core: la columna existe en la tabla, pero el dominio no la conoce). Las entidades internas (rutinas, aprobadores, líneas e historial) cuelgan de su raíz con FK y `ON DELETE CASCADE` |
+| P-03 | **Referencias entre contextos por ID, sin FK** | La validación usa réplicas locales (`*References`) alimentadas por el EventBus |
 | P-04 | **Las invariantes de negocio también viven en el motor** | Índices únicos filtrados y `CHECK` en los estados, intervalos, cotización, pausa y finalización |
 | P-05 | **Dos dimensiones de estado, dos columnas** | Activación (`State` o `Status`) separada del estado de negocio (`DueStatus`) |
 | P-06 | **Los parámetros son datos** | La matriz `RoutineTypes` y `ApprovalPolicies` (solo inserción, versionada por `EffectiveFrom`) |
 | P-07 | **Todo estado es un enum** | En código, cada estado o clasificación es un `enum` de C# en el Domain de su servicio (catálogo en §5). En SQL Server se guarda por nombre (`varchar(20)` + `CHECK` con los mismos valores), nunca como `bit` ni como un entero mágico |
 | P-08 | **Tiempo explícito** | `datetimeoffset(0)` para los instantes y `date` para las fechas de negocio |
-| P-09 | **Mensajería confiable** | `OutboxMessages` e `InboxMessages` en cada schema de negocio |
+| P-09 | **Mensajería confiable** | `OutboxMessages` y `EventCheckpoints` (suscriptor + último offset) en cada schema de negocio y en `reporting`; el log de eventos vive en el schema `eventbus` |
+| P-10 | **Kilómetros como `bigint`** | Toda columna de kilometraje (`OdometerKm`, `CycleStartKm`, `ServicedKm`, `Kilometers`, `NextDueKm`) es `bigint` |
 
 ---
 
@@ -90,11 +92,13 @@ erDiagram
     }
     CustomerReferences {
         uniqueidentifier CustomerId PK
+        varchar TaxId UK
         nvarchar Name
         varchar Status "Active|Inactive"
     }
     WorkshopReferences {
         uniqueidentifier WorkshopId PK
+        varchar TaxId UK
         nvarchar Name
         varchar Status "Active|Inactive"
     }
@@ -102,6 +106,7 @@ erDiagram
         uniqueidentifier ApproverId PK
         uniqueidentifier CustomerId
         nvarchar FullName
+        nvarchar Email
         varchar Status "Active|Inactive"
     }
 ```
@@ -112,6 +117,7 @@ erDiagram
 erDiagram
     RoutineTypes ||--o{ MaintenanceRoutines : "parametriza"
     MaintenancePlans ||--o{ MaintenanceRoutines : "contains"
+    MaintenancePlans ||--o{ OdometerReadings : "log (ADR-0025)"
     MaintenanceRoutines ||--o{ Alerts : "raises"
     RoutineTypes {
         uniqueidentifier Id PK
@@ -154,6 +160,9 @@ erDiagram
     Alerts {
         uniqueidentifier Id PK
         uniqueidentifier VehicleId
+        varchar Plate
+        uniqueidentifier CustomerId
+        nvarchar RoutineName
         uniqueidentifier RoutineId FK
         int CycleNumber
         varchar Type "DueSoon|Overdue"
@@ -166,7 +175,18 @@ erDiagram
         varchar ResolutionReason
         rowversion RowVersion
     }
+    OdometerReadings {
+        bigint Id PK
+        uniqueidentifier VehicleId FK
+        bigint Kilometers "ge 0"
+        datetimeoffset ReadAt
+        datetimeoffset ReceivedAt
+        varchar Outcome "Accepted|Ignored"
+        varchar IgnoredReason "nullable, NotGreaterThanCurrent"
+    }
 ```
+
+`OdometerReadings` (ADR-0025) es un log de solo inserción fuera del agregado `MaintenancePlan`. Se inserta en la misma transacción que el cambio del plan. Las lecturas de vehículos desconocidos no se guardan. Índice `IX_OdometerReadings_VehicleId_ReceivedAt (VehicleId, ReceivedAt DESC)`.
 
 **Valores calculados (no se almacenan)**: el próximo mantenimiento es `CycleStartKm + IntervalKm` y `DATEADD(month, IntervalMonths, CycleStartDate)`. El % efectivo es `COALESCE(Override, RoutineTypes.DueSoonThresholdPercent)`.
 
@@ -189,10 +209,12 @@ erDiagram
         bigint Number UK "SEQUENCE"
         varchar Origin "Automatic|Manual"
         uniqueidentifier VehicleId
+        varchar Plate
         uniqueidentifier RoutineId
         nvarchar RoutineName
         uniqueidentifier CustomerId
         uniqueidentifier WorkshopId
+        uniqueidentifier ResponsibleApproverId "nullable"
         varchar Status "9 estados (incl. OnSite)"
         varchar StatusBeforeHold "nullable"
         varchar ApprovalReason "Quote|AdditionalServices"
@@ -259,7 +281,32 @@ erDiagram
 
 ### Tablas técnicas (en cada schema de negocio)
 
-`OutboxMessages` (Id, Topic, MessageKey, EventType, Payload, OccurredAt, ProcessedAt, Attempts, LastError) e `InboxMessages` (MessageId + ConsumerName, ProcessedAt).
+`OutboxMessages` (Id = MessageId, Stream, EventType, Subject, Payload, OccurredAt, ProcessedAt, Attempts, LastError; índice filtrado `WHERE ProcessedAt IS NULL`) y `EventCheckpoints` (SubscriberName PK, LastOffset, UpdatedAt), en `customers`, `workshops`, `fleet`, `maintenance`, `serviceorders` y `reporting` (este último solo con `EventCheckpoints`).
+
+### `eventbus` (log de eventos, ADR-0024)
+
+```mermaid
+erDiagram
+    Events {
+        bigint Offset PK "identity"
+        uniqueidentifier MessageId UK
+        varchar Stream
+        varchar Type
+        varchar Subject
+        datetimeoffset OccurredAt
+        datetimeoffset StoredAt
+        nvarchar Payload
+    }
+    DeadLetters {
+        bigint Id PK "identity"
+        varchar SubscriberName
+        bigint Offset
+        nvarchar Error
+        datetimeoffset ReportedAt
+    }
+```
+
+> El EventBus no usa Outbox (es el log). `Events.Offset` es estrictamente creciente y global; la idempotencia por `MessageId` la resuelve el índice único.
 
 ---
 
@@ -292,6 +339,7 @@ erDiagram
         int InvalidRows
         int SkippedRows
         int ImportedRows
+        nvarchar FailureReason "nullable"
     }
     ImportRows {
         bigint Id PK
@@ -315,12 +363,15 @@ erDiagram
     VehicleRoutineStatus {
         uniqueidentifier RoutineId PK
         uniqueidentifier VehicleId
+        varchar Plate
+        uniqueidentifier CustomerId
         nvarchar RoutineName
         varchar State
         varchar DueStatus
         bigint NextDueKm
         date NextDueDate
         decimal ConsumedPercent
+        bigint LastEventOffset
     }
     ServiceOrderFacts {
         uniqueidentifier ServiceOrderId PK
@@ -334,6 +385,7 @@ erDiagram
         decimal TotalAmount
         bit AutoApproved
         datetimeoffset CreatedAt "y fechas de cada fase"
+        bigint LastEventOffset
     }
     AlertFacts {
         uniqueidentifier AlertId PK
@@ -344,8 +396,11 @@ erDiagram
         datetimeoffset RaisedAt
         datetimeoffset AcknowledgedAt
         datetimeoffset ResolvedAt
+        bigint LastEventOffset
     }
 ```
+
+> Todas las tablas de proyección (`Customers`, `Workshops`, `Vehicles`, `VehicleRoutineStatus`, `ServiceOrderFacts` y `AlertFacts`) llevan `LastEventOffset bigint` además de `LastEventAt`.
 
 > Las proyecciones **no tienen `CHECK` de enums**: son copias tolerantes (*tolerant reader*). Si el dueño agrega un valor nuevo, la proyección lo guarda sin fallar. Tampoco tienen FK: se actualizan por evento y en cualquier orden.
 
@@ -369,8 +424,11 @@ erDiagram
 | D-16 | `AppointmentAt` y `AppointmentNotes`, con `CK_ServiceOrders_AppointmentRequired` | ADR-0021: la cita es un dato de la orden, obligatoria desde `OnSite`. No hay módulo de agendamiento |
 | D-17 | `imports.ImportRows` guarda la fila original (`RawData`) y sus errores | Permite generar el CSV de errores descargable y auditar cada carga |
 | D-18 | `reporting.*Facts` desnormalizadas, con las fechas de cada fase | Los reportes son consultas sobre una sola tabla, sin `JOIN` entre schemas. Los tiempos de ciclo se calculan con `DATEDIFF` sobre columnas locales |
-| D-19 | `LastEventAt` en cada proyección | Descarta los eventos fuera de orden: solo se aplica un evento si es más reciente que el último registrado |
-| D-20 | Permisos generados con un ciclo para los 7 schemas | Cada usuario tiene `GRANT` sobre su schema y `DENY` sobre los otros 6, sin repetir 42 líneas a mano |
+| D-19 | `LastEventOffset` (y `LastEventAt` para auditoría) en cada proyección | Descarta los eventos fuera de orden: solo se aplica un evento si su `metadata.Offset` es mayor que `LastEventOffset`. Se usa el offset y no `OccurredAt` porque varios eventos de una misma transacción comparten fecha (ADR-0024) |
+| D-20 | Permisos generados con un ciclo para los 8 schemas | Cada usuario tiene `GRANT` sobre su schema y `DENY` sobre los otros 7, sin repetir 56 líneas a mano |
+| D-21 | `maintenance.OdometerReadings` como log fuera del agregado | ADR-0025: la regla RN-6 es visible en la UI y el agregado `MaintenancePlan` no crece |
+| D-22 | `EventCheckpoints` en lugar de `InboxMessages` | ADR-0024: el suscriptor guarda el último offset procesado por transacción; no hay tabla de deduplicación por mensaje |
+| D-23 | `RowVersion` como propiedad sombra | El dominio no conoce la persistencia: `ApplyRutaVivaConventions()` configura `rowversion` en toda raíz de agregado |
 | D-12 | `ServiceOrders.Number` desde una `SEQUENCE` | Número legible `OS-000123` |
 | D-13 | Índices de bandeja: alertas por estado, órdenes por taller y estado, y por dueño y estado | Vistas del CRM |
 | D-14 | `ApprovalReason` y `ApprovalPriority` en la orden, más el índice filtrado `IX_ServiceOrders_ApprovalInbox` (`WHERE Status = 'PendingApproval'`) | A-15: la bandeja de aprobaciones muestra primero las de prioridad alta (servicios adicionales con el vehículo en sitio). El motivo decide si al aprobar la orden va a `Approved` o vuelve a `OnSite` |
@@ -382,9 +440,11 @@ erDiagram
 
 | Usuario | Permisos | Prohibido |
 |---|---|---|
-| `rutaviva_{service}_app` (×7: customers, workshops, fleet, maintenance, serviceorders, imports, reporting) | `SELECT/INSERT/UPDATE/DELETE` en su `SCHEMA` | `DENY` explícito en los otros 6 schemas |
+| `rutaviva_{service}_app` (×8: customers, workshops, fleet, maintenance, serviceorders, imports, reporting, eventbus) | `SELECT/INSERT/UPDATE/DELETE` en su `SCHEMA` | `DENY` explícito en los otros 7 schemas |
 | `rutaviva_serviceorders_app` | Además, `UPDATE` sobre la SEQUENCE de números | — |
 | Administrador local | DDL para las migraciones | No lo usan los servicios en ejecución |
+
+> **ADR-0028 (autenticación de Windows en local):** en local los servicios se conectan con `Trusted_Connection=True`, sin contraseñas en archivos. Los usuarios `rutaviva_{schema}_app` se siguen creando con el script como control verificable (una prueba con `EXECUTE AS USER` comprueba que cada uno solo accede a su schema). Un entorno con modo mixto o en la nube cambia solo `ConnectionStrings:RutaViva`.
 
 ---
 
@@ -405,6 +465,8 @@ Cada enum vive en el proyecto `Domain` del servicio dueño. Las réplicas (`*Ref
 | Maintenance | `AlertType` | `DueSoon`, `Overdue` | `maintenance.Alerts.Type` |
 | Maintenance | `AlertTrigger` | `Distance`, `Time`, `DistanceAndTime` | `maintenance.Alerts.TriggeredBy` |
 | Maintenance | `AlertStatus` | `Active`, `Acknowledged`, `Resolved` | `maintenance.Alerts.Status` |
+| Maintenance | `OdometerReadingOutcome` | `Accepted`, `Ignored` | `maintenance.OdometerReadings.Outcome` |
+| Maintenance | `OdometerReadingIgnoredReason` | `NotGreaterThanCurrent` | `maintenance.OdometerReadings.IgnoredReason` |
 | Maintenance | `AlertResolutionReason` | `RoutineRestarted`, `EscalatedToOverdue`, `ParametersChanged`, `RoutineDeactivated` | `maintenance.Alerts.ResolutionReason` |
 | ServiceOrders | `ServiceOrderStatus` | `Created`, `Quoted`, `PendingApproval`, `Approved`, `OnSite`, `InProgress`, `OnHold`, `Completed`, `Cancelled` | `Status`, `StatusBeforeHold`, `FromStatus`, `ToStatus` |
 | ServiceOrders | `ServiceOrderOrigin` | `Automatic`, `Manual` | `serviceorders.ServiceOrders.Origin` |
@@ -431,6 +493,6 @@ Cada enum vive en el proyecto `Domain` del servicio dueño. Las réplicas (`*Ref
 | E-01 | Valores numéricos **explícitos y empezando en 1** (`Active = 1`). `default(T)` = 0 no es un estado válido, así que un valor sin asignar se detecta |
 | E-02 | Persistencia por **nombre**: `HasConversion<string>().HasMaxLength(20)` en cada `IEntityTypeConfiguration`. Agregar un valor no reordena datos y la BD es legible en la demo |
 | E-03 | El `CHECK` de cada columna lista **exactamente** los valores del enum. Una prueba de integración compara `Enum.GetNames<T>()` con la definición del `CHECK` en `sys.check_constraints` |
-| E-04 | En los contratos de Kafka y en la API REST, los enums se serializan **como texto** (`JsonStringEnumConverter`). Agregar un valor al final es compatible. Renombrar o quitar uno exige una versión nueva del contrato (`.v2`) |
+| E-04 | En los contratos del EventBus y en la API REST, los enums se serializan **como texto** (`JsonStringEnumConverter`). Agregar un valor al final es compatible. Renombrar o quitar uno exige una versión nueva del contrato (`.v2`) |
 | E-05 | En Angular, cada enum tiene un espejo como tipo literal de TypeScript (`type ServiceOrderStatus = 'Created' \| ...`) en `core/models`, más un mapa de etiquetas en español (`En sitio`, `En proceso`, `Finalizada`) en un solo archivo |
 | E-06 | Las reglas no se basan en comparar el orden numérico de los enums (`status < InProgress`). Se usan conjuntos explícitos en el dominio, por ejemplo `CancellableStatuses` |

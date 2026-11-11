@@ -4,7 +4,11 @@
     Uso: sqlcmd -S localhost -E -i rutaviva-reference-schema.sql
          -v CustomersAppPassword="..." WorkshopsAppPassword="..." FleetAppPassword="..."
             MaintenanceAppPassword="..." ServiceOrdersAppPassword="..."
-            ImportsAppPassword="..." ReportingAppPassword="..."
+            ImportsAppPassword="..." ReportingAppPassword="..." EventBusAppPassword="..."
+    ADR-0028: en local los servicios se conectan con autenticación de Windows (Trusted_Connection);
+    los usuarios rutaviva_{schema}_app se crean igual como control verificable de aislamiento.
+    RowVersion es una propiedad sombra en EF Core: el dominio no la conoce; la columna rowversion existe en la tabla.
+    Los kilómetros son bigint.
 */
 
 IF DB_ID(N'RutaViva') IS NULL
@@ -27,6 +31,8 @@ GO
 CREATE SCHEMA imports;
 GO
 CREATE SCHEMA reporting;
+GO
+CREATE SCHEMA eventbus;
 GO
 
 /* ===================== customers ===================== */
@@ -92,25 +98,34 @@ CREATE INDEX IX_Vehicles_CustomerId_Status ON fleet.Vehicles (CustomerId, Status
 
 CREATE TABLE fleet.CustomerReferences (
     CustomerId  uniqueidentifier   NOT NULL CONSTRAINT PK_Fleet_CustomerReferences PRIMARY KEY,
+    TaxId       varchar(20)        NOT NULL,
     Name        nvarchar(150)      NOT NULL,
     Status      varchar(20)        NOT NULL,
     UpdatedAt   datetimeoffset(0)  NOT NULL
 );
 
+CREATE UNIQUE INDEX UX_CustomerReferences_TaxId ON fleet.CustomerReferences (TaxId);
+
 CREATE TABLE fleet.WorkshopReferences (
     WorkshopId  uniqueidentifier   NOT NULL CONSTRAINT PK_Fleet_WorkshopReferences PRIMARY KEY,
+    TaxId       varchar(20)        NOT NULL,
     Name        nvarchar(150)      NOT NULL,
     Status      varchar(20)        NOT NULL,
     UpdatedAt   datetimeoffset(0)  NOT NULL
 );
+
+CREATE UNIQUE INDEX UX_WorkshopReferences_TaxId ON fleet.WorkshopReferences (TaxId);
 
 CREATE TABLE fleet.ApproverReferences (
     ApproverId  uniqueidentifier   NOT NULL CONSTRAINT PK_Fleet_ApproverReferences PRIMARY KEY,
     CustomerId  uniqueidentifier   NOT NULL,
     FullName    nvarchar(150)      NOT NULL,
+    Email       nvarchar(254)      NOT NULL,
     Status      varchar(20)        NOT NULL,
     UpdatedAt   datetimeoffset(0)  NOT NULL
 );
+
+CREATE INDEX IX_ApproverReferences_Email ON fleet.ApproverReferences (Email);
 
 /* ===================== maintenance ===================== */
 
@@ -171,6 +186,9 @@ CREATE INDEX IX_MaintenanceRoutines_RoutineTypeId ON maintenance.MaintenanceRout
 CREATE TABLE maintenance.Alerts (
     Id                uniqueidentifier   NOT NULL CONSTRAINT PK_Alerts PRIMARY KEY,
     VehicleId         uniqueidentifier   NOT NULL,
+    Plate             varchar(10)        NOT NULL,
+    CustomerId        uniqueidentifier   NOT NULL,
+    RoutineName       nvarchar(100)      NOT NULL,
     RoutineId         uniqueidentifier   NOT NULL CONSTRAINT FK_Alerts_MaintenanceRoutines
                                          REFERENCES maintenance.MaintenanceRoutines (Id) ON DELETE CASCADE,
     CycleNumber       int                NOT NULL,
@@ -191,6 +209,22 @@ CREATE TABLE maintenance.Alerts (
 
 CREATE INDEX IX_Alerts_Status_RaisedAt ON maintenance.Alerts (Status, RaisedAt DESC) INCLUDE (VehicleId, RoutineId, Type);
 CREATE INDEX IX_Alerts_VehicleId ON maintenance.Alerts (VehicleId);
+
+CREATE TABLE maintenance.OdometerReadings (
+    Id             bigint IDENTITY(1, 1)  NOT NULL CONSTRAINT PK_OdometerReadings PRIMARY KEY,
+    VehicleId      uniqueidentifier       NOT NULL CONSTRAINT FK_OdometerReadings_MaintenancePlans
+                                          REFERENCES maintenance.MaintenancePlans (VehicleId),
+    Kilometers     bigint                 NOT NULL CONSTRAINT CK_OdometerReadings_Kilometers CHECK (Kilometers >= 0),
+    ReadAt         datetimeoffset(0)      NOT NULL,
+    ReceivedAt     datetimeoffset(0)      NOT NULL,
+    Outcome        varchar(20)            NOT NULL CONSTRAINT CK_OdometerReadings_Outcome CHECK (Outcome IN ('Accepted', 'Ignored')),
+    IgnoredReason  varchar(30)            NULL CONSTRAINT CK_OdometerReadings_IgnoredReason CHECK (IgnoredReason IN ('NotGreaterThanCurrent')),
+    CONSTRAINT CK_OdometerReadings_IgnoredData CHECK (
+        (Outcome = 'Ignored' AND IgnoredReason IS NOT NULL)
+        OR (Outcome = 'Accepted' AND IgnoredReason IS NULL))
+);
+
+CREATE INDEX IX_OdometerReadings_VehicleId_ReceivedAt ON maintenance.OdometerReadings (VehicleId, ReceivedAt DESC);
 
 /* ===================== serviceorders ===================== */
 
@@ -214,10 +248,12 @@ CREATE TABLE serviceorders.ServiceOrders (
                                                      CONSTRAINT UX_ServiceOrders_Number UNIQUE,
     Origin                        varchar(20)        NOT NULL CONSTRAINT CK_ServiceOrders_Origin CHECK (Origin IN ('Automatic', 'Manual')),
     VehicleId                     uniqueidentifier   NOT NULL,
+    Plate                         varchar(10)        NOT NULL,
     RoutineId                     uniqueidentifier   NOT NULL,
     RoutineName                   nvarchar(100)      NOT NULL,
     CustomerId                    uniqueidentifier   NOT NULL,
     WorkshopId                    uniqueidentifier   NOT NULL,
+    ResponsibleApproverId         uniqueidentifier   NULL,
     Status                        varchar(20)        NOT NULL CONSTRAINT CK_ServiceOrders_Status
                                                      CHECK (Status IN ('Created', 'Quoted', 'PendingApproval', 'Approved', 'OnSite', 'InProgress', 'OnHold', 'Completed', 'Cancelled')),
     StatusBeforeHold              varchar(20)        NULL CONSTRAINT CK_ServiceOrders_StatusBeforeHold
@@ -372,6 +408,7 @@ CREATE TABLE imports.ImportStages (
     InvalidRows  int                NOT NULL CONSTRAINT DF_ImportStages_InvalidRows DEFAULT (0),
     SkippedRows  int                NOT NULL CONSTRAINT DF_ImportStages_SkippedRows DEFAULT (0),
     ImportedRows int                NOT NULL CONSTRAINT DF_ImportStages_ImportedRows DEFAULT (0),
+    FailureReason nvarchar(500)     NULL,
     CONSTRAINT UX_ImportStages_Job_Entity UNIQUE (ImportJobId, EntityType)
 );
 
@@ -397,7 +434,8 @@ CREATE TABLE reporting.Customers (
     Name        nvarchar(150)      NOT NULL,
     TaxId       varchar(20)        NOT NULL,
     Status      varchar(20)        NOT NULL,
-    UpdatedAt   datetimeoffset(3)  NOT NULL
+    UpdatedAt   datetimeoffset(3)  NOT NULL,
+    LastEventOffset  bigint        NOT NULL
 );
 
 CREATE TABLE reporting.Workshops (
@@ -405,7 +443,8 @@ CREATE TABLE reporting.Workshops (
     Name        nvarchar(150)      NOT NULL,
     City        nvarchar(100)      NOT NULL,
     Status      varchar(20)        NOT NULL,
-    UpdatedAt   datetimeoffset(3)  NOT NULL
+    UpdatedAt   datetimeoffset(3)  NOT NULL,
+    LastEventOffset  bigint        NOT NULL
 );
 
 CREATE TABLE reporting.Vehicles (
@@ -415,7 +454,8 @@ CREATE TABLE reporting.Vehicles (
     WorkshopId  uniqueidentifier   NOT NULL,
     Status      varchar(20)        NOT NULL,
     OdometerKm  bigint             NOT NULL,
-    UpdatedAt   datetimeoffset(3)  NOT NULL
+    UpdatedAt   datetimeoffset(3)  NOT NULL,
+    LastEventOffset  bigint        NOT NULL
 );
 
 CREATE INDEX IX_Reporting_Vehicles_CustomerId ON reporting.Vehicles (CustomerId);
@@ -423,6 +463,8 @@ CREATE INDEX IX_Reporting_Vehicles_CustomerId ON reporting.Vehicles (CustomerId)
 CREATE TABLE reporting.VehicleRoutineStatus (
     RoutineId        uniqueidentifier   NOT NULL CONSTRAINT PK_Reporting_VehicleRoutineStatus PRIMARY KEY,
     VehicleId        uniqueidentifier   NOT NULL,
+    Plate            varchar(10)        NOT NULL,
+    CustomerId       uniqueidentifier   NOT NULL,
     RoutineName      nvarchar(100)      NOT NULL,
     State            varchar(20)        NOT NULL,
     DueStatus        varchar(20)        NOT NULL,
@@ -432,6 +474,7 @@ CREATE TABLE reporting.VehicleRoutineStatus (
     NextDueKm        bigint             NULL,
     NextDueDate      date               NULL,
     ConsumedPercent  decimal(6, 2)      NULL,
+    LastEventOffset  bigint             NOT NULL,
     LastEventAt      datetimeoffset(3)  NOT NULL
 );
 
@@ -462,6 +505,7 @@ CREATE TABLE reporting.ServiceOrderFacts (
     CompletedAt         datetimeoffset(0)  NULL,
     CancelledAt         datetimeoffset(0)  NULL,
     CancellationReason  varchar(30)        NULL,
+    LastEventOffset     bigint             NOT NULL,
     LastEventAt         datetimeoffset(3)  NOT NULL
 );
 
@@ -482,20 +526,44 @@ CREATE TABLE reporting.AlertFacts (
     AcknowledgedAt    datetimeoffset(0)  NULL,
     ResolvedAt        datetimeoffset(0)  NULL,
     ResolutionReason  varchar(30)        NULL,
+    LastEventOffset   bigint             NOT NULL,
     LastEventAt       datetimeoffset(3)  NOT NULL
 );
 
 CREATE INDEX IX_Reporting_AlertFacts_Customer_RaisedAt ON reporting.AlertFacts (CustomerId, RaisedAt);
 
-CREATE TABLE reporting.InboxMessages (
-    MessageId     uniqueidentifier   NOT NULL,
-    ConsumerName  varchar(100)       NOT NULL,
-    ProcessedAt   datetimeoffset(3)  NOT NULL,
-    CONSTRAINT PK_reporting_InboxMessages PRIMARY KEY (MessageId, ConsumerName)
+CREATE TABLE reporting.EventCheckpoints (
+    SubscriberName  varchar(60)        NOT NULL CONSTRAINT PK_reporting_EventCheckpoints PRIMARY KEY,
+    LastOffset      bigint             NOT NULL,
+    UpdatedAt       datetimeoffset(3)  NOT NULL
 );
 GO
 
-/* ===================== Outbox / Inbox (uno por schema de negocio) ===================== */
+/* ===================== eventbus (ADR-0024, D-05: log de eventos) ===================== */
+
+CREATE TABLE eventbus.Events (
+    [Offset]    bigint IDENTITY(1, 1)  NOT NULL CONSTRAINT PK_Events PRIMARY KEY,
+    MessageId   uniqueidentifier       NOT NULL CONSTRAINT UX_Events_MessageId UNIQUE,
+    Stream      varchar(60)            NOT NULL,
+    [Type]      varchar(150)           NOT NULL,
+    Subject     varchar(60)            NOT NULL,
+    OccurredAt  datetimeoffset(3)      NOT NULL,
+    StoredAt    datetimeoffset(3)      NOT NULL,
+    Payload     nvarchar(max)          NOT NULL
+);
+
+CREATE INDEX IX_Events_Stream_Offset ON eventbus.Events (Stream, [Offset]);
+
+CREATE TABLE eventbus.DeadLetters (
+    Id              bigint IDENTITY(1, 1)  NOT NULL CONSTRAINT PK_DeadLetters PRIMARY KEY,
+    SubscriberName  varchar(60)            NOT NULL,
+    [Offset]        bigint                 NOT NULL,
+    Error           nvarchar(2000)         NOT NULL,
+    ReportedAt      datetimeoffset(3)      NOT NULL
+);
+GO
+
+/* ===================== Outbox / EventCheckpoints (uno por schema de negocio) ===================== */
 
 DECLARE @schemas TABLE (Name sysname);
 INSERT INTO @schemas (Name) VALUES (N'customers'), (N'workshops'), (N'fleet'), (N'maintenance'), (N'serviceorders');
@@ -512,22 +580,21 @@ BEGIN
     SET @sql = N'
 CREATE TABLE ' + QUOTENAME(@schema) + N'.OutboxMessages (
     Id          uniqueidentifier   NOT NULL CONSTRAINT PK_' + @schema + N'_OutboxMessages PRIMARY KEY,
-    Topic       varchar(200)       NOT NULL,
-    MessageKey  varchar(100)       NOT NULL,
-    EventType   varchar(200)       NOT NULL,
+    Stream      varchar(60)        NOT NULL,
+    EventType   varchar(150)       NOT NULL,
+    Subject     varchar(60)        NOT NULL,
     Payload     nvarchar(max)      NOT NULL,
     OccurredAt  datetimeoffset(3)  NOT NULL,
     ProcessedAt datetimeoffset(3)  NULL,
     Attempts    int                NOT NULL CONSTRAINT DF_' + @schema + N'_OutboxMessages_Attempts DEFAULT (0),
-    LastError   nvarchar(2000)     NULL
+    LastError   nvarchar(1000)     NULL
 );
 CREATE INDEX IX_OutboxMessages_Pending ON ' + QUOTENAME(@schema) + N'.OutboxMessages (OccurredAt) WHERE ProcessedAt IS NULL;
 
-CREATE TABLE ' + QUOTENAME(@schema) + N'.InboxMessages (
-    MessageId     uniqueidentifier   NOT NULL,
-    ConsumerName  varchar(100)       NOT NULL,
-    ProcessedAt   datetimeoffset(3)  NOT NULL,
-    CONSTRAINT PK_' + @schema + N'_InboxMessages PRIMARY KEY (MessageId, ConsumerName)
+CREATE TABLE ' + QUOTENAME(@schema) + N'.EventCheckpoints (
+    SubscriberName  varchar(60)        NOT NULL CONSTRAINT PK_' + @schema + N'_EventCheckpoints PRIMARY KEY,
+    LastOffset      bigint             NOT NULL,
+    UpdatedAt       datetimeoffset(3)  NOT NULL
 );';
     EXEC sys.sp_executesql @sql;
     FETCH NEXT FROM schema_cursor INTO @schema;
@@ -560,6 +627,7 @@ IF SUSER_ID(N'rutaviva_maintenance_app') IS NULL   CREATE LOGIN rutaviva_mainten
 IF SUSER_ID(N'rutaviva_serviceorders_app') IS NULL CREATE LOGIN rutaviva_serviceorders_app WITH PASSWORD = N'$(ServiceOrdersAppPassword)';
 IF SUSER_ID(N'rutaviva_imports_app') IS NULL       CREATE LOGIN rutaviva_imports_app       WITH PASSWORD = N'$(ImportsAppPassword)';
 IF SUSER_ID(N'rutaviva_reporting_app') IS NULL     CREATE LOGIN rutaviva_reporting_app     WITH PASSWORD = N'$(ReportingAppPassword)';
+IF SUSER_ID(N'rutaviva_eventbus_app') IS NULL      CREATE LOGIN rutaviva_eventbus_app      WITH PASSWORD = N'$(EventBusAppPassword)';
 GO
 
 USE RutaViva;
@@ -573,7 +641,8 @@ INSERT INTO @services (SchemaName, UserName) VALUES
     (N'maintenance',   N'rutaviva_maintenance_app'),
     (N'serviceorders', N'rutaviva_serviceorders_app'),
     (N'imports',       N'rutaviva_imports_app'),
-    (N'reporting',     N'rutaviva_reporting_app');
+    (N'reporting',     N'rutaviva_reporting_app'),
+    (N'eventbus',      N'rutaviva_eventbus_app');
 
 DECLARE @ownerSchema sysname;
 DECLARE @userName sysname;

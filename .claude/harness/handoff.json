@@ -61,6 +61,11 @@
         "Future services are added by appending assembly names to ArchitectureAssemblies.AssemblyNames; the layer, isolation, setter, enum and naming rules pick them up by suffix.",
         "Snapshot comparison is semantic (JsonNode.DeepEquals), so formatting differences in the .approved.json files do not fail the test."
       ]
+    },
+    "3": {
+      "runId": "wf_e6852c12-50d",
+      "exports": {},
+      "decisions": []
     }
   }
 }

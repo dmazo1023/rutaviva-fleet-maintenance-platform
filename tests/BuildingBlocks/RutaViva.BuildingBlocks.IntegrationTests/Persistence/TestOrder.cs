@@ -1,8 +1,8 @@
-using RutaViva.BuildingBlocks.Infrastructure.Persistence;
+using RutaViva.BuildingBlocks.Domain.Primitives;
 
 namespace RutaViva.BuildingBlocks.IntegrationTests.Persistence;
 
-public sealed class TestOrder : IHasRowVersion
+public sealed class TestOrder : AggregateRoot<Guid>
 {
     public TestOrder(Guid id, string name, TestOrderStatus status, DateTimeOffset createdAt, decimal amount)
     {
@@ -13,8 +13,6 @@ public sealed class TestOrder : IHasRowVersion
         Amount = amount;
     }
 
-    public Guid Id { get; private set; }
-
     public string Name { get; private set; }
 
     public TestOrderStatus Status { get; private set; }
@@ -22,8 +20,6 @@ public sealed class TestOrder : IHasRowVersion
     public DateTimeOffset CreatedAt { get; private set; }
 
     public decimal Amount { get; private set; }
-
-    public byte[] RowVersion { get; private set; } = [];
 
     public void Rename(string name)
     {

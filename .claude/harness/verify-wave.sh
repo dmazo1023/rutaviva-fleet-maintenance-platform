@@ -111,7 +111,7 @@ added_lines() {
 while IFS= read -r file; do
   [[ -z "$file" || ! -f "$file" ]] && continue
   case "$file" in
-    *.Designer.cs) ;;
+    *.Designer.cs|*/Migrations/*.cs) ;;
     *.cs)
       content="$(added_lines "$file")"
       hits="$(printf '%s\n' "$content" | grep -E '(^|[^[:alnum:]_])var[[:space:]]+[[:alpha:]_]' | sed "s|^|$file:var:|")"

@@ -24,7 +24,7 @@ public sealed class EfUnitOfWorkTests(SqlServerTestDatabase database) : IClassFi
         Result result = await unitOfWork.SaveChangesAsync(cancellationToken);
 
         result.IsSuccess.Should().BeTrue();
-        order.RowVersion.Should().NotBeEmpty();
+        ReadRowVersion(context, order).Should().NotBeEmpty();
     }
 
     [Fact]
@@ -48,6 +48,9 @@ public sealed class EfUnitOfWorkTests(SqlServerTestDatabase database) : IClassFi
         secondResult.Error.Type.Should().Be(ErrorType.Conflict);
         secondResult.Error.Code.Should().Be(ConflictCode);
     }
+
+    private static byte[] ReadRowVersion(TestDbContext context, TestOrder order)
+        => context.Entry(order).Property<byte[]>(RutaVivaModelBuilderExtensions.RowVersionPropertyName).CurrentValue;
 
     private async Task SeedAsync(TestOrder order, CancellationToken cancellationToken)
     {

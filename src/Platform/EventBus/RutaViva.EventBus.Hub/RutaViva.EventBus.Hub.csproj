@@ -4,5 +4,6 @@
     <ProjectReference Include="..\RutaViva.EventBus.Application\RutaViva.EventBus.Application.csproj" />
     <ProjectReference Include="..\RutaViva.EventBus.Infrastructure\RutaViva.EventBus.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\RutaViva.BuildingBlocks.Api\RutaViva.BuildingBlocks.Api.csproj" />
+    <ProjectReference Include="..\..\RutaViva.ServiceDefaults\RutaViva.ServiceDefaults.csproj" />
   </ItemGroup>
 </Project>

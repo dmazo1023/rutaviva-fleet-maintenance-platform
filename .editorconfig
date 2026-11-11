@@ -22,3 +22,6 @@ csharp_style_namespace_declarations = file_scoped:error
 dotnet_diagnostic.IDE0161.severity = error
 dotnet_diagnostic.IDE0005.severity = error
 dotnet_diagnostic.CS1591.severity = none
+
+[**/Migrations/*.cs]
+generated_code = true

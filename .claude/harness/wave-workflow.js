@@ -337,6 +337,11 @@ while (true) {
     const scope = blamed.length ? blamed : agents
     const gateFailures = scope.flatMap(a => a.tasks.map(t => t.id)).filter(id => open(id) && !exhausted.has(id)).map(id => ({ taskId: id, reason }))
     pending = [...gateFailures, ...stillExhausted]
+    if (!pending.length) {
+      escalateOpen(`Bloqueada: la compuerta falla por tareas ya escaladas y no queda ninguna tarea a la que reintentar. ${reason}`)
+      log('La compuerta falla por tareas ya escaladas; la ola se detiene sin repetir la compuerta')
+      break
+    }
     log(`Compuerta fallida (${gate?.failedCheck ?? 'desconocido'}); tareas afectadas: ${pending.map(p => p.taskId).join(', ')}`)
     continue
   }

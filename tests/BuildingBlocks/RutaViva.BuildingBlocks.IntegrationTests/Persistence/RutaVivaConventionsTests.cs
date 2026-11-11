@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore.Metadata;
+using RutaViva.BuildingBlocks.Infrastructure.Persistence;
 using RutaViva.Testing.Fixtures;
 
 namespace RutaViva.BuildingBlocks.IntegrationTests.Persistence;
@@ -31,6 +33,19 @@ public sealed class RutaVivaConventionsTests(SqlServerTestDatabase database) : I
         string? actual = await SqlSchemaReader.ReadColumnTypeAsync(database.ConnectionString, TestDbContext.Schema, table, column, cancellationToken);
 
         actual.Should().Be(expected);
+    }
+
+    [Fact]
+    public async Task RowVersion_Should_BeShadowProperty_When_EntityIsAggregateRoot()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        await using TestDbContext context = await database.CreateDbContextAsync<TestDbContext>(cancellationToken);
+
+        IProperty property = context.Model.FindEntityType(typeof(TestOrder))!.FindProperty(RutaVivaModelBuilderExtensions.RowVersionPropertyName)!;
+
+        typeof(TestOrder).GetProperty(RutaVivaModelBuilderExtensions.RowVersionPropertyName).Should().BeNull();
+        property.IsShadowProperty().Should().BeTrue();
+        property.IsConcurrencyToken.Should().BeTrue();
     }
 
     [Fact]
