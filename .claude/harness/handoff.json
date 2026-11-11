@@ -160,6 +160,20 @@
         "UpdatedBy/AcknowledgedBy come from the request body (no auth yet). PUT/PATCH commands answer 204 via ToNoContentResult; failures use ToHttpResult.",
         "Request field is dueSoonThresholdPercent (spec name) for routine and routine-type PUT; no PATCH plan status route because the registry has none."
       ]
+    },
+    "6": {
+      "runId": "wf_ea54841e-4af",
+      "exports": {
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/MaintenanceRoutine.cs": "internal bool IsCycleStartedBy(ServiceRecord service) (new)",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/MaintenancePlan.cs": "public Result RestartRoutine(RoutineId id, ServiceRecord service, Guid serviceOrderId, RoutineParameterCatalog catalog) (now returns Success with no change or events when the routine's current cycle already starts at the same Kilometers and Date)"
+      },
+      "decisions": [
+        "RN-5 idempotency in the domain is keyed on the service record (km + date equal to the current cycle start), not on ServiceOrderId: remembering the order id would need a new column and migration in Inf…",
+        "Scenario tests create one SqlServerTestDatabase and factory per test through DemoScenarioHarness, not IClassFixture, because the scenarios are stateful.",
+        "Event delivery resolves the concrete handler classes (VehicleRegisteredHandler etc.), because the subscriber builder registers them with TryAddScoped<THandler>() and not as IIntegrationEventHandler<T>…",
+        "BuildingBlocks owner: the Outbox needs a guaranteed insert order within one SaveChanges (ordered ids or sequential writes) so Sequence follows design D-05 emission order.",
+        "DemoLoadScenarioTests no longer asserts Registered-before-Overdue by Sequence; it asserts both event types are stored per plate, since the order is random with the current Guid PK."
+      ]
     }
   }
 }

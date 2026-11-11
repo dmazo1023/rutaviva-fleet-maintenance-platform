@@ -74,6 +74,9 @@ public sealed class MaintenanceRoutine : Entity<RoutineId>
 
     internal void ChangeState(RoutineState state) => State = state;
 
+    internal bool IsCycleStartedBy(ServiceRecord service) =>
+        Cycle.StartKm == service.Kilometers && Cycle.StartDate == service.Date;
+
     internal void Restart(ServiceRecord service)
     {
         Cycle = Cycle.Next(service);

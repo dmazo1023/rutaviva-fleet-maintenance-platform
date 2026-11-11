@@ -16,6 +16,7 @@ public sealed class OutboxIntegrationEventPublisherTests(SqlServerTestDatabase d
     private const string ExpectedType = "rutaviva.testing.SampleHappened.v1";
     private const string ExpectedSource = "/rutaviva/maintenance";
     private const string OrderIdProperty = "orderId";
+    private const int EventsInOneTransaction = 20;
 
     private static readonly DateTimeOffset Now = new(2026, 3, 1, 8, 30, 0, TimeSpan.Zero);
 
@@ -58,6 +59,40 @@ public sealed class OutboxIntegrationEventPublisherTests(SqlServerTestDatabase d
         envelope.Time.Should().Be(Now);
         envelope.Data.GetProperty(OrderIdProperty).GetGuid().Should().Be(orderId);
     }
+
+    [Fact]
+    public async Task Enqueue_Should_AssignSequenceInEmissionOrder_When_ManyEventsAreSavedTogether()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        string subject = Guid.NewGuid().ToString();
+        Guid[] orderIds = Enumerable.Range(0, EventsInOneTransaction).Select(_ => Guid.NewGuid()).ToArray();
+        await using TestDbContext context = await database.CreateDbContextAsync<TestDbContext>(cancellationToken);
+        OutboxIntegrationEventPublisher publisher = CreatePublisher(context);
+
+        foreach (Guid orderId in orderIds)
+        {
+            publisher.Enqueue(new SampleHappenedV1(orderId), subject);
+        }
+
+        await new EfUnitOfWork<TestDbContext>(context).SaveChangesAsync(cancellationToken);
+
+        IReadOnlyList<Guid> stored = await ReadOrderIdsBySequenceAsync(subject, cancellationToken);
+        stored.Should().Equal(orderIds);
+    }
+
+    private async Task<IReadOnlyList<Guid>> ReadOrderIdsBySequenceAsync(string subject, CancellationToken cancellationToken)
+    {
+        await using TestDbContext reader = await database.CreateDbContextAsync<TestDbContext>(cancellationToken);
+        List<string> payloads = await reader.Set<OutboxMessage>()
+            .Where(message => message.Subject == subject)
+            .OrderBy(message => message.Sequence)
+            .Select(message => message.Payload)
+            .ToListAsync(cancellationToken);
+        return payloads.Select(ReadOrderId).ToList();
+    }
+
+    private static Guid ReadOrderId(string payload) =>
+        JsonSerializer.Deserialize<IntegrationEventEnvelope>(payload, IntegrationEventJson.Options)!.Data.GetProperty(OrderIdProperty).GetGuid();
 
     private static OutboxIntegrationEventPublisher CreatePublisher(TestDbContext context)
     {

@@ -29,7 +29,7 @@ public sealed class IntegrationEventEnvelopeFactory
 
         return new IntegrationEventEnvelope
         {
-            Id = Guid.NewGuid(),
+            Id = SequentialGuid.Next(),
             Source = string.Format(SourceFormat, _serviceName),
             Type = descriptor.EventType.ToString(),
             Subject = subject,

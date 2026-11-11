@@ -57,8 +57,8 @@
 
 ## 9. Pruebas de integración de punta a punta del servicio
 
-- [ ] 9.1 `{TI}/Scenarios/DemoLoadScenarioTests.cs`: publica `VehicleRegisteredV1` de los 10 vehículos en un EventBus en proceso, carga las 15 rutinas por el endpoint bulk con `FakeClock` en 2026-11-12 y ejecuta los 7 casos de telemetría y las 2 fechas. Verificar con `dotnet test --filter Category=Integration`: 4 `DueSoon`, 4 `Overdue`, resultados por caso y eventos en el orden de design D-05
-- [ ] 9.2 `{TI}/Scenarios/RestartIdempotencyTests.cs`: `ServiceOrderCompletedV1` entregado 5 veces reinicia la rutina una vez (RN-5) y `VehicleStatusChangedV1(Inactive)` repetido publica un solo `MaintenancePlanStatusChanged`. Verificar con `dotnet test --filter Category=Integration`
+- [x] 9.1 `{TI}/Scenarios/DemoLoadScenarioTests.cs`: publica `VehicleRegisteredV1` de los 10 vehículos en un EventBus en proceso, carga las 15 rutinas por el endpoint bulk con `FakeClock` en 2026-11-12 y ejecuta los 7 casos de telemetría y las 2 fechas. Verificar con `dotnet test --filter Category=Integration`: 4 `DueSoon`, 4 `Overdue`, resultados por caso y eventos en el orden de design D-05
+- [x] 9.2 `{TI}/Scenarios/RestartIdempotencyTests.cs`: `ServiceOrderCompletedV1` entregado 5 veces reinicia la rutina una vez (RN-5) y `VehicleStatusChangedV1(Inactive)` repetido publica un solo `MaintenancePlanStatusChanged`. Verificar con `dotnet test --filter Category=Integration`
 
 ## 10. Muestras de la demo
 

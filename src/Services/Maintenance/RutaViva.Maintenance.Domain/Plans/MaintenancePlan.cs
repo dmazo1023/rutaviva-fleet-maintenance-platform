@@ -163,6 +163,11 @@ public sealed class MaintenancePlan : AggregateRoot<VehicleId>
             return Result.Failure(target.Error);
         }
 
+        if (target.Value.Routine.IsCycleStartedBy(service))
+        {
+            return Result.Success();
+        }
+
         target.Value.Routine.Restart(service);
         AdvanceOdometerTo(service);
         DateOnly effectiveDate = LatestOf(service.Date, LastTimeEvaluationDate);
