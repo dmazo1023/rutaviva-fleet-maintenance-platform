@@ -1,8 +1,8 @@
 ## 1. Proyecto y reglas
 
-- [ ] 1.1 Crear `src/Web/rutaviva-fleet-maintenance-ui` con Angular CLI 22 (standalone, sin zone.js, SCSS, routing), `app.config.ts` con `provideZonelessChangeDetection`, `provideRouter(routes, withComponentInputBinding())` y `provideHttpClient(withInterceptors([]))`, y `proxy.conf.json` hacia el Gateway. Verificar con `ng build` y `ng test` en verde sobre el proyecto recién creado
-- [ ] 1.2 Configurar ESLint (`no-restricted-imports` para la regla de dependencia de design D-01) y Stylelint (`color-no-hex` salvo `_tokens.scss`, sin `::ng-deep`, sin `transition: all`) en `npm run lint`. Verificar con `npm run lint` en verde y con un hex temporal en un componente que lo hace fallar
-- [ ] 1.3 Componente de humo con `templateUrl`, `input()` y `output()` y su prueba (Ola 0 del harness); borrarlo al pasar. Verificar con `ng test` en verde
+- [x] 1.1 Crear `src/Web/rutaviva-fleet-maintenance-ui` con Angular CLI 22 (standalone, sin zone.js, SCSS, routing), `app.config.ts` con `provideZonelessChangeDetection`, `provideRouter(routes, withComponentInputBinding())` y `provideHttpClient(withInterceptors([]))`, y `proxy.conf.json` hacia el Gateway. Verificar con `ng build` y `ng test` en verde sobre el proyecto recién creado
+- [x] 1.2 Configurar ESLint (`no-restricted-imports` para la regla de dependencia de design D-01) y Stylelint (`color-no-hex` salvo `_tokens.scss`, sin `::ng-deep`, sin `transition: all`) en `npm run lint`. Verificar con `npm run lint` en verde y con un hex temporal en un componente que lo hace fallar
+- [x] 1.3 Componente de humo con `templateUrl`, `input()` y `output()` y su prueba (Ola 0 del harness); borrarlo al pasar. Verificar con `ng test` en verde
 
 ## 2. Contratos de la SPA (primero)
 
