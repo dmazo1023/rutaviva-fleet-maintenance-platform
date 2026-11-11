@@ -22,14 +22,14 @@
 
 > 4.1 a 4.3 modifican `MaintenancePlan.cs` y `MaintenanceRoutine.cs`: un solo agente, en secuencia.
 
-- [ ] 4.1 `MaintenanceRoutine` y `MaintenancePlan` con `Create`, `RegisterRoutine` (A-01, `Routine.AlreadyExists`, `Routine.LastServiceKmAboveOdometer`, `Routine.IncompleteLastService`) y construcción de snapshots, en `{D}/Plans/`. Verificar con pruebas en `{TD}/Plans/RegisterRoutineTests.cs` usando `MaintenancePlanBuilder`: alta vencida emite `RoutineRegistered` y luego `RoutineBecameOverdue`; EVA30D con 20 % queda `DueSoon` y con 10 % `UpToDate`
-- [ ] 4.2 `RecordOdometerReading` y `Reevaluate` (fecha efectiva de design D-04, `CanBeEvaluated`, rutinas inactivas omitidas). Verificar con pruebas en `{TD}/Plans/EvaluationScenariosTests.cs` que reproducen la tabla de carga de `samples/README.md` (4 `DueSoon`, 4 `Overdue`), los casos de telemetría 1 a 6 y las fechas 2027-01-20 y 2027-02-10
+- [x] 4.1 `MaintenanceRoutine` y `MaintenancePlan` con `Create`, `RegisterRoutine` (A-01, `Routine.AlreadyExists`, `Routine.LastServiceKmAboveOdometer`, `Routine.IncompleteLastService`) y construcción de snapshots, en `{D}/Plans/`. Verificar con pruebas en `{TD}/Plans/RegisterRoutineTests.cs` usando `MaintenancePlanBuilder`: alta vencida emite `RoutineRegistered` y luego `RoutineBecameOverdue`; EVA30D con 20 % queda `DueSoon` y con 10 % `UpToDate`
+- [x] 4.2 `RecordOdometerReading` y `Reevaluate` (fecha efectiva de design D-04, `CanBeEvaluated`, rutinas inactivas omitidas). Verificar con pruebas en `{TD}/Plans/EvaluationScenariosTests.cs` que reproducen la tabla de carga de `samples/README.md` (4 `DueSoon`, 4 `Overdue`), los casos de telemetría 1 a 6 y las fechas 2027-01-20 y 2027-02-10
 - [ ] 4.3 `UpdateRoutineOverrides`, `ChangeRoutineState`, `RestartRoutine` (A-08), `Suspend` y `Resume` (idempotentes). Verificar con pruebas en `{TD}/Plans/`: A-16 (reversión y aviso no repetido), A-17 (desactivar no toca la orden y emite `RoutineStateChanged`), A-18 (suspendido registra odómetro sin evaluar; reanudar reevalúa), RN-5 (ciclo 2, odómetro actualizado)
 - [x] 4.4 Agregado `Alert` (`Raise`, `Acknowledge`, `Resolve` idempotente) en `{D}/Alerts/`. Verificar con pruebas en `{TD}/Alerts/AlertTests.cs` de las 4 transiciones válidas y `Alert.InvalidTransition`
 
 ## 5. Contratos de Application
 
-- [ ] 5.1 Puertos de design D-06 en `{A}/Abstractions/`, commands, queries y DTOs de design D-07 (incluidos `MaintenancePlanSummaryDto`, `MaintenancePlanDetailDto`, `RoutineTrackDto`, `AlertDto`, `ReevaluationSummary`, `RoutineBulkRow`) en sus carpetas por feature. Verificar con `dotnet build` y la prueba de arquitectura de Application
+- [x] 5.1 Puertos de design D-06 en `{A}/Abstractions/`, commands, queries y DTOs de design D-07 (incluidos `MaintenancePlanSummaryDto`, `MaintenancePlanDetailDto`, `RoutineTrackDto`, `AlertDto`, `ReevaluationSummary`, `RoutineBulkRow`) en sus carpetas por feature. Verificar con `dotnet build` y la prueba de arquitectura de Application
 
 ## 6. Handlers de Application
 
@@ -40,7 +40,7 @@
 - [ ] 6.5 `RegisterRoutinesBulkHandler`, `BulkRoutineRowValidator` y `BulkDuplicateDetector` en `{A}/Routines/Bulk/`. Verificar con pruebas en `{TA}/Routines/Bulk/`: 501 filas → `Validation`; `dryRun` no llama a `SaveChangesAsync`; códigos de CN-03 por fila; `Routine.AlreadyExists` → `Skipped`
 - [ ] 6.6 Handlers de alertas (`RaiseDueSoonAlertHandler`, `RaiseOverdueAlertHandler`, `ResolveAlertsOnRevertHandler`, `ResolveAlertsOnRestartHandler`, `ResolveAlertsOnDeactivationHandler`) y `AcknowledgeAlertHandler` en `{A}/Alerts/`. Verificar con pruebas en `{TA}/Alerts/`: `DueSoon` sin primer aviso no crea alerta; escalamiento resuelve antes de crear
 - [ ] 6.7 `CreateMaintenancePlanHandler`, `ChangePlanStatusHandler`, `RestartRoutineHandler` en `{A}/Plans/` y handlers de integración `VehicleRegisteredHandler`, `VehicleStatusChangedHandler`, `ServiceOrderCompletedHandler` en `{A}/IntegrationEvents/Inbound/`. Verificar con pruebas en `{TA}/IntegrationEvents/`: plan existente no se duplica; rutina desconocida en `ServiceOrderCompleted` → éxito con log
-- [ ] 6.8 Mappers de dominio a `V1` en `{A}/IntegrationEvents/Outbound/` (uno por evento de la tabla de design D-05). Verificar con pruebas en `{TA}/IntegrationEvents/Outbound/` que cada mapper copia el snapshot completo y el stream correcto
+- [x] 6.8 Mappers de dominio a `V1` en `{A}/IntegrationEvents/Outbound/` (uno por evento de la tabla de design D-05). Verificar con pruebas en `{TA}/IntegrationEvents/Outbound/` que cada mapper copia el snapshot completo y el stream correcto
 - [ ] 6.9 Query handlers de plan (detalle con pistas, resúmenes), lecturas, alertas y tipos en `{A}/Plans/Queries/`, `{A}/Telemetry/Queries/`, `{A}/Alerts/Queries/`, `{A}/RoutineTypes/Queries/`. Verificar con pruebas en `{TA}/Queries/`: `limit` > 200 → `Validation`, `pageSize` > 100 → `Validation`
 
 ## 7. Infraestructura

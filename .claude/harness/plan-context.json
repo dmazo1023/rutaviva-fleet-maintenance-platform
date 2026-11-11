@@ -1,10 +1,66 @@
 {
-  "agents": [
-    { "id": "M2.E", "tasks": 2, "files": ["src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/", "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Evaluation/"],
-      "read": ["openspec/changes/maintenance-core/design.md#L111-L141", "openspec/changes/maintenance-core/specs/maintenance-plan-evaluation/spec.md", {"label": "VOs de Plans (firmas)", "lines": 250}], "writeLines": 650, "skills": 1 },
-    { "id": "M2.R", "tasks": 1, "files": ["src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/", "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/RoutineTypes/"],
-      "read": ["openspec/changes/maintenance-core/design.md#L48-L60", "openspec/changes/maintenance-core/specs/routine-type-catalog/spec.md", {"label": "VOs y errores", "lines": 150}], "writeLines": 400, "skills": 1 },
-    { "id": "M2.L", "tasks": 1, "files": ["src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/", "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Alerts/"],
-      "read": ["openspec/changes/maintenance-core/design.md#L84-L110", "openspec/changes/maintenance-core/specs/maintenance-alerts/spec.md", {"label": "eventos de Alert y errores", "lines": 120}], "writeLines": 400, "skills": 1 }
-  ]
+ "agents": [
+  {
+   "id": "M3.P",
+   "tasks": 2,
+   "files": [
+    "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/MaintenancePlan.cs",
+    "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/MaintenanceRoutine.cs",
+    "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Plans/"
+   ],
+   "read": [
+    "openspec/changes/maintenance-core/design.md#L60-L85",
+    "openspec/changes/maintenance-core/design.md#L131-L181",
+    "openspec/changes/maintenance-core/specs/maintenance-plan-evaluation/spec.md",
+    "samples/README.md#L1-L60",
+    {
+     "label": "VOs, evaluación y eventos (firmas)",
+     "lines": 203
+    }
+   ],
+   "writeLines": 700,
+   "skills": 1
+  },
+  {
+   "id": "M3.C",
+   "tasks": 1,
+   "files": [
+    "src/Services/Maintenance/RutaViva.Maintenance.Application/"
+   ],
+   "read": [
+    "openspec/changes/maintenance-core/design.md#L182-L234",
+    {
+     "label": "abstracciones de BuildingBlocks.Application",
+     "lines": 120
+    },
+    {
+     "label": "firmas de dominio",
+     "lines": 150
+    }
+   ],
+   "writeLines": 700,
+   "skills": 1
+  },
+  {
+   "id": "M3.O",
+   "tasks": 1,
+   "files": [
+    "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/",
+    "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/"
+   ],
+   "read": [
+    "openspec/changes/maintenance-core/design.md#L142-L181",
+    {
+     "label": "contratos V1 de maintenance",
+     "lines": 220
+    },
+    {
+     "label": "eventos de dominio",
+     "lines": 150
+    }
+   ],
+   "writeLines": 600,
+   "skills": 1
+  }
+ ]
 }
