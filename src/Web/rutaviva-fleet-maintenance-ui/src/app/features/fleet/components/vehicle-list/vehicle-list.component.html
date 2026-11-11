@@ -1,0 +1,78 @@
+<section class="vehicle-list-wrap" [attr.aria-label]="texts.vehiclesSectionAria">
+  <table class="vehicle-table">
+    <thead>
+      <tr>
+        <th scope="col">{{ texts.colVehicle }}</th>
+        <th scope="col">{{ texts.colCustomer }}</th>
+        <th scope="col" class="vehicle-table__num">{{ texts.colOdometer }}</th>
+        <th scope="col">{{ texts.colNextMaintenance }}</th>
+        <th scope="col">{{ texts.colStatus }}</th>
+        <th scope="col">{{ texts.colOrder }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (v of vehicles(); track v.vehicleId) {
+        <tr
+          class="vehicle-table__row"
+          [class.vehicle-table__row--inactive]="v.status === 'Inactive'"
+          [class.flash-change]="isFlashed(v.vehicleId)"
+          (click)="onRowClick(v.plate)"
+        >
+          <td>
+            <div class="vehicle-table__vehicle-cell">
+              <app-plate-chip [plate]="v.plate" [link]="'/flota/' + v.plate" />
+              <div class="vehicle-table__model">
+                <span class="vehicle-table__brand">{{ v.brand }} {{ v.model }}</span>
+                <span class="vehicle-table__year">{{ v.modelYear }}</span>
+              </div>
+            </div>
+          </td>
+          <td class="vehicle-table__customer">{{ v.customerName }}</td>
+          <td class="vehicle-table__num">{{ formatKm(v.odometerKm) }}</td>
+          <td>
+            @if (v.nextMaintenance; as next) {
+              <div class="vehicle-table__next">
+                <div class="vehicle-table__next-top">
+                  <span class="vehicle-table__routine">{{ next.routineName }}</span>
+                  <span
+                    class="vehicle-table__rem"
+                    [class.vehicle-table__rem--neg]="next.remainingValue < 0"
+                  >
+                    {{ formatRemaining(next) }}
+                  </span>
+                </div>
+                <app-mini-bar [percent]="next.consumedPercent" [status]="next.status" />
+              </div>
+            } @else {
+              <span class="vehicle-table__muted">{{ texts.noActiveRoutines }}</span>
+            }
+          </td>
+          <td>
+            @if (v.status === 'Inactive') {
+              <app-status-pill status="Inactive" />
+            } @else if (v.worstDueStatus) {
+              <app-status-pill [status]="v.worstDueStatus" [trigger]="v.worstTriggeredBy" />
+            } @else {
+              <app-status-pill status="UpToDate" />
+            }
+          </td>
+          <td>
+            @if (v.openOrder; as ord) {
+              <button
+                type="button"
+                class="btn btn--ghost vehicle-table__order-btn"
+                (click)="onOrderClick($event, ord.orderId)"
+              >
+                <span class="vehicle-table__order-num">{{ ord.number }}</span>
+                <app-status-pill [status]="ord.status" [small]="true" />
+              </button>
+            } @else {
+              <span class="vehicle-table__muted">—</span>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>
+

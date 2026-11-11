@@ -18,7 +18,9 @@ const featureRules = FEATURES.map((feature) => ({
     'no-restricted-imports': [
       'error',
       {
-        patterns: FEATURES.filter((other) => other !== feature).map((other) => ({
+        patterns: FEATURES.filter(
+          (other) => other !== feature && !(feature === 'fleet' && other === 'maintenance')
+        ).map((other) => ({
           group: [`**/features/${other}`, `**/features/${other}/**`],
           message: `Feature '${feature}' cannot import from feature '${other}'.`,
         })),

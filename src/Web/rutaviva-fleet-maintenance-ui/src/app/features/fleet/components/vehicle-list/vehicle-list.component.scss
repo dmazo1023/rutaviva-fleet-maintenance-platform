@@ -1,0 +1,118 @@
+.vehicle-list-wrap {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+
+.vehicle-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th,
+  td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  th {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-500);
+    background: var(--bg-subtle);
+  }
+
+  &__row {
+    cursor: pointer;
+    transition: background-color 140ms ease;
+
+    &:hover {
+      background: var(--bg-subtle);
+    }
+
+    &--inactive {
+      opacity: 0.68;
+    }
+  }
+
+  &__vehicle-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  &__model {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__brand {
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+
+  &__year {
+    font-size: 11px;
+    color: var(--ink-500);
+  }
+
+  &__num {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__next {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 170px;
+  }
+
+  &__next-top {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    font-size: 12px;
+  }
+
+  &__routine {
+    font-weight: 500;
+    color: var(--ink-800);
+  }
+
+  &__rem {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-600);
+
+    &--neg {
+      color: var(--danger);
+      font-weight: 600;
+    }
+  }
+
+  &__muted {
+    color: var(--ink-500);
+    font-size: 12px;
+  }
+
+  &__order-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+  }
+
+  &__order-num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+}
+

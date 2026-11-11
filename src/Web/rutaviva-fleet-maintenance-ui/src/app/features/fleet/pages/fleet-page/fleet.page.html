@@ -1,0 +1,63 @@
+<div class="fleet-page">
+  <header class="fleet-page__header">
+    <h1 id="h1" tabindex="-1" class="fleet-page__title">{{ texts.title }}</h1>
+
+    <div class="fleet-page__controls">
+      <div class="fleet-page__search">
+        <span class="ms fleet-page__search-icon" aria-hidden="true">search</span>
+        <input
+          type="search"
+          class="input fleet-page__search-input"
+          [value]="searchQuery()"
+          [placeholder]="texts.searchPlaceholder"
+          [attr.aria-label]="texts.searchAriaLabel"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+
+      <app-segmented-filter
+        [legend]="texts.statusLegend"
+        name="fleet-status"
+        [options]="filterOptions()"
+        [selectedValue]="activeFilter()"
+        defaultValue="All"
+        queryParamKey="status"
+        (valueChange)="onFilterChange($event)"
+      />
+    </div>
+  </header>
+
+  @if (listLoadable().status === 'loading' && sortedVehicles().length === 0) {
+    <app-skeleton [rows]="5" />
+  } @else if (listLoadable().status === 'error') {
+    <app-error-state
+      [title]="texts.errorTitle"
+      [message]="texts.errorMessage"
+      [retryLabel]="texts.retry"
+      (retryClicked)="onRetry()"
+    />
+  } @else if (sortedVehicles().length === 0) {
+    <app-empty-state
+      icon="local_shipping"
+      [title]="texts.emptyTitle"
+      [message]="texts.emptyMessage"
+      [actionLabel]="texts.emptyAction"
+      actionRoute="/carga"
+    />
+  } @else if (filteredVehicles().length === 0) {
+    <app-empty-state
+      icon="search_off"
+      [title]="texts.noMatches"
+      [actionLabel]="texts.clearFilters"
+      (actionClicked)="onClearFilters()"
+    />
+  } @else {
+    <app-vehicle-list
+      [vehicles]="filteredVehicles()"
+      [flashedIds]="flashedIds()"
+      (selectVehicle)="onSelectVehicle($event)"
+      (selectOrder)="onSelectOrder($event)"
+    />
+  }
+</div>
+
