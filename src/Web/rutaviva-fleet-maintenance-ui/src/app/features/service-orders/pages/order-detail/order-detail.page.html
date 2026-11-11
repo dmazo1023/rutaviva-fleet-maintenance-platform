@@ -1,0 +1,90 @@
+@if (detailLoadable().status === 'loading' && !detailLoadable().data) {
+  <app-skeleton [rows]="4" />
+} @else if (detailLoadable().status === 'error') {
+  <app-error-state
+    [title]="texts.errorTitle"
+    [message]="texts.errorMessage"
+    [retryLabel]="texts.retry"
+    (retryClicked)="onRetry()"
+  />
+} @else if (detailLoadable().data; as order) {
+  <div class="order-detail">
+    <header class="order-detail__header">
+      <div class="order-detail__header-left">
+        <a
+          routerLink="/ordenes"
+          class="icon-btn"
+          [attr.aria-label]="texts.backToOrdersAria"
+        >
+          <span class="ms" aria-hidden="true">arrow_back</span>
+        </a>
+        <h1 id="d-title" tabindex="-1" class="order-detail__number">{{ order.number }}</h1>
+        <app-plate-chip [plate]="order.plate" [link]="'/flota/' + order.plate" />
+        <span class="order-detail__routine">{{ order.routineName }}</span>
+      </div>
+
+      <div class="order-detail__header-right">
+        @if (order.priority === 'High' && order.status === 'PendingApproval') {
+          <span class="order-detail__priority">{{ texts.priorityBadge }}</span>
+        }
+        <app-status-pill [status]="order.status" />
+      </div>
+    </header>
+
+    <div class="order-detail__layout">
+      <div class="order-detail__main">
+        <app-order-stepper
+          [status]="order.status"
+          [statusBeforeHold]="order.statusBeforeHold"
+        />
+
+        <app-service-lines
+          [lines]="order.lines"
+          [total]="order.total"
+          [status]="order.status"
+          [autoApproved]="order.autoApproved"
+          [autoApprovalMaxAmount]="order.autoApprovalMaxAmountApplied"
+          [isWorkshop]="isWorkshop()"
+          (priceSaved)="onPriceSaved(order.id, $event)"
+        />
+
+        <app-order-actions
+          [availableActions]="order.availableActions"
+          (actionTriggered)="onActionTriggered(order.id, $event)"
+        />
+
+        <app-order-history [entries]="order.history" />
+      </div>
+
+      <aside class="order-detail__aside">
+        <dl class="order-detail__facts">
+          <div class="order-detail__fact">
+            <dt>{{ texts.workshopLabel }}</dt>
+            <dd>{{ order.workshopName }}</dd>
+          </div>
+          <div class="order-detail__fact">
+            <dt>{{ texts.routineLabel }}</dt>
+            <dd>{{ order.routineName }}</dd>
+          </div>
+          <div class="order-detail__fact">
+            <dt>{{ texts.appointmentLabel }}</dt>
+            <dd>{{ order.appointmentAt ?? texts.noAppointment }}</dd>
+          </div>
+          <div class="order-detail__fact">
+            <dt>{{ texts.policyAppliedLabel }}</dt>
+            <dd>{{ formatCop(order.autoApprovalMaxAmountApplied) }}</dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
+
+    <app-order-form-dialog
+      [open]="dialogAction() !== null"
+      [action]="dialogAction()"
+      [busy]="submittingAction()"
+      (submitted)="onDialogSubmitted(order.id, $event)"
+      (closed)="onDialogClosed()"
+    />
+  </div>
+}
+

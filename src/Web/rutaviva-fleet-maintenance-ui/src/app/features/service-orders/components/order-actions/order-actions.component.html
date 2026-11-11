@@ -1,0 +1,52 @@
+@if (availableActions().length > 0) {
+  <div class="order-actions">
+    <div class="order-actions__left">
+      @if (cancelAction(); as cancelItem) {
+        <div class="order-actions__item">
+          <button
+            type="button"
+            class="btn btn--ghost order-actions__cancel-btn"
+            [disabled]="!cancelItem.enabled"
+            [attr.aria-describedby]="
+              !cancelItem.enabled && cancelItem.blockedReason
+                ? 'blocked-' + cancelItem.action
+                : null
+            "
+            (click)="onTrigger(cancelItem)"
+          >
+            {{ getActionLabel(cancelItem.action) }}
+          </button>
+          @if (!cancelItem.enabled && cancelItem.blockedReason) {
+            <span [id]="'blocked-' + cancelItem.action" class="order-actions__reason">
+              {{ getBlockedLabel(cancelItem.blockedReason) }}
+            </span>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="order-actions__right">
+      @for (act of rightActions(); track act.action) {
+        <div class="order-actions__item">
+          <button
+            type="button"
+            [class]="getButtonClass(act.action)"
+            [disabled]="!act.enabled"
+            [attr.aria-describedby]="
+              !act.enabled && act.blockedReason ? 'blocked-' + act.action : null
+            "
+            (click)="onTrigger(act)"
+          >
+            {{ getActionLabel(act.action) }}
+          </button>
+          @if (!act.enabled && act.blockedReason) {
+            <span [id]="'blocked-' + act.action" class="order-actions__reason">
+              {{ getBlockedLabel(act.blockedReason) }}
+            </span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
+

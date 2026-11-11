@@ -1,0 +1,76 @@
+<div class="orders-page">
+  <header class="orders-page__header">
+    <h1 id="h1" tabindex="-1" class="orders-page__title">{{ texts.title }}</h1>
+
+    <app-segmented-filter
+      [legend]="texts.statusLegend"
+      name="orders-status"
+      [options]="filterOptions()"
+      [selectedValue]="activeFilter()"
+      defaultValue="PendingApproval"
+      queryParamKey="statusGroup"
+      (valueChange)="onFilterChange($event)"
+    />
+  </header>
+
+  @if (listLoadable().status === 'loading' && listLoadable().data.length === 0) {
+    <app-skeleton [rows]="4" />
+  } @else if (listLoadable().status === 'error') {
+    <app-error-state
+      [title]="texts.errorTitle"
+      [message]="texts.errorMessage"
+      [retryLabel]="texts.retry"
+      (retryClicked)="onRetry()"
+    />
+  } @else if (filteredOrders().length === 0) {
+    <app-empty-state icon="assignment_turned_in" [title]="emptyStateTitle()" tone="is-ok" />
+  } @else {
+    <div class="orders-table-wrap">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ texts.colOrder }}</th>
+            <th scope="col">{{ texts.colVehicle }}</th>
+            <th scope="col">{{ texts.colRoutine }}</th>
+            <th scope="col">{{ texts.colStatus }}</th>
+            <th scope="col">{{ texts.colAppointment }}</th>
+            <th scope="col" class="orders-table__num">{{ texts.colTotal }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of filteredOrders(); track order.id) {
+            <tr
+              class="orders-table__row"
+              [class.flash-change]="isFlashed(order.id)"
+              (click)="onSelectOrder(order.id)"
+            >
+              <td>
+                <div class="orders-table__order-cell">
+                  <span class="orders-table__num-code">{{ order.number }}</span>
+                  @if (order.priority === 'High' && order.status === 'PendingApproval') {
+                    <span class="orders-table__priority">{{ texts.priorityBadge }}</span>
+                  }
+                  @if (getReasonLabel(order); as reasonText) {
+                    <span class="orders-table__reason">{{ reasonText }}</span>
+                  }
+                </div>
+              </td>
+              <td>
+                <app-plate-chip [plate]="order.plate" [link]="'/flota/' + order.plate" />
+              </td>
+              <td class="orders-table__routine">{{ order.routineName }}</td>
+              <td>
+                <app-status-pill [status]="order.status" />
+              </td>
+              <td class="orders-table__date">
+                {{ order.appointmentAt ?? texts.noAppointment }}
+              </td>
+              <td class="orders-table__num">{{ formatCurrency(order.total) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
