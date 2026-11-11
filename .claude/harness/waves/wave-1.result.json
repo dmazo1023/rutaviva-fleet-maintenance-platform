@@ -1,0 +1,231 @@
+{
+  "wave": "1",
+  "verified": [
+    "2.1",
+    "2.3",
+    "2.4",
+    "2.2",
+    "3.1",
+    "3.3",
+    "8.1",
+    "3.2"
+  ],
+  "escalated": [],
+  "unaccounted": [],
+  "handoff": {
+    "exports": {
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain": "Primitives: Entity<TId>, AggregateRoot<TId>(DomainEvents, Raise, ClearDomainEvents), abstract record ValueObject. Events: IDomainEvent. Results: Error(Code,Message,Type), ErrorType, Result, Result<T>. Guards: Guard.NotNull/NotNullOrWhiteSpace/NotDefault/Positive",
+      "IntegrationEventEnvelope.cs / EventBus / Abstractions": "sealed record IntegrationEventEnvelope{Id:Guid,Source,Type,Subject,Time:DateTimeOffset,TraceParent?,Data:JsonElement; consts CloudEventsSpecVersion,JsonContentType}; record EventRecord(long Offset,string Stream,IntegrationEventEnvelope Envelope); record EventMetadata(Guid MessageId,long Offset,string Type,string Subject,DateTimeOffset OccurredAt); EventBusHubMethods consts incl. HubPath",
+      "Events V1": "all sealed records implement IIntegrationEvent with const EventName and const Stream; snapshot events also IRoutineSnapshotEvent{Routine} / IServiceOrderSnapshotEvent{Order}; Ids are Guid, km/amounts decimal, dates DateOnly in RoutineSnapshot",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/*.cs (ns RutaViva.BuildingBlocks.Application.Abstractions)": "ICommand<TResult>; IQuery<TResult>; ICommandHandler<in TCommand,TResult>.HandleAsync(command,ct):Task<Result<TResult>>; IQueryHandler<,>; IUnitOfWork.SaveChangesAsync(ct):Task<Result>; IClock{UtcNow;TodayIn(TimeZoneInfo):DateOnly}; IDomainEventHandler<in TEvent>; IIntegrationEventMapper<in T>.Map; IIntegrationEventHandler<in T>.HandleAsync(evt,EventMetadata,ct):Task<Result>; IIntegrationEventPublisher.Enqueue(evt,subject); IEventCheckpointStore{GetLastOffsetAsync;SaveAsync}",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/DependencyInjection/CommandHandlerServiceCollectionExtensions.cs": "namespace RutaViva.BuildingBlocks.Application.DependencyInjection; static IServiceCollection AddCommandHandlers(this IServiceCollection services, Assembly assembly)",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Decorators/*.cs (ns ...Application.Decorators)": "sealed ValidationCommandHandlerDecorator<TCommand,TResult>(ICommandHandler inner, IEnumerable<IValidator<TCommand>>); sealed LoggingCommandHandlerDecorator<TCommand,TResult>(ICommandHandler inner, ILogger<...>)",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/BulkRegistrationHandler.cs (ns ...Application.Bulk)": "abstract BulkRegistrationHandler<TRow,TCommand>(ICommandHandler<TCommand,Guid>) where TCommand:ICommand<Guid>; Task<IReadOnlyList<BulkRowResult>> ExecuteAsync(IReadOnlyList<TRow>, ct); protected abstract int RowNumberOf(TRow); string NaturalKey(TRow); Task<Result<TCommand>> ResolveCommandAsync(TRow,ct); Task<bool> ExistsAsync(string naturalKey,ct)",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/ (scope)": "IBulkExecutionScope.Resolve(IUnitOfWork real):IUnitOfWork; sealed DryRunUnitOfWork:IUnitOfWork; sealed CommittingBulkExecutionScope; sealed DryRunBulkExecutionScope; static BulkExecutionScope.For(bool dryRun):IBulkExecutionScope",
+      "SystemClock.cs": "public sealed class SystemClock(TimeProvider timeProvider) : IClock",
+      "FakeClock.cs": "public sealed class FakeClock(DateTimeOffset initialUtcNow) : IClock { void Set(DateTimeOffset); void Advance(TimeSpan); }",
+      "SqlServerTestDatabase.cs": "public sealed class SqlServerTestDatabase : IAsyncLifetime { string DatabaseName, ConnectionString, MasterConnectionString; Task<TContext> CreateDbContextAsync<TContext>(CancellationToken) where TContext : DbContext }"
+    },
+    "decisions": [
+      "Domain types live in folders Primitives/, Events/, Results/, Guards/ with matching namespaces RutaViva.BuildingBlocks.Domain.{Primitives,Events,Results,Guards} (IDE0130).",
+      "Se eligieron Guid para IDs, decimal para km e importes, DateOnly para fechas de ciclo/vencimiento y RoutineBulkRow.LastServiceDate.",
+      "EventRecord es (Offset, Stream, Envelope); IntegrationEventEnvelope.Data es JsonElement con JsonPropertyName en minuscula CloudEvents.",
+      "BulkErrorCodes expone un const por codigo (p. ej. VehicleOwnerNotFound = Vehicle.OwnerNotFound).",
+      "BulkRegistrationHandler fija TCommand : ICommand<Guid>: los commands de alta usados en lote deben devolver Guid, porque la firma de 2 genericos no admite TResult.",
+      "Se agrego protected abstract RowNumberOf(TRow): las filas de contratos no comparten interfaz, asi el handler obtiene el numero de fila.",
+      "Para dryRun, el DI debe registrar IUnitOfWork con BulkExecutionScope.For(dryRun).Resolve(realUow); los command handlers reciben ese IUnitOfWork.",
+      "IClock assumed in namespace RutaViva.BuildingBlocks.Application.Abstractions; if agent C uses another namespace, fix the using in my 3 files.",
+      "SystemClock requires a TimeProvider in its constructor (register TimeProvider.System in DI)."
+    ]
+  },
+  "implemented": [
+    {
+      "agent": "A",
+      "status": "complete",
+      "notes": "The source files already existed at the project root; I moved them into subfolders so namespaces match folders. The old root paths no longer exist. Added the four test files. Nothing compiled or run.",
+      "files": [
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Primitives/AggregateRoot.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Primitives/Entity.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Primitives/ValueObject.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Events/IDomainEvent.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Results/Error.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Results/ErrorType.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Results/Result.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Results/ResultOfT.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Guards/Guard.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/ValueObjectTests.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/AggregateRootTests.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/ResultTests.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/GuardTests.cs"
+      ]
+    },
+    {
+      "agent": "B",
+      "status": "complete",
+      "notes": "47 archivos creados. dotnet build del proyecto en verde, 0 advertencias. Sin referencias a otros proyectos. Tipos de campos no fijados por design.md fueron inferidos.",
+      "files": [
+        "src/Contracts/RutaViva.IntegrationContracts/Abstractions/EventMetadata.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Abstractions/IIntegrationEvent.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Abstractions/IRoutineSnapshotEvent.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Abstractions/IServiceOrderSnapshotEvent.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Bulk/ApproverBulkRow.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Bulk/BulkErrorCodes.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Bulk/BulkRequest.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Bulk/BulkRowError.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Bulk/BulkRowOutcome.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Bulk/BulkRowResult.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Bulk/CustomerBulkRow.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Bulk/RoutineBulkRow.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Bulk/VehicleBulkRow.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Bulk/WorkshopBulkRow.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Customers/ApproverRegisteredV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Customers/ApproverStatusChangedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Customers/CustomerRegisteredV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Customers/CustomerStatusChangedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/EventBus/EventBusHubMethods.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/EventBus/EventRecord.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Fleet/VehicleRegisteredV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Fleet/VehicleResponsibleAssignedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Fleet/VehicleStatusChangedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/IntegrationEventEnvelope.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/AlertRaisedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/AlertStatusChangedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenancePlanStatusChangedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineDueSoonV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineDueStatusRevertedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineOverdueV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineParametersChangedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineRegisteredV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineRestartedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineStateChangedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/OdometerReadingRecordedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/RoutineSnapshot.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderAppointmentScheduledV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderApprovalRequestedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderCompletedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderCreatedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderLinesChangedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderLineSnapshot.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderSnapshot.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderStatusChangedV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Streams.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Workshops/WorkshopRegisteredV1.cs",
+        "src/Contracts/RutaViva.IntegrationContracts/Workshops/WorkshopStatusChangedV1.cs"
+      ]
+    },
+    {
+      "agent": "C",
+      "status": "complete",
+      "notes": "No compile ni ejecute pruebas. Namespaces: Abstractions, Decorators, DependencyInjection, Bulk bajo RutaViva.BuildingBlocks.Application. Validacion devuelve Error Code Validation.Failed con mensajes unidos por \"; \". Clave natural comparada con OrdinalIgnoreCase; se registra al primer uso (fila Skipped repetida => DuplicateInBatch). Las pruebas dependen de Microsoft.Extensions.DependencyInjection (llega transitivo via EF Core del proyecto de pruebas). Orden de decoradores: Validation interno, Logging externo.",
+      "files": [
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/ICommand.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IQuery.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/ICommandHandler.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IQueryHandler.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IUnitOfWork.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IClock.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IDomainEventHandler.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IIntegrationEventMapper.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IIntegrationEventHandler.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IIntegrationEventPublisher.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IEventCheckpointStore.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Decorators/ValidationCommandHandlerDecorator.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Decorators/LoggingCommandHandlerDecorator.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/DependencyInjection/CommandHandlerServiceCollectionExtensions.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/IBulkExecutionScope.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/DryRunUnitOfWork.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/CommittingBulkExecutionScope.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/DryRunBulkExecutionScope.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/BulkExecutionScope.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/BulkRegistrationHandler.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/SampleCommand.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/SampleCommandValidator.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/SampleCommandHandler.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/CapturingLogger.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/ValidationCommandHandlerDecoratorTests.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/LoggingCommandHandlerDecoratorTests.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/CommandHandlerRegistrationTests.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/BulkRow.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/BulkCommand.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/SavingBulkCommandHandler.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/TestBulkRegistrationHandler.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/BulkRegistrationHandlerTests.cs"
+      ]
+    },
+    {
+      "agent": "D",
+      "status": "complete",
+      "notes": "Single WHILE loop over 8 schemas with dynamic SQL and QUOTENAME; inner cursor emits DENY for the other 7. Passwords via sqlcmd variables ($(CustomersAppPassword) etc.). Idempotent via existence checks. Not executed.",
+      "files": [
+        "deploy/local/sql/00-database.sql",
+        "deploy/local/sql/01-schemas-and-users.sql",
+        "deploy/local/sql/README.md"
+      ]
+    },
+    {
+      "agent": "E",
+      "status": "complete",
+      "notes": "Not compiled. Assumes a DbContext with a public constructor taking DbContextOptions<T>. The SQL Server integration test needs a local server.",
+      "files": [
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Time/SystemClock.cs",
+        "tests/RutaViva.Testing.Common/FakeClock.cs",
+        "tests/RutaViva.Testing.Common/SqlServerTestDatabase.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Infrastructure/SystemClockTests.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Testing/SqlServerTestDatabaseTests.cs"
+      ]
+    }
+  ],
+  "history": [
+    {
+      "round": 0,
+      "gate": {
+        "passed": false,
+        "failedCheck": "4-build"
+      }
+    },
+    {
+      "round": 1,
+      "gate": {
+        "passed": true,
+        "failedCheck": null
+      }
+    },
+    {
+      "round": 1,
+      "verdict": [
+        {
+          "taskId": "2.1",
+          "passed": true
+        },
+        {
+          "taskId": "2.3",
+          "passed": true
+        },
+        {
+          "taskId": "2.4",
+          "passed": true
+        },
+        {
+          "taskId": "2.2",
+          "passed": true
+        },
+        {
+          "taskId": "3.1",
+          "passed": true
+        },
+        {
+          "taskId": "3.3",
+          "passed": true
+        },
+        {
+          "taskId": "8.1",
+          "passed": true
+        },
+        {
+          "taskId": "3.2",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

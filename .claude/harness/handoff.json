@@ -1,1 +1,32 @@
-{ "change": "foundation-platform", "waves": {} }
+{
+  "change": "foundation-platform",
+  "waves": {
+    "1": {
+      "runId": "wf_7cd647c5-84b",
+      "exports": {
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain": "Primitives: Entity<TId>, AggregateRoot<TId>(DomainEvents, Raise, ClearDomainEvents), abstract record ValueObject. Events: IDomainEvent. Results: Error(Code,Message,Type), ErrorType, Result, Result<T>. Guards: Guard.NotNull/NotNullOrWhiteSpace/NotDefault/Positive",
+        "IntegrationEventEnvelope.cs / EventBus / Abstractions": "sealed record IntegrationEventEnvelope{Id:Guid,Source,Type,Subject,Time:DateTimeOffset,TraceParent?,Data:JsonElement; consts CloudEventsSpecVersion,JsonContentType}; record EventRecord(long Offset,string Stream,IntegrationEventEnvelope Envelope); record EventMetadata(Guid MessageId,long Offset,string Type,string Subject,DateTimeOffset OccurredAt); EventBusHubMethods consts incl. HubPath",
+        "Events V1": "all sealed records implement IIntegrationEvent with const EventName and const Stream; snapshot events also IRoutineSnapshotEvent{Routine} / IServiceOrderSnapshotEvent{Order}; Ids are Guid, km long, amounts decimal, dates DateOnly in RoutineSnapshot",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/*.cs (ns RutaViva.BuildingBlocks.Application.Abstractions)": "ICommand<TResult>; IQuery<TResult>; ICommandHandler<in TCommand,TResult>.HandleAsync(command,ct):Task<Result<TResult>>; IQueryHandler<,>; IUnitOfWork.SaveChangesAsync(ct):Task<Result>; IClock{UtcNow;TodayIn(TimeZoneInfo):DateOnly}; IDomainEventHandler<in TEvent>; IIntegrationEventMapper<in T>.Map; IIntegrationEventHandler<in T>.HandleAsync(evt,EventMetadata,ct):Task<Result>; IIntegrationEventPublisher.Enqueue(evt,subject); IEventCheckpointStore{GetLastOffsetAsync;SaveAsync}",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/DependencyInjection/CommandHandlerServiceCollectionExtensions.cs": "namespace RutaViva.BuildingBlocks.Application.DependencyInjection; static IServiceCollection AddCommandHandlers(this IServiceCollection services, Assembly assembly)",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Decorators/*.cs (ns ...Application.Decorators)": "sealed ValidationCommandHandlerDecorator<TCommand,TResult>(ICommandHandler inner, IEnumerable<IValidator<TCommand>>); sealed LoggingCommandHandlerDecorator<TCommand,TResult>(ICommandHandler inner, ILogger<...>)",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/BulkRegistrationHandler.cs (ns ...Application.Bulk)": "abstract BulkRegistrationHandler<TRow,TCommand>(ICommandHandler<TCommand,Guid>) where TCommand:ICommand<Guid>; Task<IReadOnlyList<BulkRowResult>> ExecuteAsync(IReadOnlyList<TRow>, ct); protected abstract int RowNumberOf(TRow); string NaturalKey(TRow); Task<Result<TCommand>> ResolveCommandAsync(TRow,ct); Task<bool> ExistsAsync(string naturalKey,ct)",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/ (scope)": "IBulkExecutionScope.Resolve(IUnitOfWork real):IUnitOfWork; sealed DryRunUnitOfWork:IUnitOfWork; sealed CommittingBulkExecutionScope; sealed DryRunBulkExecutionScope; static BulkExecutionScope.For(bool dryRun):IBulkExecutionScope",
+        "SystemClock.cs": "public sealed class SystemClock(TimeProvider timeProvider) : IClock",
+        "FakeClock.cs": "public sealed class FakeClock(DateTimeOffset initialUtcNow) : IClock { void Set(DateTimeOffset); void Advance(TimeSpan); }",
+        "SqlServerTestDatabase.cs": "public sealed class SqlServerTestDatabase : IAsyncLifetime { string DatabaseName, ConnectionString, MasterConnectionString; Task<TContext> CreateDbContextAsync<TContext>(CancellationToken) where TContext : DbContext }"
+      },
+      "decisions": [
+        "Domain types live in folders Primitives/, Events/, Results/, Guards/ with matching namespaces RutaViva.BuildingBlocks.Domain.{Primitives,Events,Results,Guards} (IDE0130).",
+        "Guid para IDs; long para km (int para intervalos km) y decimal solo para importes y porcentajes (corregido por el orquestador según data-model y ADR-0014); DateOnly para fechas de ciclo y LastServiceDate.",
+        "EventRecord es (Offset, Stream, Envelope); IntegrationEventEnvelope.Data es JsonElement con JsonPropertyName en minuscula CloudEvents.",
+        "BulkErrorCodes expone un const por codigo (p. ej. VehicleOwnerNotFound = Vehicle.OwnerNotFound).",
+        "BulkRegistrationHandler fija TCommand : ICommand<Guid>: los commands de alta usados en lote deben devolver Guid, porque la firma de 2 genericos no admite TResult.",
+        "Se agrego protected abstract RowNumberOf(TRow): las filas de contratos no comparten interfaz, asi el handler obtiene el numero de fila.",
+        "Para dryRun, el DI debe registrar IUnitOfWork con BulkExecutionScope.For(dryRun).Resolve(realUow); los command handlers reciben ese IUnitOfWork.",
+        "IClock assumed in namespace RutaViva.BuildingBlocks.Application.Abstractions; if agent C uses another namespace, fix the using in my 3 files.",
+        "SystemClock requires a TimeProvider in its constructor (register TimeProvider.System in DI)."
+      ]
+    }
+  }
+}

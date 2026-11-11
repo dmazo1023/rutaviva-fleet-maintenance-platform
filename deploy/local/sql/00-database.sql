@@ -1,0 +1,3 @@
+IF DB_ID(N'RutaViva') IS NULL
+    CREATE DATABASE [RutaViva];
+GO

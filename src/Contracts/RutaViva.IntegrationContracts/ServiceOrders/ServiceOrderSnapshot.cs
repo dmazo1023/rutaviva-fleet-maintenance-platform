@@ -1,0 +1,25 @@
+namespace RutaViva.IntegrationContracts.ServiceOrders;
+
+public sealed record ServiceOrderSnapshot(
+    Guid ServiceOrderId,
+    string Number,
+    string Origin,
+    Guid VehicleId,
+    string Plate,
+    Guid? RoutineId,
+    string? RoutineName,
+    Guid CustomerId,
+    Guid WorkshopId,
+    Guid? ResponsibleApproverId,
+    string Status,
+    string? StatusBeforeHold,
+    string? ApprovalReason,
+    string? ApprovalPriority,
+    decimal? RoutineAmount,
+    decimal? AdditionalAmount,
+    decimal? TotalAmount,
+    string? Currency,
+    bool AutoApproved,
+    DateTimeOffset? AppointmentAt,
+    string? CancellationReason,
+    DateTimeOffset CreatedAt);

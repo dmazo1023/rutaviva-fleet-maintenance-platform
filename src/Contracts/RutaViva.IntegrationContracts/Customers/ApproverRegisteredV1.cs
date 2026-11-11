@@ -1,0 +1,10 @@
+using RutaViva.IntegrationContracts.Abstractions;
+
+namespace RutaViva.IntegrationContracts.Customers;
+
+public sealed record ApproverRegisteredV1(Guid ApproverId, Guid CustomerId, string FullName, string Email, string Status, DateTimeOffset OccurredAt) : IIntegrationEvent
+{
+    public const string EventName = "ApproverRegistered";
+
+    public const string Stream = Streams.CustomersCustomer;
+}
