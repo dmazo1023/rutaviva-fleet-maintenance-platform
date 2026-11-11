@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/RutaViva.BuildingBlocks.Api/RutaViva.BuildingBlocks.Api.csproj" />
+    <Project Path="src/BuildingBlocks/RutaViva.BuildingBlocks.Application/RutaViva.BuildingBlocks.Application.csproj" />
+    <Project Path="src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/RutaViva.BuildingBlocks.Domain.csproj" />
+    <Project Path="src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/RutaViva.BuildingBlocks.EventBus.Client.csproj" />
+    <Project Path="src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/RutaViva.BuildingBlocks.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Contracts/">
+    <Project Path="src/Contracts/RutaViva.IntegrationContracts/RutaViva.IntegrationContracts.csproj" />
+  </Folder>
+</Solution>

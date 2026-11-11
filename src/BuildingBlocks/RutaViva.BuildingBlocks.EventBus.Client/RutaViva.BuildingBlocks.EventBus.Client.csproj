@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\RutaViva.BuildingBlocks.Application\RutaViva.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\..\Contracts\RutaViva.IntegrationContracts\RutaViva.IntegrationContracts.csproj" />
+  </ItemGroup>
+</Project>

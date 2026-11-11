@@ -1,0 +1,1521 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RutaViva · Flota y órdenes · aprobado v3</title>
+<!--
+  Mockup interactivo · sistema de diseño EXTERNO (RutaViva) con toques Doggie.
+  Tokens en mockups/design-system/MASTER.md. Lo que lleva prefijo .mk- es instrumentación y NO se implementa.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400..600,0..1,0&display=block" />
+<style>
+  /* ===== Tokens (únicos valores literales permitidos) ===== */
+  :root {
+    color-scheme: light;
+    --font-body: 'Manrope', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+
+    --c-bg: #F5F7F6; --c-surface: #FFFFFF; --c-sunken: #EEF2F0;
+    --c-text: #16201C; --c-muted: #56635E;
+    --c-border: #DCE3E0; --c-border-strong: #C4CEC9;
+    --c-brand: #0E5A4A; --c-on-brand: #FFFFFF; --c-brand-soft: #E3F1EC; --c-brand-hover: #0B4A3D;
+    --c-pulse: #12B886;
+    /* Estados · semáforo (v3, tomado del reporte de consumo): relleno brillante + texto oscuro del mismo tono */
+    --c-ok: #047857; --c-ok-soft: #ECFDF5; --c-ok-bar: #10B981;
+    --c-warn: #A16207; --c-warn-soft: #FEF9C3; --c-warn-bar: #EAB308; --c-hatch: rgb(234 179 8 / .38);
+    --c-danger: #B91C1C; --c-danger-soft: #FEF2F2; --c-danger-bar: #DC2626;
+    --c-info: #1F5E8C; --c-info-soft: #E5F0F8;
+    --c-neutral: #475569; --c-neutral-soft: #EEF1F4;
+    --c-track: #E4EAE7;
+    --c-plate: #F9D85A; --c-plate-ink: #1A1A1A;
+    --c-focus: #0E5A4A;
+    --c-overlay: rgb(10 20 16 / .45);
+    --c-flash: rgb(18 184 134 / .16);
+
+    --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-6: 24px; --s-8: 32px; --s-12: 48px;
+    --r-chip: 5px; --r-ctl: 10px; --r-panel: 14px; --r-modal: 20px;
+    --sh-pop: 0 2px 6px rgb(16 32 28 / .08), 0 16px 40px rgb(16 32 28 / .16);
+    --ease: cubic-bezier(.2, .8, .2, 1);
+    --dur-fast: 150ms; --dur: 240ms; --dur-slow: 700ms;
+  }
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --c-bg: #0E1513; --c-surface: #151E1B; --c-sunken: #1C2723;
+    --c-text: #E8EFEC; --c-muted: #9DB0A8;
+    --c-border: #26332E; --c-border-strong: #34443E;
+    --c-brand: #3DCB9F; --c-on-brand: #04261C; --c-brand-soft: #15302A; --c-brand-hover: #5ED8B1;
+    --c-pulse: #3DCB9F;
+    --c-ok: #6EE7B7; --c-ok-soft: #12302A; --c-ok-bar: #34D399;
+    --c-warn: #FDE047; --c-warn-soft: #332C12; --c-warn-bar: #FACC15; --c-hatch: rgb(250 204 21 / .30);
+    --c-danger: #FCA5A5; --c-danger-soft: #3A1E1C; --c-danger-bar: #F87171;
+    --c-info: #7CB8E8; --c-info-soft: #16283A;
+    --c-neutral: #AEB9C7; --c-neutral-soft: #1F2630;
+    --c-track: #24302C;
+    --c-focus: #3DCB9F;
+    --c-overlay: rgb(0 0 0 / .6);
+    --c-flash: rgb(61 203 159 / .14);
+  }
+
+  /* ===== Base ===== */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body { font: 400 15px/1.5 var(--font-body); color: var(--c-text); background: var(--c-bg); -webkit-font-smoothing: antialiased; }
+  h1, h2, h3 { margin: 0; line-height: 1.2; text-wrap: balance; }
+  p { margin: 0; }
+  a { color: inherit; }
+  button, input, select { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--c-focus); outline-offset: 2px; border-radius: 4px; }
+  [hidden] { display: none !important; }
+  .tabular { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--c-muted); }
+  .mono { font-family: var(--font-mono); }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  .ms { font-family: 'Material Symbols Rounded'; font-weight: 400; font-style: normal; font-size: 20px; line-height: 1; letter-spacing: normal;
+        text-transform: none; display: inline-block; white-space: nowrap; direction: ltr; -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga';
+        font-variation-settings: 'FILL' 0, 'wght' 450, 'GRAD' 0, 'opsz' 20; user-select: none; flex: none; }
+  .ms--fill { font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20; }
+  .ms--s { font-size: 16px; }
+  .skip { position: absolute; left: 8px; top: -60px; z-index: 300; padding: 8px 12px; background: var(--c-brand); color: var(--c-on-brand); border-radius: var(--r-ctl); }
+  .skip:focus { top: 8px; }
+
+  /* ===== Instrumentación del mockup (no se implementa) ===== */
+  .mk-bar { position: sticky; top: 0; z-index: 200; display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center;
+            padding: 8px 16px; background: #111827; color: #f9fafb; font: 13px/1.4 system-ui, sans-serif; }
+  .mk-bar label { display: inline-flex; gap: 6px; align-items: center; }
+  .mk-bar select { font: inherit; color: #111827; }
+  .mk-bar button { font: inherit; padding: 3px 10px; border-radius: 6px; border: 1px solid #4b5563; background: #1f2937; color: #f9fafb; cursor: pointer; }
+  .mk-bar button:hover { background: #374151; }
+  .mk-bar .mk-date { margin-left: auto; color: #9ca3af; }
+  .mk-frame { margin: 0 auto; container: frame / inline-size; transition: max-width .2s ease; background: var(--c-bg); }
+  .mk-tag { display: none; position: absolute; top: -10px; left: 8px; z-index: 5; padding: 0 6px; border-radius: 4px;
+            background: #db2777; color: #fff; font: 600 11px/18px ui-monospace, monospace; pointer-events: none; }
+  body.mk-show-tags .mk-tag { display: inline-block; }
+  body.mk-show-tags [data-card] { outline: 1px dashed #db2777; outline-offset: 2px; }
+  [data-card] { position: relative; }
+
+  /* ===== Shell ===== */
+  .app { display: grid; grid-template-columns: 88px minmax(0, 1fr); min-height: calc(100dvh - 44px); }
+  .rail { position: sticky; top: 44px; align-self: start; height: calc(100dvh - 44px); display: flex; flex-direction: column; align-items: center;
+          gap: var(--s-1); padding: var(--s-4) var(--s-2); background: var(--c-surface); border-right: 1px solid var(--c-border); }
+  .brand { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: var(--s-4); border-radius: 12px; background: var(--c-brand); color: var(--c-on-brand); }
+  .brand svg { width: 28px; height: 28px; }
+  .nav { display: flex; flex-direction: column; gap: 2px; width: 100%; margin: 0; padding: 0; list-style: none; }
+  .nav a { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 2px; border-radius: var(--r-ctl);
+           text-decoration: none; color: var(--c-muted); font-size: 11.5px; font-weight: 600; transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+  .nav a:hover { background: var(--c-sunken); color: var(--c-text); }
+  .nav a[aria-current="page"] { color: var(--c-brand); background: var(--c-brand-soft); }
+  .nav a[aria-current="page"] .ms { font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+  .nav .ms { font-size: 24px; }
+  .nav .dot { position: absolute; top: 6px; right: 18px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--c-danger-bar); color: var(--c-on-brand);
+              font: 700 11px/18px var(--font-body); text-align: center; }
+  [data-theme="dark"] .nav .dot { color: var(--c-bg); }
+
+  .col { display: flex; flex-direction: column; min-width: 0; }
+  .topbar { position: sticky; top: 44px; z-index: 50; display: flex; align-items: center; gap: var(--s-3); padding: 10px clamp(var(--s-4), 3cqi, var(--s-8));
+            background: color-mix(in srgb, var(--c-bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--c-border); }
+  .wordmark { font-weight: 800; font-size: 18px; letter-spacing: -.02em; color: var(--c-text); }
+  .wordmark span { color: var(--c-brand); }
+  .topbar .grow { flex: 1; }
+  .live { display: inline-flex; align-items: center; gap: 8px; padding: 0 10px; height: 32px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--c-muted); }
+  .live i { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--c-pulse); }
+  .live i::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--c-pulse); opacity: 0; animation: pulse 2.4s var(--ease) infinite; }
+  .live.is-off i { background: var(--c-neutral); }
+  .live.is-off i::after { animation: none; }
+  @keyframes pulse { 0% { transform: scale(.6); opacity: .7; } 100% { transform: scale(1.8); opacity: 0; } }
+
+  .select { position: relative; display: inline-flex; align-items: center; }
+  .select select { appearance: none; height: 36px; padding: 0 32px 0 12px; border: 1px solid var(--c-border); border-radius: var(--r-ctl);
+                   background: var(--c-surface); font-weight: 600; font-size: 14px; cursor: pointer; max-width: 230px; text-overflow: ellipsis; }
+  .select .ms { position: absolute; right: 8px; pointer-events: none; color: var(--c-muted); }
+  .select--icon select { padding-left: 36px; }
+  .select--icon .ms:first-child { left: 10px; right: auto; }
+
+  .icon-btn { position: relative; display: inline-grid; place-items: center; width: 40px; height: 40px; flex: none; border: 1px solid transparent; border-radius: var(--r-ctl);
+              background: transparent; color: var(--c-muted); cursor: pointer; text-decoration: none;
+              transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+  .icon-btn:hover { background: var(--c-sunken); color: var(--c-text); }
+  .icon-btn[disabled] { opacity: .4; cursor: not-allowed; }
+  .icon-btn .badge { position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--c-danger-bar);
+                     color: var(--c-on-brand); font: 700 10px/16px var(--font-body); }
+  [data-theme="dark"] .icon-btn .badge { color: var(--c-bg); }
+  .icon-btn.is-spinning .ms { animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* tooltip */
+  [data-tip] { position: relative; }
+  [data-tip]::after { content: attr(data-tip); position: absolute; left: 50%; top: calc(100% + 6px); z-index: 80; transform: translate(-50%, -2px); padding: 4px 8px; border-radius: 6px;
+                      background: var(--c-text); color: var(--c-bg); font: 600 12px/1.3 var(--font-body); white-space: nowrap; opacity: 0; pointer-events: none;
+                      transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease); }
+  [data-tip]:hover::after, [data-tip]:focus-visible::after { opacity: 1; transform: translate(-50%, 0); transition-delay: .35s; }
+  [data-tip-pos="left"]::after { left: auto; right: 0; transform: translate(0, -2px); }
+  [data-tip-pos="left"]:hover::after, [data-tip-pos="left"]:focus-visible::after { transform: translate(0, 0); }
+
+  .page { padding: clamp(var(--s-4), 3cqi, var(--s-8)); padding-bottom: var(--s-12); }
+  .page-head { display: flex; align-items: baseline; gap: var(--s-3); margin-bottom: var(--s-4); }
+  .page-head h1 { font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
+  .page-head h1:focus { outline: none; }
+  .count { font-size: 15px; font-weight: 600; color: var(--c-muted); }
+
+  /* ===== Botones ===== */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 14px; border: 1px solid transparent;
+         border-radius: var(--r-ctl); font: 700 14px var(--font-body); cursor: pointer; text-decoration: none; white-space: nowrap;
+         transition: background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease); }
+  .btn:active { transform: translateY(1px); }
+  .btn--primary { background: var(--c-brand); color: var(--c-on-brand); }
+  .btn--primary:hover { background: var(--c-brand-hover); }
+  .btn--ghost { background: var(--c-surface); border-color: var(--c-border); color: var(--c-text); }
+  .btn--ghost:hover { border-color: var(--c-border-strong); background: var(--c-sunken); }
+  .btn--danger { background: var(--c-danger-bar); color: var(--c-on-brand); }
+  [data-theme="dark"] .btn--danger { color: var(--c-bg); }
+  .btn--quiet { background: transparent; color: var(--c-brand); padding: 0 8px; }
+  .btn--quiet:hover { background: var(--c-brand-soft); }
+  .btn--s { min-height: 32px; padding: 0 10px; font-size: 13px; }
+  .btn[aria-busy="true"] { opacity: .65; cursor: progress; }
+  .btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+  /* ===== Placa y pastillas ===== */
+  .plate { display: inline-flex; align-items: center; height: 24px; padding: 0 7px; border: 1.5px solid var(--c-plate-ink); border-radius: var(--r-chip);
+           background: var(--c-plate); color: var(--c-plate-ink); font: 600 13px/1 var(--font-mono); letter-spacing: .06em; flex: none; }
+  a.plate { text-decoration: none; }
+  a.plate:hover { box-shadow: 0 0 0 3px var(--c-brand-soft); }
+  .plate--lg { height: 38px; padding: 0 12px; font-size: 20px; border-width: 2px; border-radius: 7px; }
+  .pill { --fg: var(--c-neutral); --bg: var(--c-neutral-soft); display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 10px 0 7px;
+          border-radius: 999px; background: var(--bg); color: var(--fg); font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+  .pill .ms { font-size: 16px; }
+  .is-ok { --fg: var(--c-ok); --bg: var(--c-ok-soft); --bar: var(--c-ok-bar); }
+  .is-warn { --fg: var(--c-warn); --bg: var(--c-warn-soft); --bar: var(--c-warn-bar); }
+  .is-danger { --fg: var(--c-danger); --bg: var(--c-danger-soft); --bar: var(--c-danger-bar); }
+  .is-info { --fg: var(--c-info); --bg: var(--c-info-soft); --bar: var(--c-info); }
+  .is-brand { --fg: var(--c-brand); --bg: var(--c-brand-soft); --bar: var(--c-brand); }
+  .is-neutral { --fg: var(--c-neutral); --bg: var(--c-neutral-soft); --bar: var(--c-neutral); }
+  .trig { display: inline-flex; gap: 1px; margin-left: 2px; opacity: .85; }
+
+  /* ===== Filtros ===== */
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); margin-bottom: var(--s-4); }
+  .seg { display: inline-flex; gap: 2px; margin: 0; padding: 3px; border: 1px solid var(--c-border); border-radius: 12px; background: var(--c-surface); }
+  .seg legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: 9px; cursor: pointer; font-size: 13.5px; font-weight: 600;
+               color: var(--c-muted); transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+  .seg label:hover { color: var(--c-text); }
+  .seg input:checked + label { background: var(--c-sunken); color: var(--c-text); }
+  .seg input:focus-visible + label { outline: 2px solid var(--c-focus); outline-offset: 1px; }
+  .seg .n { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--c-muted); }
+  .seg .sw { width: 8px; height: 8px; border-radius: 50%; background: var(--bar); }
+  .search { position: relative; flex: 1 1 220px; max-width: 320px; }
+  .search .ms { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--c-muted); pointer-events: none; }
+  .search input { width: 100%; height: 40px; padding: 0 12px 0 38px; border: 1px solid var(--c-border); border-radius: var(--r-ctl); background: var(--c-surface); }
+  .search input::placeholder { color: var(--c-muted); }
+
+  /* ===== Flota: lista + detalle ===== */
+  .fleet { display: grid; gap: var(--s-4); align-items: start; }
+  .panel { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-panel); }
+  .vlist { overflow: hidden; }
+  .vhead, .vrow { display: grid; grid-template-columns: minmax(170px, 1.25fr) minmax(130px, 1fr) 96px minmax(190px, 1.5fr) 132px 88px; align-items: center; gap: var(--s-4); padding: 0 var(--s-4); }
+  .vhead { height: 40px; border-bottom: 1px solid var(--c-border); font-size: 12.5px; font-weight: 700; color: var(--c-muted); }
+  .vhead .r, .vrow .r { text-align: right; justify-self: end; }
+  .vrow { position: relative; min-height: 64px; text-decoration: none; border-bottom: 1px solid var(--c-border); transition: background-color var(--dur-fast) var(--ease); }
+  .vrow:last-child { border-bottom: 0; }
+  .vrow:hover { background: var(--c-sunken); }
+  .vrow[aria-current="true"] { background: var(--c-brand-soft); }
+  .vrow[aria-current="true"]::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--c-brand); }
+  .vrow::after { content: ''; position: absolute; inset: 0; background: var(--c-flash); opacity: 0; pointer-events: none; }
+  .vrow.flash::after { animation: flash 1.6s var(--ease); }
+  @keyframes flash { 0%, 30% { opacity: 1; } 100% { opacity: 0; } }
+  .vid { display: flex; align-items: center; gap: var(--s-3); min-width: 0; }
+  .vmodel { display: flex; flex-direction: column; min-width: 0; font-weight: 700; font-size: 14px; line-height: 1.25; }
+  .vmodel small { font-weight: 500; font-size: 12.5px; color: var(--c-muted); }
+  .vcust { font-size: 13.5px; color: var(--c-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vodo { font-weight: 600; font-size: 14px; }
+  .vnext { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; font-size: 13px; }
+  .vnext b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vnext .mini { grid-column: 1 / -1; }
+  .vorder { display: inline-flex; align-items: center; gap: 4px; font: 500 12.5px var(--font-mono); color: var(--c-muted); }
+  .vorder.is-warn { color: var(--c-warn); }
+  .vrow.is-off .vid, .vrow.is-off .vnext, .vrow.is-off .vodo { opacity: .55; }
+
+  .mini { position: relative; height: 6px; border-radius: 3px; background: var(--c-track); overflow: hidden; }
+  .mini span { position: absolute; inset: 0; background: var(--bar); transform-origin: left; transition: transform var(--dur-slow) var(--ease); }
+
+  .has-detail { grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); }
+  .has-detail .vhead { display: none; }
+  .has-detail .vrow { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "id st" "nx nx"; gap: 6px var(--s-3); padding: 12px var(--s-4); }
+  .has-detail .vrow .vid { grid-area: id; } .has-detail .vrow .vst { grid-area: st; } .has-detail .vrow .vnext { grid-area: nx; }
+  .has-detail .vcust, .has-detail .vodo, .has-detail .vorder-cell { display: none; }
+  .has-detail .vlist { position: sticky; top: 108px; max-height: calc(100dvh - 130px); overflow: auto; }
+
+  /* ===== Detalle ===== */
+  .detail { padding: var(--s-6); }
+  .d-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s-4); align-items: center; }
+  .d-head .back { display: none; }
+  .d-id { display: flex; align-items: center; gap: var(--s-4); min-width: 0; }
+  .d-id h2 { font-size: 22px; font-weight: 800; letter-spacing: -.01em; }
+  .d-sub { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 2px; font-size: 13px; color: var(--c-muted); }
+  .d-sub span { display: inline-flex; align-items: center; gap: 4px; }
+  .odo { text-align: right; }
+  .odo-val { font-size: 28px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .odo-unit { margin-left: 4px; font-size: 14px; font-weight: 700; color: var(--c-muted); }
+  .odo-at { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 12.5px; color: var(--c-muted); }
+  .d-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-6); margin: var(--s-4) 0 0; padding: var(--s-3) 0 0; border-top: 1px solid var(--c-border); }
+  .d-meta div { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; }
+  .d-meta dt { display: inline-flex; color: var(--c-muted); }
+  .d-meta dd { margin: 0; }
+  .d-meta .push { margin-left: auto; }
+  .banner { display: flex; align-items: center; gap: var(--s-3); margin-top: var(--s-4); padding: 10px 14px; border-radius: var(--r-ctl); background: var(--bg); color: var(--fg); font-weight: 600; font-size: 14px; }
+  .banner .grow { flex: 1; }
+
+  /* switch */
+  .switch { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none; cursor: pointer; font-weight: 600; font-size: 13.5px; }
+  .switch .knob { position: relative; width: 38px; height: 22px; flex: none; border-radius: 11px; background: var(--c-border-strong); transition: background-color var(--dur) var(--ease); }
+  .switch .knob::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--c-surface);
+                         box-shadow: 0 1px 2px rgb(0 0 0 / .25); transition: transform var(--dur) var(--ease); }
+  .switch[aria-checked="true"] .knob { background: var(--c-brand); }
+  .switch[aria-checked="true"] .knob::after { transform: translateX(16px); }
+  .switch[disabled] { opacity: .45; cursor: not-allowed; }
+  .switch:focus-visible { outline: none; }
+  .switch:focus-visible .knob { outline: 2px solid var(--c-focus); outline-offset: 2px; }
+
+  /* tabs */
+  .tabs { display: flex; gap: var(--s-1); margin: var(--s-6) 0 0; border-bottom: 1px solid var(--c-border); }
+  .tab { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 42px; padding: 0 12px; border: 0; background: none; cursor: pointer;
+         font-weight: 700; font-size: 14px; color: var(--c-muted); }
+  .tab:hover { color: var(--c-text); }
+  .tab[aria-selected="true"] { color: var(--c-text); }
+  .tab[aria-selected="true"]::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: var(--c-brand); }
+  .tab .n { font-variant-numeric: tabular-nums; color: var(--c-muted); font-weight: 600; }
+
+  /* ===== Rutinas · firma "ruta de la rutina" ===== */
+  .routines { margin: 0; padding: 0; list-style: none; }
+  .rt { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: var(--s-2) var(--s-4); padding: var(--s-4) 0; border-bottom: 1px solid var(--c-border); }
+  .rt:last-child { border-bottom: 0; }
+  .rt-ico { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--bg); color: var(--fg); }
+  .rt-ico .ms { font-size: 22px; }
+  .rt-main { display: grid; gap: 10px; min-width: 0; }
+  .rt-title { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .rt-title h3 { font-size: 15.5px; font-weight: 700; }
+  .rt-ovr { display: inline-flex; color: var(--c-muted); }
+  .rt-ctl { display: flex; align-items: center; gap: 2px; align-self: start; }
+  .rt-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; font-size: 13.5px; }
+  .rt-foot .due { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+  .rt-foot .due .ms { color: var(--c-muted); }
+  .rt-foot .grow { flex: 1; }
+  .order-link { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px 3px 6px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600;
+                background: var(--bg); color: var(--fg); }
+  .order-link .mono { font-size: 12.5px; }
+  .order-link:hover { text-decoration: underline; }
+  .rt.is-off .rt-main, .rt.is-off .rt-ico { opacity: .5; }
+
+  .trk { display: grid; grid-template-columns: 22px minmax(0, 1fr) 84px; align-items: center; gap: 10px; }
+  .trk > .ms { color: var(--c-muted); }
+  .trk-bar { position: relative; height: 10px; border-radius: 5px; background: var(--c-track); }
+  .trk-zone { position: absolute; top: 0; bottom: 0; border-radius: 0 5px 5px 0;
+              background: repeating-linear-gradient(-45deg, var(--c-hatch) 0 3px, transparent 3px 7px); }
+  .trk-fill { position: absolute; inset: 0; border-radius: 5px; background: var(--bar); transform-origin: left; transition: transform var(--dur-slow) var(--ease); }
+  .trk-dot { position: absolute; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: var(--c-surface); border: 3px solid var(--fg);
+             transition: left var(--dur-slow) var(--ease); }
+  .trk-end { position: absolute; right: -1px; top: -4px; bottom: -4px; width: 2px; border-radius: 1px; background: var(--c-border-strong); }
+  .trk-rem { text-align: right; font-size: 13.5px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--fg); }
+  .vrem { font-weight: 700; color: var(--fg); }
+  .trk-rem.is-neg { color: var(--c-danger); }
+  .rt.is-off .trk { --bar: var(--c-neutral); --fg: var(--c-neutral); }
+
+  /* órdenes / lecturas */
+  .rows { margin: 0; padding: 0; list-style: none; }
+  .row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s-2) var(--s-4); align-items: center; padding: 14px 0; border-bottom: 1px solid var(--c-border); }
+  .row:last-child { border-bottom: 0; }
+  .row .t { font-weight: 700; font-size: 14.5px; }
+  .row .s { font-size: 13px; color: var(--c-muted); }
+  .steps { display: flex; align-items: center; gap: 0; margin-top: 8px; }
+  .steps i { width: 10px; height: 10px; border-radius: 50%; background: var(--c-track); border: 2px solid var(--c-track); }
+  .steps i.done { background: var(--c-brand); border-color: var(--c-brand); }
+  .steps i.now { background: var(--c-surface); border-color: var(--bar, var(--c-brand)); box-shadow: 0 0 0 3px var(--bg, var(--c-brand-soft)); }
+  .steps b { width: 22px; height: 2px; background: var(--c-track); }
+  .steps b.done { background: var(--c-brand); }
+  .rd-ignored { color: var(--c-muted); }
+  .rd-ignored .t { text-decoration: line-through; text-decoration-thickness: 1px; font-weight: 600; }
+
+  /* ===== Órdenes ===== */
+  .dot--warn { background: var(--c-warn-bar) !important; }
+  .orow { position: relative; display: grid; grid-template-columns: 130px minmax(180px, 1.4fr) 150px 170px; align-items: center; gap: var(--s-4);
+          min-height: 60px; padding: 0 var(--s-4); border-bottom: 1px solid var(--c-border); text-decoration: none; transition: background-color var(--dur-fast) var(--ease); }
+  .orow:last-child { border-bottom: 0; }
+  .orow:hover { background: var(--c-sunken); }
+  .orow[aria-current="true"] { background: var(--c-brand-soft); }
+  .orow[aria-current="true"]::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--c-brand); }
+  .o-id { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13.5px; }
+  .prio { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--c-danger-soft); color: var(--c-danger); }
+  .o-veh { display: flex; align-items: center; gap: var(--s-3); min-width: 0; }
+  .o-rt { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .o-amt { text-align: right; font-weight: 700; font-size: 14px; }
+  .o-st { justify-self: end; }
+  .has-detail .orow, .olist-compact .orow { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "id st" "veh amt"; gap: 6px var(--s-3); padding: 12px var(--s-4); }
+  .has-detail .o-id { grid-area: id; } .has-detail .o-st { grid-area: st; } .has-detail .o-veh { grid-area: veh; } .has-detail .o-amt { grid-area: amt; }
+
+  .stepper { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: var(--s-6) 0 0; padding: 0; list-style: none; }
+  .stepper li { position: relative; display: grid; justify-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--c-muted); text-align: center; }
+  .stepper li::before { content: ''; position: absolute; top: 11px; right: 50%; width: 100%; height: 2px; background: var(--c-track); z-index: 0; }
+  .stepper li:first-child::before { display: none; }
+  .stepper li.done::before, .stepper li.now::before { background: var(--c-brand); }
+  .stepper i { position: relative; z-index: 1; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--c-surface); border: 2px solid var(--c-track); }
+  .stepper li.done i { background: var(--c-brand); border-color: var(--c-brand); color: var(--c-on-brand); }
+  .stepper li.now { color: var(--c-text); font-weight: 800; }
+  .stepper li.now i { border: 6px solid var(--bar); box-shadow: 0 0 0 4px var(--bg); }
+  .stepper.is-hold { opacity: .55; }
+  .sec { margin: var(--s-6) 0 var(--s-2); font-size: 13px; font-weight: 800; color: var(--c-muted); }
+  .lines { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--c-border); }
+  .ln { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: var(--s-4); padding: 12px 0; border-bottom: 1px solid var(--c-border); }
+  .ln-main { display: grid; gap: 2px; min-width: 0; }
+  .ln .t { font-weight: 700; font-size: 14.5px; }
+  .ln-amt { font-weight: 700; font-size: 15px; text-align: right; }
+  .ln.is-rej .t, .ln.is-rej .ln-amt { text-decoration: line-through; color: var(--c-muted); }
+  .pill--s { height: 22px; padding: 0 8px 0 5px; font-size: 12px; }
+  .price { display: flex; align-items: center; gap: var(--s-2); }
+  .price .field .inp { height: 36px; width: 150px; }
+  .tot { display: flex; align-items: baseline; justify-content: flex-end; gap: var(--s-3); padding: var(--s-4) 0 0; }
+  .tot > span:first-child { margin-right: auto; }
+  .tot b { font-size: 22px; font-weight: 800; letter-spacing: -.01em; }
+  .actbar { position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: var(--s-6) calc(-1 * var(--s-6)) 0;
+            padding: var(--s-4) var(--s-6); background: var(--c-surface); border-top: 1px solid var(--c-border); }
+  .actbar .grow { flex: 1; }
+  .why { display: inline-flex; align-items: center; gap: 4px; margin-right: var(--s-2); font-size: 13px; font-weight: 600; color: var(--c-muted); }
+  .btn--danger-text { color: var(--c-danger); }
+  .btn--quiet.btn--danger-text:hover { background: var(--c-danger-soft); }
+  .hist { margin-top: var(--s-4); }
+  .hist summary { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; margin-left: -8px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; color: var(--c-muted); list-style: none; }
+  .hist summary::-webkit-details-marker { display: none; }
+  .hist summary:hover { background: var(--c-sunken); color: var(--c-text); }
+  .hist .n { font-variant-numeric: tabular-nums; }
+  .hint { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--c-muted); }
+  .fields--stack { grid-template-columns: 1fr; }
+  .row a.t { text-decoration: none; }
+  .row a.t:hover { text-decoration: underline; }
+
+  /* ===== Estados ===== */
+  .state { display: grid; justify-items: center; gap: var(--s-3); padding: var(--s-12) var(--s-6); text-align: center; }
+  .state .ill { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 20px; background: var(--bg); color: var(--fg); }
+  .state .ill .ms { font-size: 32px; }
+  .state h2 { font-size: 18px; font-weight: 800; }
+  .state p { max-width: 42ch; color: var(--c-muted); }
+  .sk { display: block; border-radius: 6px; background: linear-gradient(90deg, var(--c-sunken) 25%, var(--c-bg) 50%, var(--c-sunken) 75%); background-size: 200% 100%;
+        animation: shimmer 1.4s linear infinite; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+  .sk-row { display: grid; grid-template-columns: 64px 1fr 120px 90px; gap: var(--s-4); align-items: center; height: 64px; padding: 0 var(--s-4); border-bottom: 1px solid var(--c-border); }
+
+  /* ===== Vistas básicas ===== */
+  .simple .row { padding: 14px var(--s-4); }
+  .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--s-4); }
+  .rep { display: grid; gap: var(--s-3); padding: var(--s-4) var(--s-4) var(--s-4); }
+  .rep h2 { font-size: 15.5px; font-weight: 800; }
+  .rep .code { font: 600 12px var(--font-mono); color: var(--c-muted); }
+  .rep .acts { display: flex; gap: var(--s-2); }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .tbl th { height: 40px; padding: 0 var(--s-4); text-align: left; font-size: 12.5px; font-weight: 700; color: var(--c-muted); border-bottom: 1px solid var(--c-border); }
+  .tbl td { height: 52px; padding: 0 var(--s-4); border-bottom: 1px solid var(--c-border); }
+  .tbl tr:last-child td { border-bottom: 0; }
+  .tbl .r { text-align: right; }
+  .stage { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: var(--s-4); padding: 14px var(--s-4); border-bottom: 1px solid var(--c-border); }
+  .stage:last-child { border-bottom: 0; }
+  .stage .num { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--bg); color: var(--fg); font-weight: 800; font-size: 14px; }
+  .policy { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-4); padding: var(--s-4); margin-bottom: var(--s-4); }
+  .policy .amt { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+  /* ===== Modal ===== */
+  dialog { width: min(480px, calc(100vw - 32px)); padding: 0; border: 0; border-radius: var(--r-modal); background: var(--c-surface); color: var(--c-text); box-shadow: var(--sh-pop); }
+  dialog::backdrop { background: var(--c-overlay); }
+  dialog[open] { animation: pop var(--dur) var(--ease); }
+  @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+  .m-head { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-6) var(--s-6) 0; }
+  .m-head h2 { flex: 1; font-size: 18px; font-weight: 800; }
+  .m-body { display: grid; gap: var(--s-4); padding: var(--s-4) var(--s-6); }
+  .m-foot { display: flex; justify-content: flex-end; gap: var(--s-2); padding: var(--s-4) var(--s-6) var(--s-6); }
+  .m-foot .left { margin-right: auto; }
+  .fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-3); }
+  .field { display: grid; gap: 6px; }
+  .field label { font-size: 13px; font-weight: 700; }
+  .field .inp { display: flex; align-items: center; height: 44px; border: 1px solid var(--c-border-strong); border-radius: var(--r-ctl); background: var(--c-surface); }
+  .field .inp:focus-within { border-color: var(--c-focus); box-shadow: 0 0 0 3px var(--c-brand-soft); }
+  .field input { width: 100%; min-width: 0; height: 100%; padding: 0 0 0 12px; border: 0; background: none; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .field input:focus-visible { outline: none; }
+  .field input::placeholder { color: var(--c-muted); font-weight: 500; }
+  .field .unit { padding: 0 12px 0 6px; font-size: 13px; font-weight: 700; color: var(--c-muted); }
+  .field[aria-invalid="true"] .inp, .field.is-invalid .inp { border-color: var(--c-danger-bar); }
+  .err { color: var(--c-danger); font-size: 13px; font-weight: 600; }
+  .preview { display: grid; gap: 10px; padding: var(--s-4); border-radius: var(--r-panel); background: var(--c-sunken); }
+  .preview .rt-title { justify-content: space-between; }
+  .impact { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--s-2); }
+  .impact li { display: flex; align-items: center; gap: var(--s-3); padding: 10px 12px; border-radius: var(--r-ctl); background: var(--c-sunken); font-weight: 600; font-size: 14px; }
+  .impact .ms { color: var(--c-muted); }
+
+  /* ===== Toasts ===== */
+  .toasts { position: fixed; right: 16px; bottom: 16px; z-index: 150; display: grid; gap: var(--s-2); width: min(380px, calc(100vw - 32px)); }
+  .toast { display: flex; align-items: center; gap: var(--s-3); padding: 12px 12px 12px 14px; border-radius: 14px; background: var(--c-text); color: var(--c-bg);
+           box-shadow: var(--sh-pop); font-size: 14px; font-weight: 600; animation: pop var(--dur) var(--ease); }
+  .toast .ms { color: var(--c-pulse); }
+  .toast.is-danger .ms { color: var(--c-danger-bar); }
+  .toast.is-warn .ms { color: var(--c-warn-bar); }
+  .toast .grow { flex: 1; }
+  .toast button, .toast a { padding: 6px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--c-pulse); font-weight: 800; cursor: pointer; text-decoration: none; }
+  .toast button:hover, .toast a:hover { background: color-mix(in srgb, var(--c-bg) 12%, transparent); }
+
+  /* ===== Responsive (consulta por contenedor: responde al selector de ancho) ===== */
+  @container frame (max-width: 1180px) {
+    .vhead, .vrow { grid-template-columns: minmax(160px, 1.2fr) 90px minmax(170px, 1.5fr) 128px 84px; }
+    .vcust { display: none; }
+  }
+  @container frame (max-width: 1100px) {
+    .has-detail { grid-template-columns: 1fr; }
+    .has-detail .vlist { display: none; }
+    .d-head .back { display: inline-grid; }
+  }
+  @container frame (max-width: 900px) {
+    .vhead { display: none; }
+    .vrow { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "id st" "nx nx"; gap: 8px var(--s-3); padding: 12px var(--s-4); }
+    .vrow .vid { grid-area: id; } .vrow .vst { grid-area: st; } .vrow .vnext { grid-area: nx; }
+    .vodo, .vorder-cell { display: none; }
+  }
+  @container frame (max-width: 760px) {
+    .app { grid-template-columns: minmax(0, 1fr); }
+    .nav li { flex: 1; min-width: 0; }
+    .nav a { padding: 6px 0; font-size: 10.5px; }
+    .wordmark { display: none; }
+    .toolbar .seg { flex: 1 1 auto; justify-content: space-between; }
+    .rail { position: sticky; top: auto; bottom: 0; order: 2; z-index: 60; height: auto; align-self: end; flex-direction: row; padding: 6px 8px;
+            border-right: 0; border-top: 1px solid var(--c-border); }
+    .brand { display: none; }
+    .nav { flex-direction: row; justify-content: space-around; }
+    .nav a { flex: 1; font-size: 11px; padding: 6px 0; }
+    .nav .dot { right: calc(50% - 22px); }
+    .topbar .select--cust select { max-width: 150px; }
+    .topbar .select--prof { display: none; }
+    .live b { display: none; }
+    .page-head h1 { font-size: 24px; }
+    .detail { padding: var(--s-4); }
+    .d-head { grid-template-columns: auto minmax(0, 1fr); }
+    .odo { grid-column: 1 / -1; display: flex; align-items: baseline; gap: var(--s-2); text-align: left; padding-top: var(--s-2); border-top: 1px dashed var(--c-border); }
+    .odo-at { margin-left: auto; }
+    .d-id { gap: var(--s-3); }
+    .plate--lg { height: 32px; font-size: 17px; }
+    .d-id h2 { font-size: 18px; }
+    .d-meta .push { margin-left: 0; }
+    .rt { grid-template-columns: 36px minmax(0, 1fr); }
+    .rt-ico { width: 36px; height: 36px; }
+    .rt-ctl { grid-column: 2; justify-self: start; order: 3; }
+    .trk { grid-template-columns: 20px minmax(0, 1fr) 76px; }
+    .fields { grid-template-columns: 1fr 1fr; }
+    .fields .field:last-child { grid-column: 1 / -1; }
+    .seg label { padding: 0 9px; white-space: nowrap; }
+    .seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+    .seg .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .search { max-width: none; }
+    .tbl .hide-s { display: none; }
+    .orow { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "id st" "veh amt"; gap: 6px var(--s-3); padding: 12px var(--s-4); }
+    .o-id { grid-area: id; } .o-st { grid-area: st; } .o-veh { grid-area: veh; } .o-amt { grid-area: amt; }
+    .stepper li span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .stepper li.now span { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: nowrap; }
+    .actbar { margin: var(--s-4) calc(-1 * var(--s-4)) 0; padding: var(--s-3) var(--s-4); }
+    .actbar .btn { flex: 1 1 auto; }
+    .actbar .grow { display: none; }
+    .why { flex-basis: 100%; }
+    .ln { grid-template-columns: 36px minmax(0, 1fr); }
+    .ln-amt, .price { grid-column: 2; justify-self: start; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+
+<div class="mk-bar" role="toolbar" aria-label="Controles del mockup">
+  <strong>RutaViva · Flota y órdenes · aprobado v3</strong>
+  <label>Estado <select id="mk-state">
+    <option value="default">Con datos</option><option value="loading">Cargando</option><option value="empty">Vacío</option>
+    <option value="error">Error</option><option value="offline">Sin conexión en vivo</option></select></label>
+  <label>Ancho <select id="mk-width"><option value="100%">Escritorio</option><option value="1024px">1024</option><option value="768px">768</option><option value="390px">390</option></select></label>
+  <label><input type="checkbox" id="mk-tags" /> Etiquetas</label>
+  <label><input type="checkbox" id="mk-dark" /> Tema oscuro</label>
+  <button type="button" id="mk-reading">Lectura RVA102 +700 km</button>
+  <button type="button" id="mk-day">Revisión diaria +7 días</button>
+  <span class="mk-date" id="mk-date"></span>
+</div>
+
+<div class="mk-frame" id="mk-frame">
+  <div class="app">
+    <nav class="rail" aria-label="Principal" data-card="N · Navegación">
+      <span class="mk-tag">N · Navegación</span>
+      <a class="brand" href="#/flota" aria-label="RutaViva, inicio">
+        <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M8 25c0-6 4-8 8-8s8-2 8-8" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" />
+          <circle cx="8" cy="25" r="2.6" fill="currentColor" />
+          <circle cx="24" cy="8" r="3.6" fill="var(--c-pulse)" />
+        </svg>
+      </a>
+      <ul class="nav" id="nav">
+        <li><a href="#/flota" data-route="flota"><span class="ms" aria-hidden="true">local_shipping</span>Flota</a></li>
+        <li><a href="#/alertas" data-route="alertas"><span class="ms" aria-hidden="true">notifications</span>Alertas<span class="dot" id="nav-alerts"></span></a></li>
+        <li><a href="#/ordenes" data-route="ordenes"><span class="ms" aria-hidden="true">assignment</span>Órdenes<span class="dot dot--warn" id="nav-orders"></span></a></li>
+        <li><a href="#/parametros" data-route="parametros"><span class="ms" aria-hidden="true">tune</span>Parámetros</a></li>
+        <li><a href="#/carga" data-route="carga"><span class="ms" aria-hidden="true">upload_file</span>Carga</a></li>
+        <li><a href="#/reportes" data-route="reportes"><span class="ms" aria-hidden="true">bar_chart</span>Reportes</a></li>
+      </ul>
+    </nav>
+
+    <div class="col">
+      <header class="topbar" data-card="T · Barra superior">
+        <span class="mk-tag">T · Barra superior</span>
+        <span class="wordmark" aria-hidden="true">ruta<span>viva</span></span>
+        <span class="grow"></span>
+        <span class="live" id="live" role="status"><i aria-hidden="true"></i><b>En vivo</b></span>
+        <button class="icon-btn" type="button" id="btn-refresh" aria-label="Reevaluar con los parámetros vigentes" data-tip="Actualizar"><span class="ms" aria-hidden="true">refresh</span></button>
+        <div class="select select--icon select--cust">
+          <span class="ms ms--s" aria-hidden="true">apartment</span>
+          <select id="cust" aria-label="Cliente">
+            <option value="">Todos los clientes</option>
+            <option value="900000001">RutaViva S.A.S.</option>
+            <option value="800200300">Transportes Andinos S.A.</option>
+            <option value="811400500">Distribuidora El Valle Ltda.</option>
+          </select>
+          <span class="ms ms--s" aria-hidden="true">expand_more</span>
+        </div>
+        <div class="select select--icon select--prof">
+          <span class="ms ms--s" aria-hidden="true">badge</span>
+          <select id="profile" aria-label="Perfil">
+            <option value="operator">Operador</option>
+            <option value="approver">Aprobador</option>
+            <option value="workshop">Taller</option>
+          </select>
+          <span class="ms ms--s" aria-hidden="true">expand_more</span>
+        </div>
+      </header>
+
+      <main id="main" class="page" tabindex="-1">
+        <div data-state-view="default" id="view"></div>
+
+        <div data-state-view="loading" aria-busy="true" aria-label="Cargando flota">
+          <div class="page-head"><span class="sk" style="width:120px;height:32px"></span></div>
+          <div class="toolbar"><span class="sk" style="width:360px;height:40px;border-radius:12px"></span><span class="sk" style="width:240px;height:40px"></span></div>
+          <div class="panel">
+            <div class="sk-row"><span class="sk" style="height:24px"></span><span class="sk" style="height:14px"></span><span class="sk" style="height:10px"></span><span class="sk" style="height:24px;border-radius:12px"></span></div>
+            <div class="sk-row"><span class="sk" style="height:24px"></span><span class="sk" style="height:14px;width:70%"></span><span class="sk" style="height:10px"></span><span class="sk" style="height:24px;border-radius:12px"></span></div>
+            <div class="sk-row"><span class="sk" style="height:24px"></span><span class="sk" style="height:14px;width:85%"></span><span class="sk" style="height:10px"></span><span class="sk" style="height:24px;border-radius:12px"></span></div>
+            <div class="sk-row"><span class="sk" style="height:24px"></span><span class="sk" style="height:14px;width:60%"></span><span class="sk" style="height:10px"></span><span class="sk" style="height:24px;border-radius:12px"></span></div>
+          </div>
+        </div>
+
+        <div data-state-view="empty">
+          <div class="page-head"><h1>Flota</h1></div>
+          <section class="panel state is-brand" data-card="A0 · Flota vacía">
+            <span class="mk-tag">A0 · Flota vacía</span>
+            <span class="ill"><span class="ms" aria-hidden="true">local_shipping</span></span>
+            <h2>Aún no hay vehículos</h2>
+            <p>Carga tu flota desde los archivos de Excel para empezar a ver sus mantenimientos.</p>
+            <a class="btn btn--primary" href="#/carga"><span class="ms" aria-hidden="true">upload_file</span>Cargar flota</a>
+          </section>
+        </div>
+
+        <div data-state-view="error">
+          <div class="page-head"><h1>Flota</h1></div>
+          <section class="panel state is-danger" role="alert" data-card="A! · Error de carga">
+            <span class="mk-tag">A! · Error de carga</span>
+            <span class="ill"><span class="ms" aria-hidden="true">cloud_off</span></span>
+            <h2>No pudimos cargar la flota</h2>
+            <p>El servicio de flota no respondió. Tus datos están a salvo.</p>
+            <button class="btn btn--ghost" type="button" id="retry"><span class="ms" aria-hidden="true">refresh</span>Reintentar</button>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- C · Ajuste de parámetros de la rutina -->
+<dialog id="dlg-params" aria-labelledby="dp-title" data-card="C · Ajustar rutina">
+  <form method="dialog" id="form-params" novalidate>
+    <div class="m-head">
+      <span class="rt-ico is-brand" id="dp-ico"><span class="ms" aria-hidden="true">oil_barrel</span></span>
+      <h2 id="dp-title">Cambio de aceite</h2>
+      <button class="icon-btn" type="button" data-close aria-label="Cerrar"><span class="ms" aria-hidden="true">close</span></button>
+    </div>
+    <div class="m-body">
+      <div class="fields">
+        <div class="field" id="f-km">
+          <label for="in-km">Cada</label>
+          <div class="inp"><input id="in-km" name="km" inputmode="numeric" autocomplete="off" /><span class="unit">km</span></div>
+        </div>
+        <div class="field" id="f-months">
+          <label for="in-months">O cada</label>
+          <div class="inp"><input id="in-months" name="months" inputmode="numeric" autocomplete="off" /><span class="unit">meses</span></div>
+        </div>
+        <div class="field" id="f-pct">
+          <label for="in-pct">Avisar al</label>
+          <div class="inp"><input id="in-pct" name="pct" inputmode="decimal" autocomplete="off" /><span class="unit">% final</span></div>
+        </div>
+      </div>
+      <p class="err" id="dp-err" role="alert" hidden></p>
+      <div class="preview" id="dp-preview" aria-live="polite"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn--quiet left" type="button" id="dp-reset"><span class="ms" aria-hidden="true">restart_alt</span>Valores del tipo</button>
+      <button class="btn btn--ghost" type="button" data-close>Cancelar</button>
+      <button class="btn btn--primary" type="submit" id="dp-save">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- D · Desactivar vehículo -->
+<dialog id="dlg-veh" aria-labelledby="dv-title" data-card="D · Desactivar vehículo">
+  <div class="m-head">
+    <span class="rt-ico is-neutral"><span class="ms" aria-hidden="true">pause_circle</span></span>
+    <h2 id="dv-title">Desactivar RVA104</h2>
+    <button class="icon-btn" type="button" data-close aria-label="Cerrar"><span class="ms" aria-hidden="true">close</span></button>
+  </div>
+  <div class="m-body"><ul class="impact" id="dv-impact"></ul></div>
+  <div class="m-foot">
+    <button class="btn btn--ghost" type="button" data-close>Cancelar</button>
+    <button class="btn btn--danger" type="button" id="dv-confirm">Desactivar</button>
+  </div>
+</dialog>
+
+<!-- L · Formulario de acción de la orden (cotizar, pedir/agregar servicio, cita, finalizar) -->
+<dialog id="dlg-form" aria-labelledby="df-title" data-card="L · Acción con datos">
+  <form method="dialog" id="form-act" novalidate>
+    <div class="m-head">
+      <span class="rt-ico is-brand" id="df-ico"></span>
+      <h2 id="df-title">Acción</h2>
+      <button class="icon-btn" type="button" data-close aria-label="Cerrar"><span class="ms" aria-hidden="true">close</span></button>
+    </div>
+    <div class="m-body"><div class="fields fields--stack" id="df-fields"></div><p class="err" id="df-err" role="alert" hidden></p><div id="df-extra"></div></div>
+    <div class="m-foot">
+      <button class="btn btn--ghost" type="button" data-close>Volver</button>
+      <button class="btn btn--primary" type="submit" id="df-submit">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- M · Confirmación con impacto (rechazar, cancelar) -->
+<dialog id="dlg-confirm" aria-labelledby="dc-title" data-card="M · Confirmar">
+  <div class="m-head">
+    <span class="rt-ico is-danger" id="dc-ico"></span>
+    <h2 id="dc-title">Confirmar</h2>
+    <button class="icon-btn" type="button" data-close aria-label="Cerrar"><span class="ms" aria-hidden="true">close</span></button>
+  </div>
+  <div class="m-body"><ul class="impact" id="dc-impact"></ul></div>
+  <div class="m-foot">
+    <button class="btn btn--ghost" type="button" data-close>Volver</button>
+    <button class="btn btn--danger" type="button" id="dc-ok">Confirmar</button>
+  </div>
+</dialog>
+
+<div class="toasts" id="toasts" aria-live="polite" data-card="E · Avisos"></div>
+
+<script>
+/* ===================== Datos del dominio (samples/import) ===================== */
+const D = {
+  today: new Date(2026, 10, 12),
+  profile: 'operator',
+  customer: '',
+  customers: { '900000001': 'RutaViva S.A.S.', '800200300': 'Transportes Andinos S.A.', '811400500': 'Distribuidora El Valle Ltda.' },
+  workshops: { '900100001': 'Autofrenos Medellín', '900100002': 'Servicentro La 80', '900100003': 'Lubricantes y Llantas Bogotá' },
+  people: { 'Laura_Gomez': 'Laura Gómez', 'Andres_Restrepo': 'Andrés Restrepo', 'Camila_Torres': 'Camila Torres', 'Mateo_Rios': 'Mateo Ríos', 'Julian_Ospina': 'Julián Ospina' },
+  types: {
+    OIL_CHANGE: { name: 'Cambio de aceite', icon: 'oil_barrel', km: 10000, months: 6, pct: 10 },
+    BRAKES: { name: 'Frenos', icon: 'album', km: 20000, months: 12, pct: 10 },
+    TIRES: { name: 'Llantas', icon: 'tire_repair', km: 40000, months: 24, pct: 10 },
+  },
+  vehicles: [
+    v('RVA101', '9FB4SRC9AKM100101', 'Renault', 'Kangoo', 2021, '900000001', '900100001', 'Laura_Gomez', 52300),
+    v('RVA102', '9GACE1340NB100102', 'Chevrolet', 'NHR', 2022, '900000001', '900100001', null, 81450),
+    v('RVA103', null, 'Toyota', 'Hilux', 2023, '900000001', '900100002', 'Andres_Restrepo', 30200),
+    v('RVA104', 'JHHAFJ4H2PK100104', 'Hino', '300', 2023, '900000001', '900100003', 'Laura_Gomez', 98000),
+    v('TAN201', 'LVBV3JBB1NE100201', 'Foton', 'Aumark', 2022, '800200300', '900100002', 'Camila_Torres', 120800),
+    v('TAN202', null, 'Nissan', 'Frontier', 2024, '800200300', '900100003', null, 19000),
+    v('TAN203', 'KNCSHX71AP7100203', 'Kia', 'K2700', 2023, '800200300', '900100003', 'Mateo_Rios', 70100),
+    v('EVA301', null, 'JAC', 'X200', 2026, '811400500', '900100001', 'Julian_Ospina', 0),
+    v('EVA302', '9GAJM52348B100302', 'Chevrolet', 'NPR', 2020, '811400500', '900100002', null, 45500),
+    v('EVA30D', null, 'Yamaha', 'FZ 2.0', 2024, '811400500', '900100001', 'Julian_Ospina', 12500),
+  ],
+  routines: [
+    r('RVA101', 'OIL_CHANGE', 45000, '2026-08-01'), r('RVA101', 'BRAKES', 40000, '2026-03-15'),
+    r('RVA102', 'OIL_CHANGE', 72000, '2026-07-15'),
+    r('RVA103', 'OIL_CHANGE', 28000, '2026-05-25'),
+    r('RVA104', 'OIL_CHANGE', 92000, '2026-09-20'), r('RVA104', 'BRAKES', 77000, '2025-12-01'),
+    r('TAN201', 'OIL_CHANGE', 110000, '2026-09-01'), r('TAN201', 'BRAKES', 105000, '2026-06-10'),
+    r('TAN202', 'OIL_CHANGE', 15000, '2026-04-20'),
+    r('TAN203', 'OIL_CHANGE', 60000, '2026-05-01'),
+    r('EVA301', 'OIL_CHANGE', null, null), r('EVA301', 'BRAKES', null, null),
+    r('EVA302', 'BRAKES', 27000, '2026-02-10'), r('EVA302', 'TIRES', 10000, '2025-08-01'),
+    r('EVA30D', 'OIL_CHANGE', 10000, '2026-10-01', { km: 3000, months: 3, pct: 20 }),
+  ],
+  policy: 1500000,
+  orders: [
+    { id: 'OS-0001', plate: 'RVA104', type: 'BRAKES', status: 'PendingApproval', reason: 'Quote', priority: 'Normal', policy: 1500000, appointment: null,
+      lines: [L('Routine', 'Pastillas y discos delanteros', 2350000, 'Workshop', 'PendingApproval')],
+      history: [H('12/11/2026 06:10', 'note_add', 'Creada', 'Sistema'), H('12/11/2026 07:02', 'request_quote', 'Cotizada', 'Lubricantes y Llantas Bogotá'), H('12/11/2026 07:02', 'gavel', 'Enviada a aprobación', 'Sistema')] },
+    { id: 'OS-0002', plate: 'TAN201', type: 'OIL_CHANGE', status: 'Approved', auto: true, policy: 1500000, appointment: '14/11/2026 08:00',
+      lines: [L('Routine', 'Aceite 15W-40 y filtro', 480000, 'Workshop', 'Approved')],
+      history: [H('12/11/2026 06:10', 'note_add', 'Creada', 'Sistema'), H('12/11/2026 06:55', 'request_quote', 'Cotizada', 'Servicentro La 80'), H('12/11/2026 06:55', 'bolt', 'Aprobada automáticamente', 'Sistema'), H('12/11/2026 07:20', 'event_available', 'Cita 14/11/2026 08:00', 'Servicentro La 80')] },
+    { id: 'OS-0003', plate: 'TAN202', type: 'OIL_CHANGE', status: 'Cancelled', policy: 1500000, appointment: null,
+      lines: [L('Routine', 'Aceite sintético y filtros', 1950000, 'Workshop', 'Rejected')],
+      history: [H('12/11/2026 06:10', 'note_add', 'Creada', 'Sistema'), H('12/11/2026 06:40', 'request_quote', 'Cotizada', 'Lubricantes y Llantas Bogotá'), H('12/11/2026 08:05', 'thumb_down', 'Rechazada', 'Camila Torres')] },
+    { id: 'OS-0004', plate: 'TAN203', type: 'OIL_CHANGE', status: 'PendingApproval', reason: 'AdditionalServices', priority: 'High', auto: true, policy: 1500000, appointment: '12/11/2026 07:30',
+      lines: [L('Routine', 'Aceite y filtro', 520000, 'Workshop', 'Approved'), L('Additional', 'Filtro de aire obstruido', 180000, 'Workshop', 'PendingApproval')],
+      history: [H('12/11/2026 06:10', 'note_add', 'Creada', 'Sistema'), H('12/11/2026 06:30', 'bolt', 'Aprobada automáticamente', 'Sistema'), H('12/11/2026 06:35', 'event_available', 'Cita 12/11/2026 07:30', 'Lubricantes y Llantas Bogotá'),
+                H('12/11/2026 07:34', 'garage', 'En sitio', 'Lubricantes y Llantas Bogotá'), H('12/11/2026 08:12', 'priority_high', 'Servicio adicional por aprobar', 'Lubricantes y Llantas Bogotá')] },
+  ],
+  alerts: [],
+  seq: 5,
+};
+function v(plate, vin, make, model, year, owner, shop, resp, odo) {
+  return { plate, vin, make, model, year, owner, shop, resp, odo, active: true, readAt: 'hace 3 min',
+           readings: odo ? [{ km: odo, at: '12/11/2026 08:42', ok: true }, { km: odo, at: '12/11/2026 08:41', ok: false, why: 'Repetida' },
+                            { km: odo - 50, at: '12/11/2026 08:40', ok: false, why: 'Menor que la registrada' }, { km: odo - 420, at: '11/11/2026 17:05', ok: true }] : [] };
+}
+function L(kind, desc, amount, by, appr) { return { id: Math.random().toString(36).slice(2, 8), kind, desc, amount, by, appr, pricing: amount == null ? 'PendingPricing' : 'Priced' }; }
+function H(at, icon, text, by) { return { at, icon, text, by }; }
+function r(plate, type, lastKm, lastDate, ovr) {
+  return { id: plate + '-' + type, plate, type, lastKm, lastDate: lastDate ? new Date(lastDate + 'T00:00:00') : null, ovr: ovr || null, active: true, sticky: false, cycleOrderTried: false };
+}
+
+/* ===================== Reglas (espejo de RN-1, RN-2, A-02, A-16) ===================== */
+const fmtN = new Intl.NumberFormat('es-CO');
+const fmtCOP = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+const fmtD = (d) => d.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+const DAY = 864e5;
+const addMonths = (d, m) => { const x = new Date(d); const day = x.getDate(); x.setMonth(x.getMonth() + m); if (x.getDate() < day) x.setDate(0); return x; };
+const veh = (p) => D.vehicles.find((x) => x.plate === p);
+const params = (rt, ovr) => { const t = D.types[rt.type]; const o = ovr === undefined ? rt.ovr : ovr; return { km: o?.km ?? t.km, months: o?.months ?? t.months, pct: o?.pct ?? t.pct }; };
+const SEV = ['ok', 'soon', 'over'];
+
+function evaluate(rt, ovr) {
+  const vh = veh(rt.plate), p = params(rt, ovr);
+  const startKm = rt.lastKm ?? 0, startDate = rt.lastDate ?? D.loadDate ?? D.today;
+  const out = { p, kmPct: null, timePct: null };
+  const sev = (pct) => (pct == null ? 0 : pct >= 100 ? 2 : pct >= 100 - p.pct ? 1 : 0);
+  if (p.km) { out.kmPct = Math.max(0, (vh.odo - startKm) / p.km * 100); out.nextKm = startKm + p.km; out.remKm = out.nextKm - vh.odo; }
+  if (p.months) {
+    out.nextDate = addMonths(startDate, p.months);
+    const total = (out.nextDate - startDate) / DAY, el = (D.today - startDate) / DAY;
+    out.timePct = Math.max(0, el / total * 100); out.remDays = Math.round((out.nextDate - D.today) / DAY);
+  }
+  const ks = sev(out.kmPct), ts = sev(out.timePct);
+  let s = Math.max(ks, ts);
+  if (rt.sticky && s < 2) s = 2;            // A-16: vencida no retrocede por parámetros
+  out.status = SEV[s];
+  out.trigger = s === 0 ? null : ks === s && ts === s ? 'both' : ks === s ? 'km' : ts === s ? 'time' : 'km';
+  return out;
+}
+const OPEN = ['Created', 'Quoted', 'PendingApproval', 'Approved', 'OnSite', 'InProgress', 'OnHold'];
+function stamp() { return fmtD(D.today) + ' ' + new Date().toTimeString().slice(0, 5); }
+function newOrder(rt, by) {
+  const o = { id: 'OS-' + String(D.seq++).padStart(4, '0'), plate: rt.plate, type: rt.type, status: 'Created', policy: null, appointment: null, lines: [],
+              history: [H(stamp(), 'note_add', by === 'Sistema' ? 'Creada' : 'Creada manualmente', by)] };
+  D.orders.push(o); return o;
+}
+const total = (o) => o.lines.filter((l) => l.amount != null && l.appr !== 'Rejected').reduce((s, l) => s + l.amount, 0);
+const openOrder = (rt) =>D.orders.find((o) => o.plate === rt.plate && o.type === rt.type && OPEN.includes(o.status));
+const vehStatus = (vh) => {
+  if (!vh.active) return { status: 'inactive' };
+  const list = D.routines.filter((x) => x.plate === vh.plate && x.active).map((x) => ({ rt: x, e: evaluate(x) }));
+  if (!list.length) return { status: 'ok', worst: null };
+  list.sort((a, b) => SEV.indexOf(b.e.status) - SEV.indexOf(a.e.status) || Math.max(b.e.kmPct ?? 0, b.e.timePct ?? 0) - Math.max(a.e.kmPct ?? 0, a.e.timePct ?? 0));
+  return { status: list[0].e.status, worst: list[0] };
+};
+
+const ST = {
+  ok: { label: 'Al día', cls: 'is-ok', icon: 'check_circle' },
+  soon: { label: 'Por vencer', cls: 'is-warn', icon: 'schedule' },
+  over: { label: 'Vencida', cls: 'is-danger', icon: 'error' },
+  off: { label: 'Inactiva', cls: 'is-neutral', icon: 'pause_circle' },
+  inactive: { label: 'Inactivo', cls: 'is-neutral', icon: 'pause_circle' },
+};
+const OS = {
+  Created: ['Creada', 'is-neutral', 'note_add'], Quoted: ['Cotizada', 'is-info', 'request_quote'], PendingApproval: ['Por aprobar', 'is-warn', 'gavel'],
+  Approved: ['Aprobada', 'is-info', 'task_alt'], OnSite: ['En sitio', 'is-info', 'garage'], InProgress: ['En proceso', 'is-brand', 'build'],
+  OnHold: ['En pausa', 'is-neutral', 'pause_circle'], Completed: ['Finalizada', 'is-ok', 'check_circle'], Cancelled: ['Cancelada', 'is-neutral', 'block'],
+};
+const TRIG = { km: [['speed', 'kilometraje']], time: [['event', 'tiempo']], both: [['speed', 'kilometraje'], ['event', 'tiempo']] };
+
+/* ===================== Ciclo de eventos simulado (RN-2, RN-3, ADR-0015) ===================== */
+function raise(rt, type, trigger) {
+  if (D.alerts.some((a) => a.rid === rt.id && a.type === type && a.cycle === (rt.cycle || 1))) return null;
+  const a = { id: 'AL-' + (D.alerts.length + 1), rid: rt.id, plate: rt.plate, rtype: rt.type, type, trigger, cycle: rt.cycle || 1, status: 'Active', at: fmtD(D.today) };
+  D.alerts.push(a); return a;
+}
+function reconcile(silent) {
+  const events = [];
+  D.routines.forEach((rt) => {
+    const vh = veh(rt.plate);
+    if (!rt.active || !vh.active) return;
+    const e = evaluate(rt), prev = rt.last || 'ok';
+    if (e.status === 'soon') raise(rt, 'DueSoon', e.trigger) && prev !== 'soon' && events.push({ rt, kind: 'soon' });
+    if (e.status === 'over') {
+      if (raise(rt, 'Overdue', e.trigger)) events.push({ rt, kind: 'over' });
+      D.alerts.filter((a) => a.rid === rt.id && a.type === 'DueSoon' && a.status !== 'Resolved').forEach((a) => { a.status = 'Resolved'; a.reason = 'Escalada a vencida'; });
+      rt.sticky = true;
+      if (!openOrder(rt) && !rt.cycleOrderTried) {
+        rt.cycleOrderTried = true;
+        const o = newOrder(rt, 'Sistema');
+        events.push({ rt, kind: 'order', o });
+      }
+    }
+    if (e.status === 'ok' && prev === 'soon') {
+      D.alerts.filter((a) => a.rid === rt.id && a.status !== 'Resolved').forEach((a) => { a.status = 'Resolved'; a.reason = 'Parámetros cambiados'; });
+    }
+    rt.last = e.status;
+  });
+  return silent ? [] : events;
+}
+// Estado inicial tras la carga: alertas y órdenes ya creadas (samples/README.md).
+D.routines.forEach((rt) => { if (['TAN202-OIL_CHANGE', 'RVA104-BRAKES', 'TAN201-OIL_CHANGE', 'TAN203-OIL_CHANGE'].includes(rt.id)) rt.cycleOrderTried = true; });
+reconcile(true);
+D.alerts.filter((a) => a.plate === 'TAN202').forEach((a) => { a.status = 'Acknowledged'; a.by = 'Camila Torres'; });
+
+/* ===================== Utilidades de vista ===================== */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const ms = (name, extra = '') => `<span class="ms ${extra}" aria-hidden="true">${name}</span>`;
+const pill = (key, trigger) => {
+  const s = ST[key];
+  const trig = trigger ? `<span class="trig">${TRIG[trigger].map(([i]) => ms(i, 'ms--s')).join('')}</span><span class="sr-only"> por ${TRIG[trigger].map(([, t]) => t).join(' y ')}</span>` : '';
+  return `<span class="pill ${s.cls}">${ms(s.icon, 'ms--fill')}${s.label}${trig}</span>`;
+};
+const opill = (st) => `<span class="pill ${OS[st][1]}">${ms(OS[st][2])}${OS[st][0]}</span>`;
+const remKm = (n) => (n < 0 ? '−' + fmtN.format(-n) : fmtN.format(n)) + ' km';
+const remD = (n) => (n < 0 ? '−' + -n : n) + ' d';
+const statusCls = (s) => ST[s].cls;
+
+function track(kind, pct, th, rem, cls) {
+  const p = Math.min(pct, 100), lbl = kind === 'km' ? 'Kilometraje del ciclo' : 'Tiempo del ciclo';
+  return `<div class="trk ${cls}">
+    ${ms(kind === 'km' ? 'speed' : 'event')}
+    <div class="trk-bar" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}" aria-label="${lbl}: ${Math.round(pct)} %">
+      <span class="trk-zone" style="left:${100 - th}%;width:${th}%"></span>
+      <span class="trk-fill" style="transform:scaleX(${p / 100})"></span>
+      <span class="trk-end"></span>
+      <span class="trk-dot" style="left:${p}%"></span>
+    </div>
+    <span class="trk-rem ${rem.startsWith('−') ? 'is-neg' : ''}">${rem}</span>
+  </div>`;
+}
+
+/* ===================== Router (URL = fuente de verdad) ===================== */
+function parseHash() {
+  const [path, qs] = (location.hash.slice(1) || '/flota').split('?');
+  const parts = path.split('/').filter(Boolean);
+  return { view: parts[0] || 'flota', id: parts[1] || null, q: Object.fromEntries(new URLSearchParams(qs || '')) };
+}
+function setQuery(patch) {
+  const h = parseHash(); const q = { ...h.q, ...patch };
+  Object.keys(q).forEach((k) => (q[k] === '' || q[k] == null) && delete q[k]);
+  const s = new URLSearchParams(q).toString();
+  history.replaceState(null, '', '#/' + [h.view, h.id].filter(Boolean).join('/') + (s ? '?' + s : ''));
+  render(false);
+}
+
+/* ===================== Vista: Flota ===================== */
+function inScope(plate) { return !D.customer || veh(plate).owner === D.customer; }
+function fleetView(h) {
+  const st = h.q.estado || 'all', term = (h.q.q || '').toLowerCase();
+  const scoped = D.vehicles.filter((x) => inScope(x.plate)).map((x) => ({ x, s: vehStatus(x) }));
+  const counts = { all: scoped.length, over: 0, soon: 0, ok: 0, inactive: 0 };
+  scoped.forEach(({ s }) => counts[s.status]++);
+  const rank = { over: 0, soon: 1, ok: 2, inactive: 3 };
+  const rows = scoped.filter(({ x, s }) => (st === 'all' || s.status === st) && (!term || (x.plate + ' ' + x.make + ' ' + x.model).toLowerCase().includes(term)))
+    .sort((a, b) => rank[a.s.status] - rank[b.s.status] || Math.max(b.s.worst?.e.kmPct ?? 0, b.s.worst?.e.timePct ?? 0) - Math.max(a.s.worst?.e.kmPct ?? 0, a.s.worst?.e.timePct ?? 0));
+  const segs = [['all', 'Todos', null], ['over', 'Vencida', 'is-danger'], ['soon', 'Por vencer', 'is-warn'], ['ok', 'Al día', 'is-ok'], ['inactive', 'Inactivos', 'is-neutral']]
+    .filter(([k]) => k === 'all' || counts[k] > 0 || k === st)
+    .map(([k, l, c]) => `<input type="radio" name="estado" id="seg-${k}" value="${k}" ${st === k ? 'checked' : ''} /><label for="seg-${k}" class="${c || ''}">${c ? '<i class="sw" aria-hidden="true"></i><span class="lbl">' + l + '</span>' : l}<span class="n">${counts[k]}</span></label>`).join('');
+
+  const list = rows.length ? rows.map(({ x, s }) => {
+    const w = s.worst, o = D.orders.filter((y) => y.plate === x.plate && OPEN.includes(y.status))[0];
+    const pk = s.status === 'inactive' ? 'inactive' : s.status;
+    let next = '<span class="muted">Sin rutinas activas</span>';
+    if (w) {
+      const e = w.e, useKm = e.kmPct != null && (e.timePct == null || e.kmPct >= e.timePct);
+      const pct = useKm ? e.kmPct : e.timePct, rem = useKm ? remKm(e.remKm) : remD(e.remDays);
+      next = `<b>${D.types[w.rt.type].name}</b><span class="tabular vrem ${statusCls(e.status)}">${rem}</span>
+              <span class="mini ${statusCls(e.status)}" aria-hidden="true"><span style="transform:scaleX(${Math.min(pct, 100) / 100})"></span></span>`;
+    }
+    return `<a class="vrow ${s.status === 'inactive' ? 'is-off' : ''}" href="#/flota/${x.plate}" data-plate="${x.plate}" ${h.id === x.plate ? 'aria-current="true"' : ''}>
+      <span class="vid"><span class="plate">${x.plate}</span><span class="vmodel">${x.make} ${x.model}<small>${x.year}</small></span></span>
+      <span class="vcust">${D.customers[x.owner]}</span>
+      <span class="vodo tabular r">${fmtN.format(x.odo)} km</span>
+      <span class="vnext">${next}</span>
+      <span class="vst">${pill(pk, w && s.status !== 'ok' ? w.e.trigger : null)}</span>
+      <span class="vorder-cell r">${o ? `<span class="vorder ${o.status === 'PendingApproval' ? 'is-warn' : ''}">${ms('assignment', 'ms--s')}${o.id}</span>` : ''}</span>
+    </a>`;
+  }).join('') : `<div class="state is-neutral"><span class="ill">${ms('search_off')}</span><h2>Sin coincidencias</h2><button class="btn btn--ghost" type="button" id="clear-f">Limpiar filtros</button></div>`;
+
+  return `<div class="page-head"><h1 id="h1" tabindex="-1">Flota</h1><span class="count tabular">${counts.all}</span></div>
+    <div class="toolbar">
+      <fieldset class="seg" id="seg"><legend>Estado</legend>${segs}</fieldset>
+      <div class="search">${ms('search')}<input id="q" type="search" value="${h.q.q || ''}" placeholder="Placa o modelo…" aria-label="Buscar vehículo" autocomplete="off" spellcheck="false" /></div>
+    </div>
+    <div class="fleet ${h.id ? 'has-detail' : ''}">
+      <section class="panel vlist" aria-label="Vehículos" data-card="A · Lista de vehículos"><span class="mk-tag">A · Lista de vehículos</span>
+        <div class="vhead" aria-hidden="true"><span>Vehículo</span><span>Cliente</span><span class="r">Odómetro</span><span>Próximo mantenimiento</span><span>Estado</span><span class="r">Orden</span></div>
+        ${list}
+      </section>
+      ${h.id ? detailView(h) : ''}
+    </div>`;
+}
+
+function detailView(h) {
+  const x = veh(h.id); if (!x) return '';
+  const tab = h.q.tab || 'rutinas';
+  const rts = D.routines.filter((y) => y.plate === x.plate);
+  const ords = D.orders.filter((y) => y.plate === x.plate);
+  const ro = D.profile === 'workshop';
+  const tabs = [['rutinas', 'Rutinas', rts.length], ['ordenes', 'Órdenes', ords.length], ['lecturas', 'Lecturas', x.readings.length]]
+    .map(([k, l, n]) => `<button class="tab" role="tab" type="button" id="tab-${k}" aria-controls="tp" aria-selected="${tab === k}" tabindex="${tab === k ? 0 : -1}" data-tab="${k}">${l}<span class="n">${n}</span></button>`).join('');
+  let body = '';
+  if (tab === 'rutinas') body = `<ul class="routines">${rts.map((rt) => routineRow(rt, x, ro)).join('')}</ul>`;
+  if (tab === 'ordenes') body = ords.length ? `<ul class="rows">${ords.map(orderRow).join('')}</ul>` : `<div class="state is-neutral"><span class="ill">${ms('assignment')}</span><h2>Sin órdenes</h2></div>`;
+  if (tab === 'lecturas') body = `<ul class="rows">${x.readings.map((rd) => `<li class="row ${rd.ok ? '' : 'rd-ignored'}">
+      <span class="rt-ico ${rd.ok ? 'is-brand' : 'is-neutral'}">${ms(rd.ok ? 'speed' : 'block')}</span>
+      <span><span class="t tabular">${fmtN.format(rd.km)} km</span><span class="s"> ${rd.ok ? '' : rd.why}</span></span>
+      <span class="s tabular">${rd.at}</span></li>`).join('') || '<li class="row"><span></span><span class="s">Sin lecturas</span></li>'}</ul>`;
+
+  const resp = x.resp ? D.people[x.resp] : null;
+  return `<section class="panel detail" aria-labelledby="d-title" data-card="B · Detalle del vehículo"><span class="mk-tag">B · Detalle del vehículo</span>
+    <header class="d-head" data-card="B1 · Encabezado"><span class="mk-tag">B1 · Encabezado</span>
+      <a class="icon-btn back" href="#/flota${h.q.estado ? '?estado=' + h.q.estado : ''}" aria-label="Volver a la flota">${ms('arrow_back')}</a>
+      <div class="d-id"><span class="plate plate--lg">${x.plate}</span>
+        <div><h2 id="d-title">${x.make} ${x.model}</h2>
+          <div class="d-sub"><span>${ms('calendar_month', 'ms--s')}${x.year}</span>${x.vin ? `<span class="mono" aria-label="VIN ${x.vin}">${ms('pin', 'ms--s')}${x.vin}</span>` : ''}</div>
+        </div>
+      </div>
+      <div class="odo"><span class="odo-val" id="odo">${fmtN.format(x.odo)}</span><span class="odo-unit">km</span>
+        <span class="odo-at">${ms('sensors', 'ms--s')}${x.readAt}</span></div>
+    </header>
+    <dl class="d-meta">
+      <div data-tip="Dueño"><dt>${ms('apartment')}<span class="sr-only">Dueño</span></dt><dd>${D.customers[x.owner]}</dd></div>
+      <div data-tip="Taller"><dt>${ms('build')}<span class="sr-only">Taller</span></dt><dd>${D.workshops[x.shop]}</dd></div>
+      <div data-tip="Responsable"><dt>${ms('person')}<span class="sr-only">Responsable</span></dt><dd>${resp || '<span class="muted">Sin responsable</span>'}</dd></div>
+      <div class="push"><button class="switch" type="button" role="switch" id="veh-switch" aria-checked="${x.active}" ${ro ? 'disabled' : ''}><span class="knob" aria-hidden="true"></span>${x.active ? 'Activo' : 'Inactivo'}</button></div>
+    </dl>
+    ${x.active ? '' : `<div class="banner is-neutral" role="status">${ms('pause_circle')}<span class="grow">Evaluaciones y órdenes en pausa</span></div>`}
+    <div class="tabs" role="tablist" aria-label="Secciones del vehículo">${tabs}</div>
+    <div id="tp" role="tabpanel" aria-labelledby="tab-${tab}" data-card="B2 · ${tab === 'rutinas' ? 'Rutinas' : tab === 'ordenes' ? 'Órdenes del vehículo' : 'Lecturas de odómetro'}">
+      <span class="mk-tag">B2 · ${tab}</span>${body}</div>
+  </section>`;
+}
+
+function routineRow(rt, x, ro) {
+  const t = D.types[rt.type], e = evaluate(rt);
+  const key = !rt.active ? 'off' : !x.active ? 'off' : e.status;
+  const cls = statusCls(key === 'off' ? 'off' : e.status);
+  const o = openOrder(rt);
+  const canCreate = rt.active && x.active && e.status === 'over' && !o && !ro;
+  const tracks = [
+    e.kmPct != null ? track('km', e.kmPct, e.p.pct, remKm(e.remKm), statusCls(SEV[e.kmPct >= 100 ? 2 : e.kmPct >= 100 - e.p.pct ? 1 : 0])) : '',
+    e.timePct != null ? track('time', e.timePct, e.p.pct, remD(e.remDays), statusCls(SEV[e.timePct >= 100 ? 2 : e.timePct >= 100 - e.p.pct ? 1 : 0])) : '',
+  ].join('');
+  return `<li class="rt ${rt.active && x.active ? '' : 'is-off'}" data-rid="${rt.id}">
+    <span class="rt-ico ${cls}">${ms(t.icon)}</span>
+    <div class="rt-main">
+      <div class="rt-title"><h3>${t.name}</h3>${pill(key, key === 'off' || e.status === 'ok' ? null : e.trigger)}
+        ${rt.ovr ? `<span class="rt-ovr" data-tip="Parámetros propios" aria-label="Parámetros propios">${ms('tune', 'ms--s')}</span>` : ''}</div>
+      ${tracks}
+      <div class="rt-foot">
+        <span class="due tabular" aria-label="Próximo mantenimiento">${ms('flag', 'ms--s')}${e.nextKm != null ? fmtN.format(e.nextKm) + ' km' : ''}${e.nextKm != null && e.nextDate ? '<span class="muted" aria-hidden="true">/</span>' : ''}${e.nextDate ? fmtD(e.nextDate) : ''}</span>
+        <span class="grow"></span>
+        ${o ? `<a class="order-link ${OS[o.status][1]}" href="#/ordenes/${o.id}">${ms(OS[o.status][2], 'ms--s')}<span class="mono">${o.id}</span>${OS[o.status][0]}</a>` : ''}
+        ${canCreate ? `<button class="btn btn--primary btn--s" type="button" data-create="${rt.id}">${ms('add', 'ms--s')}Crear orden</button>` : ''}
+      </div>
+    </div>
+    <div class="rt-ctl">
+      ${ro ? '' : `<button class="icon-btn" type="button" data-edit="${rt.id}" aria-label="Ajustar ${t.name}" data-tip="Ajustar" data-tip-pos="left">${ms('tune')}</button>`}
+      <button class="switch" type="button" role="switch" aria-checked="${rt.active}" data-toggle="${rt.id}" aria-label="${t.name} activa" ${ro || !x.active ? 'disabled' : ''}><span class="knob" aria-hidden="true"></span></button>
+    </div>
+  </li>`;
+}
+
+const FLOW = ['Created', 'PendingApproval', 'Approved', 'OnSite', 'InProgress', 'Completed'];
+const flowIdx = (o) => { const s = o.status === 'OnHold' ? o.before : o.status; return s === 'PendingApproval' && o.reason === 'AdditionalServices' ? 3 : FLOW.indexOf(s); };
+function orderRow(o) {
+  const idx = flowIdx(o), cls = OS[o.status][1];
+  const steps = o.status === 'Cancelled' || o.status === 'OnHold' ? '' : `<div class="steps ${cls}" aria-hidden="true">${FLOW.map((s, i) => `${i ? `<b class="${i <= idx ? 'done' : ''}"></b>` : ''}<i class="${i < idx ? 'done' : i === idx ? 'now' : ''}"></i>`).join('')}</div>`;
+  return `<li class="row"><span class="rt-ico ${cls}">${ms(OS[o.status][2])}</span>
+    <span><a class="t" href="#/ordenes/${o.id}"><span class="mono">${o.id}</span> ${D.types[o.type].name}</a>
+      <span class="s tabular"> ${total(o) ? fmtCOP.format(total(o)) : ''}</span>
+      ${o.appointment ? `<span class="s">${ms('event_available', 'ms--s')} ${o.appointment}</span>` : ''}${steps}</span>
+    ${opill(o.status)}</li>`;
+}
+
+/* ===================== Vistas básicas ===================== */
+function alertsView(h) {
+  const f = h.q.f || 'Active';
+  const scoped = D.alerts.filter((a) => inScope(a.plate));
+  const c = (s) => scoped.filter((a) => a.status === s).length;
+  const list = scoped.filter((a) => a.status === f).sort((a, b) => (b.type === 'Overdue') - (a.type === 'Overdue'));
+  return `<div class="page-head"><h1 id="h1" tabindex="-1">Alertas</h1></div>
+  <div class="toolbar"><fieldset class="seg" id="seg-al"><legend>Estado</legend>
+    ${[['Active', 'Activas'], ['Acknowledged', 'Atendidas'], ['Resolved', 'Resueltas']].map(([k, l]) => `<input type="radio" name="f" id="al-${k}" value="${k}" ${f === k ? 'checked' : ''} /><label for="al-${k}">${l}<span class="n">${c(k)}</span></label>`).join('')}
+  </fieldset></div>
+  <section class="panel simple" data-card="F · Bandeja de alertas"><span class="mk-tag">F · Bandeja de alertas</span>
+    ${list.length ? `<ul class="rows">${list.map((a) => `<li class="row">
+      <span class="rt-ico ${a.type === 'Overdue' ? 'is-danger' : 'is-warn'}">${ms(a.type === 'Overdue' ? 'error' : 'schedule')}</span>
+      <span><a class="plate" href="#/flota/${a.plate}">${a.plate}</a> <span class="t">${D.types[a.rtype].name}</span>
+        <span class="trig muted">${TRIG[a.trigger].map(([i, t]) => ms(i, 'ms--s') + `<span class="sr-only">${t}</span>`).join('')}</span>
+        <span class="d-sub"><span>${ms('event', 'ms--s')}${a.at}</span>${a.by ? `<span>${ms('person', 'ms--s')}${a.by}</span>` : ''}${a.reason ? `<span>${ms('done_all', 'ms--s')}${a.reason}</span>` : ''}</span></span>
+      ${a.status === 'Active' ? `<button class="btn btn--ghost btn--s" type="button" data-ack="${a.id}">${ms('done', 'ms--s')}Atender</button>` : ''}
+    </li>`).join('')}</ul>` : `<div class="state is-ok"><span class="ill">${ms('notifications_off')}</span><h2>Todo en orden</h2></div>`}
+  </section>`;
+}
+/* ===================== Vista: Órdenes (ADR-0003) ===================== */
+function who(x) { const vh = veh(x.plate); return D.profile === 'workshop' ? D.workshops[vh.shop] : D.profile === 'approver' ? 'Laura Gómez' : 'Operador'; }
+const PRE_PROGRESS = ['Created', 'PendingApproval', 'Approved', 'OnSite'];
+function actions(o) {
+  const A = [];
+  if (D.profile === 'approver') {
+    if (o.status === 'PendingApproval') { A.push('approve', 'reject'); if (o.reason === 'Quote') A.push('request'); }
+    if (PRE_PROGRESS.includes(o.status) || (o.status === 'OnHold' && PRE_PROGRESS.includes(o.before))) A.push('cancel');
+  }
+  if (D.profile === 'workshop') {
+    if (o.status === 'Created') A.push('quote');
+    if (o.status === 'Approved') A.push('appointment', 'onsite');
+    if (o.status === 'OnSite') A.push('addService', 'start');
+    if (o.status === 'InProgress') A.push('complete');
+  }
+  return A;
+}
+const isWaiting = (o) => o.status === 'PendingApproval';
+function ordersView(h) {
+  const f = h.q.f || 'open';
+  const scoped = D.orders.filter((o) => inScope(o.plate));
+  const groups = { approval: (o) => isWaiting(o), open: (o) => OPEN.includes(o.status), closed: (o) => !OPEN.includes(o.status), all: () => true };
+  const c = (k) => scoped.filter(groups[k]).length;
+  const rank = (o) => (isWaiting(o) && o.priority === 'High' ? 0 : isWaiting(o) ? 1 : OPEN.includes(o.status) ? 2 : 3);
+  const list = scoped.filter(groups[f]).sort((a, b) => rank(a) - rank(b) || b.id.localeCompare(a.id));
+  const segs = [['approval', 'Por aprobar', 'is-warn'], ['open', 'Abiertas', null], ['closed', 'Cerradas', null], ['all', 'Todas', null]]
+    .map(([k, l, cl]) => `<input type="radio" name="of" id="of-${k}" value="${k}" ${f === k ? 'checked' : ''} /><label for="of-${k}" class="${cl || ''}">${cl ? '<i class="sw" aria-hidden="true"></i>' : ''}${l}<span class="n">${c(k)}</span></label>`).join('');
+  const rows = list.length ? list.map((o) => `<a class="orow" href="#/ordenes/${o.id}${f !== 'open' ? '?f=' + f : ''}" ${h.id === o.id ? 'aria-current="true"' : ''}>
+      <span class="o-id"><span class="mono">${o.id}</span>${o.priority === 'High' && isWaiting(o) ? `<span class="prio" data-tip="Prioritaria">${ms('priority_high', 'ms--s')}<span class="sr-only">Prioritaria</span></span>` : ''}</span>
+      <span class="o-veh"><span class="plate">${o.plate}</span><span class="o-rt">${D.types[o.type].name}</span></span>
+      <span class="o-amt tabular">${total(o) ? fmtCOP.format(total(o)) : '<span class="muted">Sin cotizar</span>'}</span>
+      <span class="o-st">${opill(o.status)}</span>
+    </a>`).join('') : `<div class="state is-ok"><span class="ill">${ms('task_alt')}</span><h2>${f === 'approval' ? 'Nada por aprobar' : 'Sin órdenes'}</h2></div>`;
+  return `<div class="page-head"><h1 id="h1" tabindex="-1">Órdenes</h1><span class="count tabular">${scoped.length}</span></div>
+    <div class="toolbar"><fieldset class="seg" id="seg-of"><legend>Estado</legend>${segs}</fieldset></div>
+    <div class="fleet ${h.id ? 'has-detail' : ''}">
+      <section class="panel vlist olist" aria-label="Órdenes" data-card="G · Bandeja de órdenes"><span class="mk-tag">G · Bandeja de órdenes</span>${rows}</section>
+      ${h.id ? orderDetail(h) : ''}
+    </div>`;
+}
+function orderDetail(h) {
+  const o = D.orders.find((x) => x.id === h.id); if (!o) return '';
+  const x = veh(o.plate), idx = flowIdx(o), A = actions(o), t = D.types[o.type];
+  const waitingPrice = o.lines.some((l) => l.pricing === 'PendingPricing');
+  const LBL = ['Creada', 'Por aprobar', 'Aprobada', 'En sitio', 'En proceso', 'Finalizada'];
+  const stepper = o.status === 'Cancelled' ? '' : `<ol class="stepper ${o.status === 'OnHold' ? 'is-hold' : ''}" aria-label="Avance de la orden">${LBL.map((l, i) =>
+      `<li class="${i < idx || o.status === 'Completed' ? 'done' : i === idx ? 'now ' + (isWaiting(o) ? 'is-warn' : 'is-brand') : ''}" ${i === idx ? 'aria-current="step"' : ''}><i aria-hidden="true">${i < idx || o.status === 'Completed' ? ms('check', 'ms--s') : ''}</i><span>${i === 3 && isWaiting(o) && o.reason === 'AdditionalServices' ? 'En sitio' : l}</span></li>`).join('')}</ol>`;
+  const banner = o.status === 'OnHold' ? `<div class="banner is-neutral" role="status">${ms('pause_circle')}<span class="grow">Vehículo inactivo</span></div>`
+    : o.status === 'Cancelled' ? `<div class="banner is-neutral" role="status">${ms('block')}<span class="grow">Orden cancelada</span></div>`
+    : isWaiting(o) && o.priority === 'High' ? `<div class="banner is-danger" role="status">${ms('priority_high')}<span class="grow">Vehículo detenido en el taller</span></div>` : '';
+  const lines = o.lines.length ? o.lines.map((l) => {
+    const priceIt = D.profile === 'workshop' && l.pricing === 'PendingPricing';
+    const ap = { Approved: ['Aprobado', 'is-ok', 'check'], PendingApproval: ['Por aprobar', 'is-warn', 'schedule'], Rejected: ['Rechazado', 'is-neutral', 'close'] }[l.appr];
+    return `<li class="ln ${l.appr === 'Rejected' ? 'is-rej' : ''}">
+      <span class="rt-ico ${l.kind === 'Routine' ? 'is-brand' : 'is-info'}">${ms(l.kind === 'Routine' ? t.icon : 'add_circle')}</span>
+      <span class="ln-main"><span class="t">${l.desc}</span>
+        <span class="d-sub"><span>${ms(l.by === 'Workshop' ? 'build' : 'person', 'ms--s')}<span class="sr-only">Pedido por </span>${l.by === 'Workshop' ? 'Taller' : 'Aprobador'}</span>
+          <span class="pill pill--s ${ap[1]}">${ms(ap[2], 'ms--s')}${ap[0]}</span></span></span>
+      ${priceIt ? `<form class="price" data-price="${l.id}" novalidate><label class="sr-only" for="p-${l.id}">Valor de ${l.desc}</label>
+          <div class="field"><div class="inp"><input id="p-${l.id}" inputmode="numeric" placeholder="0" autocomplete="off" /><span class="unit">COP</span></div></div>
+          <button class="btn btn--primary btn--s" type="submit">Guardar</button></form>`
+        : `<span class="ln-amt tabular">${l.amount != null ? fmtCOP.format(l.amount) : `<span class="pill pill--s is-warn">${ms('hourglass_top', 'ms--s')}Sin precio</span>`}</span>`}
+    </li>`;
+  }).join('') : `<li class="ln"><span class="rt-ico is-neutral">${ms('request_quote')}</span><span class="ln-main muted">Esperando cotización del taller</span><span></span></li>`;
+  const btn = (k) => ({
+    approve: `<button class="btn btn--primary" type="button" data-act="approve" ${waitingPrice ? 'disabled aria-describedby="why-approve"' : ''}>${ms('check')}Aprobar${o.reason === 'AdditionalServices' ? ' servicio' : ''}</button>`,
+    reject: `<button class="btn btn--ghost btn--danger-text" type="button" data-act="reject">${ms('close')}Rechazar</button>`,
+    request: `<button class="btn btn--ghost" type="button" data-act="request">${ms('add')}Pedir servicio</button>`,
+    cancel: `<button class="btn btn--quiet btn--danger-text" type="button" data-act="cancel">${ms('block')}Cancelar orden</button>`,
+    quote: `<button class="btn btn--primary" type="button" data-act="quote">${ms('request_quote')}Cotizar</button>`,
+    appointment: `<button class="btn btn--ghost" type="button" data-act="appointment">${ms('event')}${o.appointment ? 'Reprogramar cita' : 'Agendar cita'}</button>`,
+    onsite: `<button class="btn btn--primary" type="button" data-act="onsite" ${o.appointment ? '' : 'disabled aria-describedby="why-onsite"'}>${ms('garage')}En sitio</button>`,
+    addService: `<button class="btn btn--ghost" type="button" data-act="addService">${ms('add')}Agregar servicio</button>`,
+    start: `<button class="btn btn--primary" type="button" data-act="start">${ms('build')}Iniciar</button>`,
+    complete: `<button class="btn btn--primary" type="button" data-act="complete">${ms('flag')}Finalizar</button>`,
+  }[k]);
+  const left = A.filter((k) => k === 'cancel'), right = A.filter((k) => k !== 'cancel').reverse();
+  const why = waitingPrice && A.includes('approve') ? `<span class="why" id="why-approve">${ms('hourglass_top', 'ms--s')}Esperando precio del taller</span>`
+    : A.includes('onsite') && !o.appointment ? `<span class="why" id="why-onsite">${ms('event_busy', 'ms--s')}Sin cita</span>` : '';
+  return `<section class="panel detail" aria-labelledby="d-title" data-card="K · Detalle de la orden"><span class="mk-tag">K · Detalle de la orden</span>
+    <header class="d-head">
+      <a class="icon-btn back" href="#/ordenes${h.q.f ? '?f=' + h.q.f : ''}" aria-label="Volver a órdenes">${ms('arrow_back')}</a>
+      <div class="d-id"><span class="rt-ico ${OS[o.status][1]}">${ms(t.icon)}</span>
+        <div><h2 id="d-title"><span class="mono">${o.id}</span> ${t.name}</h2>
+          <div class="d-sub"><a class="plate" href="#/flota/${o.plate}">${o.plate}</a><span>${ms('build', 'ms--s')}${D.workshops[x.shop]}</span>${o.appointment ? `<span>${ms('event_available', 'ms--s')}${o.appointment}</span>` : ''}</div>
+        </div></div>
+      <div class="odo">${opill(o.status)}</div>
+    </header>
+    ${stepper}${banner}
+    <h3 class="sec">Servicios</h3>
+    <ul class="lines" data-card="K1 · Líneas de servicio">${lines}</ul>
+    <div class="tot"><span>${o.auto ? `<span class="pill pill--s is-brand" data-tip="Hasta ${fmtCOP.format(o.policy)}">${ms('bolt', 'ms--s')}Aprobación automática</span>` : ''}</span><span class="muted">Total</span><b class="tabular">${fmtCOP.format(total(o))}</b></div>
+    ${A.length ? `<div class="actbar" data-card="K2 · Acciones"><span class="mk-tag">K2 · Acciones</span>${left.map(btn).join('')}<span class="grow"></span>${why}${right.map(btn).join('')}</div>` : ''}
+    <details class="hist" data-card="K3 · Historial"><summary>${ms('history')}Historial<span class="n">${o.history.length}</span></summary>
+      <ol class="rows">${[...o.history].reverse().map((e) => `<li class="row"><span class="rt-ico is-neutral">${ms(e.icon)}</span><span><span class="t">${e.text}</span><span class="d-sub"><span>${ms('person', 'ms--s')}${e.by}</span></span></span><span class="s tabular">${e.at}</span></li>`).join('')}</ol>
+    </details>
+  </section>`;
+}
+function paramsView() {
+  return `<div class="page-head"><h1 id="h1" tabindex="-1">Parámetros</h1></div>
+  <section class="panel policy" data-card="H1 · Aprobación automática"><span class="mk-tag">H1 · Aprobación automática</span>
+    <span class="rt-ico is-brand">${ms('gavel')}</span><span class="grow"><span class="muted">Aprobación automática hasta</span><br /><span class="amt">${fmtCOP.format(1500000)}</span></span>
+    <button class="btn btn--ghost" type="button">${ms('edit')}Cambiar</button></section>
+  <section class="panel" data-card="H2 · Tipos de rutina"><span class="mk-tag">H2 · Tipos de rutina</span>
+    <table class="tbl"><thead><tr><th>Rutina</th><th class="r">Km</th><th class="r">Meses</th><th class="r">Por vencer</th><th></th></tr></thead><tbody>
+    ${Object.values(D.types).map((t) => `<tr><td><span style="display:inline-flex;gap:8px;align-items:center">${ms(t.icon)}<b>${t.name}</b></span></td><td class="r tabular">${fmtN.format(t.km)}</td><td class="r tabular">${t.months}</td><td class="r tabular">${t.pct} %</td>
+      <td class="r"><button class="icon-btn" type="button" aria-label="Editar ${t.name}">${ms('edit')}</button></td></tr>`).join('')}
+    </tbody></table></section>`;
+}
+function importView() {
+  const st = [['talleres.csv', 3], ['clientes.csv', 3], ['aprobadores.csv', 5], ['vehiculos.csv', 10], ['rutinas.csv', 15]];
+  return `<div class="page-head"><h1 id="h1" tabindex="-1">Carga inicial</h1></div>
+  <section class="panel" data-card="I · Carga inicial"><span class="mk-tag">I · Carga inicial</span>
+    ${st.map(([f, n], i) => `<div class="stage"><span class="num is-ok">${i + 1}</span><span><b class="mono">${f}</b><br /><span class="muted tabular">${n} filas</span></span>${pill('ok')}</div>`).join('')}
+  </section>
+  <div class="toolbar" style="margin-top:16px"><button class="btn btn--primary" type="button">${ms('upload_file')}Subir archivos</button><button class="btn btn--ghost" type="button">${ms('download')}Plantillas</button></div>`;
+}
+function reportsView() {
+  const rs = [['R-01', 'Estado de la flota', 'local_shipping'], ['R-02', 'Órdenes de servicio', 'assignment'], ['R-03', 'Costos de mantenimiento', 'payments'], ['R-04', 'Alertas y atención', 'notifications']];
+  return `<div class="page-head"><h1 id="h1" tabindex="-1">Reportes</h1></div>
+  <div class="grid-cards" data-card="J · Catálogo de reportes"><span class="mk-tag">J · Catálogo de reportes</span>
+    ${rs.map(([c, n, i]) => `<section class="panel rep"><span class="rt-ico is-brand">${ms(i)}</span><span class="code">${c}</span><h2>${n}</h2>
+      <div class="acts"><button class="btn btn--ghost btn--s" type="button">${ms('download', 'ms--s')}.xlsx</button><button class="btn btn--quiet btn--s" type="button">.csv</button></div></section>`).join('')}
+  </div>`;
+}
+
+/* ===================== Render ===================== */
+let mkState = 'default';
+function render(focus = true) {
+  const h = parseHash();
+  $$('#nav a').forEach((a) => (a.dataset.route === h.view ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
+  const active = D.alerts.filter((a) => a.status === 'Active' && inScope(a.plate)).length;
+  $('#nav-alerts').textContent = active; $('#nav-alerts').hidden = !active;
+  const waiting = D.orders.filter((o) => isWaiting(o) && inScope(o.plate)).length;
+  $('#nav-orders').textContent = waiting; $('#nav-orders').hidden = !waiting || D.profile !== 'approver';
+  const views = { flota: fleetView, alertas: alertsView, ordenes: ordersView, parametros: paramsView, carga: importView, reportes: reportsView };
+  $('#view').innerHTML = (views[h.view] || fleetView)(h);
+  $('#mk-date').textContent = 'Hoy: ' + fmtD(D.today);
+  const target = h.id ? $('#d-title') : $('#h1');
+  if (focus && target) { target.setAttribute('tabindex', '-1'); target.focus(); }
+}
+function setState(s) {
+  mkState = s;
+  const view = s === 'offline' ? 'default' : s;
+  $$('[data-state-view]').forEach((el) => { el.hidden = el.dataset.stateView !== view; });
+  $('#live').classList.toggle('is-off', s === 'offline');
+  $('#live b').textContent = s === 'offline' ? 'Reconectando…' : 'En vivo';
+  $('#mk-state').value = s;
+}
+
+/* ===================== Avisos ===================== */
+function toast(text, { icon = 'check_circle', tone = '', action, href } = {}) {
+  const el = document.createElement('div');
+  el.className = 'toast ' + tone;
+  el.innerHTML = `${ms(icon, 'ms--fill')}<span class="grow">${text}</span>${href ? `<a href="${href}">${action}</a>` : action ? `<button type="button">${action.label}</button>` : ''}`;
+  if (action && action.fn) el.querySelector('button').addEventListener('click', () => { action.fn(); el.remove(); });
+  $('#toasts').appendChild(el);
+  setTimeout(() => el.remove(), 6000);
+}
+function announce(events) {
+  events.forEach(({ rt, kind, o }) => {
+    const n = D.types[rt.type].name;
+    if (kind === 'over') toast(`<span class="mono">${rt.plate}</span> ${n} vencida`, { icon: 'error', tone: 'is-danger', action: 'Ver', href: '#/flota/' + rt.plate });
+    if (kind === 'soon') toast(`<span class="mono">${rt.plate}</span> ${n} por vencer`, { icon: 'schedule', tone: 'is-warn', action: 'Ver', href: '#/flota/' + rt.plate });
+    if (kind === 'order') toast(`Orden <span class="mono">${o.id}</span> creada`, { icon: 'assignment', action: 'Ver', href: '#/ordenes?id=' + o.id });
+  });
+}
+function flash(plate) { const el = $(`.vrow[data-plate="${plate}"]`); if (el) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); } }
+function countUp(el, from, to) {
+  if (!el || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const t0 = performance.now(), d = 700;
+  const step = (t) => { const k = Math.min(1, (t - t0) / d); el.textContent = fmtN.format(Math.round(from + (to - from) * (1 - (1 - k) ** 3))); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+
+/* ===================== Interacción ===================== */
+const view = $('#view');
+view.addEventListener('change', (e) => {
+  if (e.target.name === 'estado') setQuery({ estado: e.target.value === 'all' ? '' : e.target.value });
+  if (e.target.name === 'f') setQuery({ f: e.target.value === 'Active' ? '' : e.target.value });
+  if (e.target.name === 'of') setQuery({ f: e.target.value === 'open' ? '' : e.target.value });
+});
+view.addEventListener('submit', (e) => {
+  const fm = e.target.closest('form[data-price]'); if (!fm) return;
+  e.preventDefault();
+  const o = curOrder(), l = o.lines.find((y) => y.id === fm.dataset.price), inp = $('input', fm);
+  const n = money(inp.value);
+  if (!n) { inp.setAttribute('aria-invalid', 'true'); fm.querySelector('.field').classList.add('is-invalid'); inp.focus(); toast('Ingresa el valor en pesos', { icon: 'error', tone: 'is-danger' }); return; }
+  l.amount = n; l.pricing = 'Priced';
+  o.history.push(H(stamp(), 'sell', `Precio: ${l.desc}`, who(o)));
+  render(false); toast(`Precio registrado · ${fmtCOP.format(n)}`);
+});
+
+/* ===================== Acciones de la orden ===================== */
+const money = (s) => { const n = Number(String(s).replace(/[^\d]/g, '')); return Number.isFinite(n) && n > 0 ? n : null; };
+const curOrder = () => D.orders.find((x) => x.id === parseHash().id);
+function busy(btn, label, fn) { btn.setAttribute('aria-busy', 'true'); const old = btn.innerHTML; btn.textContent = label; setTimeout(() => { btn.removeAttribute('aria-busy'); btn.innerHTML = old; fn(); }, 700); }
+function done(o, icon, text, msg, opts) { o.history.push(H(stamp(), icon, text, who(o))); render(false); if (msg) toast(msg, opts); }
+
+const dlgF = $('#dlg-form'), dlgC = $('#dlg-confirm'); let formSpec = null, confirmFn = null;
+function openForm(spec) {
+  formSpec = spec;
+  $('#df-title').textContent = spec.title; $('#df-ico').innerHTML = ms(spec.icon); $('#df-ico').className = 'rt-ico ' + (spec.tone || 'is-brand');
+  $('#df-submit').textContent = spec.submit; $('#df-err').hidden = true; $('#df-extra').innerHTML = spec.extra || '';
+  $('#df-fields').innerHTML = spec.fields.map((f) => `<div class="field" id="ff-${f.name}"><label for="fi-${f.name}">${f.label}</label>
+    <div class="inp"><input id="fi-${f.name}" name="${f.name}" type="${f.type || 'text'}" ${f.mode ? `inputmode="${f.mode}"` : ''} value="${f.value ?? ''}" placeholder="${f.ph ?? ''}" autocomplete="off" ${f.max ? `max="${f.max}"` : ''} />${f.unit ? `<span class="unit">${f.unit}</span>` : ''}</div></div>`).join('');
+  dlgF.showModal(); $('#df-fields input')?.focus();
+}
+$('#form-act').addEventListener('submit', (e) => {
+  e.preventDefault();
+  $$('#df-fields .field').forEach((f) => { f.classList.remove('is-invalid'); $('input', f).removeAttribute('aria-invalid'); $('input', f).removeAttribute('aria-describedby'); });
+  const vals = Object.fromEntries(formSpec.fields.map((f) => [f.name, $('#fi-' + f.name).value.trim()]));
+  const err = formSpec.validate(vals);
+  if (err) {
+    const f = $('#ff-' + err[0]); f.classList.add('is-invalid'); const i = $('input', f); i.setAttribute('aria-invalid', 'true'); i.setAttribute('aria-describedby', 'df-err');
+    $('#df-err').textContent = err[1]; $('#df-err').hidden = false; i.focus(); return;
+  }
+  busy($('#df-submit'), 'Guardando…', () => { dlgF.close(); formSpec.apply(vals); });
+});
+function openConfirm({ title, icon, items, ok, fn }) {
+  confirmFn = fn; $('#dc-title').textContent = title; $('#dc-ico').innerHTML = ms(icon); $('#dc-ok').textContent = ok;
+  $('#dc-impact').innerHTML = items.map(([i, t]) => `<li>${ms(i)}<span>${t}</span></li>`).join('');
+  dlgC.showModal(); $('#dc-ok').focus();
+}
+$('#dc-ok').addEventListener('click', (e) => busy(e.currentTarget, 'Un momento…', () => { dlgC.close(); confirmFn(); }));
+
+const toDate = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s); return m ? new Date(+m[1], m[2] - 1, +m[3]) : null; };
+const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const ACT = {
+  approve(o, btn) {
+    busy(btn, 'Aprobando…', () => {
+      o.lines.filter((l) => l.appr === 'PendingApproval').forEach((l) => { l.appr = 'Approved'; });
+      const add = o.reason === 'AdditionalServices'; o.status = add ? 'OnSite' : 'Approved'; delete o.reason; delete o.priority;
+      done(o, 'thumb_up', add ? 'Servicio adicional aprobado' : 'Aprobada', add ? 'Servicio aprobado · vuelve a En sitio' : `<span class="mono">${o.id}</span> aprobada`);
+    });
+  },
+  reject(o) {
+    const add = o.reason === 'AdditionalServices', n = o.lines.filter((l) => l.appr === 'PendingApproval').length;
+    openConfirm({ title: add ? 'Rechazar servicio adicional' : 'Rechazar cotización', icon: 'thumb_down', ok: 'Rechazar',
+      items: add ? [['remove_circle', `${n} ${n === 1 ? 'servicio se descarta' : 'servicios se descartan'}`], ['garage', 'La orden sigue en sitio con lo aprobado']]
+                 : [['block', 'La orden se cancela'], ['add_task', 'Podrás crear una orden manual']],
+      fn: () => {
+        o.lines.filter((l) => l.appr === 'PendingApproval').forEach((l) => { l.appr = 'Rejected'; });
+        o.status = add ? 'OnSite' : 'Cancelled'; delete o.reason; delete o.priority;
+        done(o, 'thumb_down', add ? 'Servicio adicional rechazado' : 'Rechazada', add ? 'Servicio rechazado' : `<span class="mono">${o.id}</span> cancelada`, { icon: 'thumb_down' });
+      } });
+  },
+  cancel(o) {
+    openConfirm({ title: `Cancelar ${o.id}`, icon: 'block', ok: 'Cancelar orden',
+      items: [['assignment_late', `${D.types[o.type].name} de ${o.plate} queda sin orden`], ['add_task', 'Podrás crear una orden manual']],
+      fn: () => { o.status = 'Cancelled'; delete o.reason; delete o.priority; done(o, 'block', 'Cancelada', `<span class="mono">${o.id}</span> cancelada`, { icon: 'block' }); } });
+  },
+  request(o) {
+    openForm({ title: 'Pedir servicio', icon: 'add_circle', submit: 'Pedir al taller', tone: 'is-info',
+      fields: [{ name: 'desc', label: 'Servicio', ph: 'Alineación y balanceo' }],
+      validate: (v) => (v.desc.length < 3 ? ['desc', 'Describe el servicio que necesitas.'] : null),
+      apply: (v) => { o.lines.push(L('Additional', v.desc, null, 'Approver', 'PendingApproval')); done(o, 'add_circle', `Pedido: ${v.desc}`, 'Servicio pedido · el taller le pondrá precio'); } });
+  },
+  quote(o) {
+    openForm({ title: `Cotizar ${o.id}`, icon: 'request_quote', submit: 'Enviar cotización',
+      fields: [{ name: 'desc', label: 'Servicio', value: D.types[o.type].name }, { name: 'amount', label: 'Valor', mode: 'numeric', unit: 'COP', ph: '0' }],
+      extra: `<p class="hint">${ms('bolt', 'ms--s')}Aprobación automática hasta ${fmtCOP.format(D.policy)}</p>`,
+      validate: (v) => (v.desc.length < 3 ? ['desc', 'Describe el servicio.'] : !money(v.amount) ? ['amount', 'Ingresa el valor en pesos, por ejemplo 480.000.'] : null),
+      apply: (v) => {
+        const n = money(v.amount), auto = n <= D.policy;
+        o.lines = [L('Routine', v.desc, n, 'Workshop', auto ? 'Approved' : 'PendingApproval')]; o.policy = D.policy;
+        o.history.push(H(stamp(), 'request_quote', 'Cotizada', who(o)));
+        if (auto) { o.status = 'Approved'; o.auto = true; done(o, 'bolt', 'Aprobada automáticamente', 'Aprobada automáticamente', { icon: 'bolt' }); }
+        else { o.status = 'PendingApproval'; o.reason = 'Quote'; o.priority = 'Normal'; done(o, 'gavel', 'Enviada a aprobación', 'Enviada a aprobación del cliente', { icon: 'gavel', tone: 'is-warn' }); }
+      } });
+  },
+  appointment(o) {
+    const t = new Date(D.today.getTime() + 2 * DAY);
+    openForm({ title: o.appointment ? 'Reprogramar cita' : 'Agendar cita', icon: 'event', submit: 'Guardar cita',
+      fields: [{ name: 'at', label: 'Fecha y hora', type: 'datetime-local', value: `${iso(t)}T08:00` }],
+      validate: (v) => (!v.at ? ['at', 'Elige fecha y hora.'] : new Date(v.at) <= D.today ? ['at', 'La cita debe ser posterior a hoy.'] : null),
+      apply: (v) => { const d = new Date(v.at); const txt = fmtD(d) + ' ' + v.at.slice(11, 16); const re = !!o.appointment; o.appointment = txt;
+        done(o, 'event_available', `${re ? 'Reprogramada' : 'Cita'} ${txt}`, `Cita ${txt}`, { icon: 'event_available' }); } });
+  },
+  onsite(o, btn) { busy(btn, 'Registrando…', () => { o.status = 'OnSite'; done(o, 'garage', 'En sitio', `<span class="mono">${o.plate}</span> en sitio`, { icon: 'garage' }); }); },
+  addService(o) {
+    openForm({ title: 'Agregar servicio', icon: 'add_circle', submit: 'Enviar a aprobación', tone: 'is-warn',
+      fields: [{ name: 'desc', label: 'Servicio', ph: 'Filtro de aire' }, { name: 'amount', label: 'Valor', mode: 'numeric', unit: 'COP', ph: '0' }],
+      validate: (v) => (v.desc.length < 3 ? ['desc', 'Describe el servicio.'] : !money(v.amount) ? ['amount', 'Ingresa el valor en pesos.'] : null),
+      apply: (v) => { o.lines.push(L('Additional', v.desc, money(v.amount), 'Workshop', 'PendingApproval')); o.status = 'PendingApproval'; o.reason = 'AdditionalServices'; o.priority = 'High';
+        done(o, 'priority_high', 'Servicio adicional por aprobar', 'Aprobación prioritaria enviada', { icon: 'priority_high', tone: 'is-warn' }); } });
+  },
+  start(o, btn) { busy(btn, 'Iniciando…', () => { o.status = 'InProgress'; done(o, 'build', 'En proceso', `<span class="mono">${o.id}</span> en proceso`, { icon: 'build' }); }); },
+  complete(o) {
+    const vh = veh(o.plate);
+    openForm({ title: `Finalizar ${o.id}`, icon: 'flag', submit: 'Finalizar',
+      fields: [{ name: 'km', label: 'Kilometraje', mode: 'numeric', unit: 'km', value: fmtN.format(vh.odo) }, { name: 'date', label: 'Fecha del servicio', type: 'date', value: iso(D.today), max: iso(D.today) }],
+      validate: (v) => { const km = Number(v.km.replace(/[^\d]/g, '')); const d = toDate(v.date);
+        return v.km === '' || !Number.isFinite(km) ? ['km', 'Ingresa el kilometraje del servicio.'] : !d ? ['date', 'Elige la fecha.'] : d > D.today ? ['date', 'La fecha no puede ser futura.'] : null; },
+      apply: (v) => {
+        const km = Number(v.km.replace(/[^\d]/g, '')), d = toDate(v.date);
+        o.status = 'Completed'; o.serviced = { km, d };
+        const rt = D.routines.find((y) => y.plate === o.plate && y.type === o.type);
+        if (rt) { rt.lastKm = km; rt.lastDate = d; rt.sticky = false; rt.cycleOrderTried = false; rt.cycle = (rt.cycle || 1) + 1; rt.last = 'ok';
+          D.alerts.filter((a) => a.rid === rt.id && a.status !== 'Resolved').forEach((a) => { a.status = 'Resolved'; a.reason = 'Rutina reiniciada'; }); }
+        if (km > vh.odo) vh.odo = km;   // A-08: monotonía
+        done(o, 'check_circle', `Finalizada · ${fmtN.format(km)} km`, `${D.types[o.type].name} de <span class="mono">${o.plate}</span> al día`, { icon: 'check_circle', action: 'Ver', href: '#/flota/' + o.plate });
+      } });
+  },
+};
+let qTimer;
+view.addEventListener('input', (e) => {
+  if (e.target.id !== 'q') return;
+  clearTimeout(qTimer);
+  qTimer = setTimeout(() => { const pos = e.target.selectionStart; setQuery({ q: e.target.value }); const q = $('#q'); q.focus(); q.setSelectionRange(pos, pos); }, 200);
+});
+view.addEventListener('keydown', (e) => {
+  if (!e.target.matches('.tab')) return;
+  const tabs = $$('.tab'), i = tabs.indexOf(e.target);
+  const n = e.key === 'ArrowRight' ? (i + 1) % tabs.length : e.key === 'ArrowLeft' ? (i - 1 + tabs.length) % tabs.length : -1;
+  if (n >= 0) { e.preventDefault(); setQuery({ tab: tabs[n].dataset.tab === 'rutinas' ? '' : tabs[n].dataset.tab }); $(`#tab-${tabs[n].dataset.tab}`).focus(); }
+});
+view.addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  const h = parseHash();
+  if (b.id === 'clear-f') setQuery({ estado: '', q: '' });
+  if (b.dataset.tab) { const k = b.dataset.tab; setQuery({ tab: k === 'rutinas' ? '' : k }); $(`#tab-${k}`).focus(); }
+  if (b.dataset.edit) openParams(b.dataset.edit);
+  if (b.dataset.toggle) toggleRoutine(b.dataset.toggle);
+  if (b.id === 'veh-switch') { const x = veh(h.id); x.active ? openDeactivate(x) : reactivate(x); }
+  if (b.dataset.create) createOrder(b);
+  if (b.dataset.act) ACT[b.dataset.act](curOrder(), b);
+  if (b.dataset.ack) { const a = D.alerts.find((y) => y.id === b.dataset.ack); a.status = 'Acknowledged'; a.by = 'Operador'; render(false); toast('Alerta atendida'); }
+});
+
+function toggleRoutine(id) {
+  const rt = D.routines.find((y) => y.id === id), n = D.types[rt.type].name;
+  if (rt.active) {
+    const snap = D.alerts.filter((a) => a.rid === id && a.status !== 'Resolved').map((a) => [a, a.status]);
+    rt.active = false; snap.forEach(([a]) => { a.status = 'Resolved'; a.reason = 'Rutina desactivada'; });
+    render(false); toast(`${n} desactivada`, { icon: 'pause_circle', action: { label: 'Deshacer', fn: () => { rt.active = true; snap.forEach(([a, s]) => { a.status = s; a.reason = null; }); render(false); } } });
+  } else { rt.active = true; announce(reconcile()); render(false); toast(`${n} activada`); }
+}
+function createOrder(btn) {
+  const rt = D.routines.find((y) => y.id === btn.dataset.create);
+  btn.setAttribute('aria-busy', 'true'); btn.innerHTML = 'Creando…';
+  setTimeout(() => {
+    const o = newOrder(rt, who(rt)); render(false); toast(`Orden <span class="mono">${o.id}</span> creada`, { icon: 'assignment', action: 'Ver', href: '#/ordenes?id=' + o.id });
+  }, 800);
+}
+
+/* C · Parámetros */
+const dlgP = $('#dlg-params'); let editing = null;
+function readForm() {
+  const val = (id) => { const s = $(id).value.replace(/\./g, '').replace(',', '.').trim(); return s === '' ? null : Number(s); };
+  return { km: val('#in-km'), months: val('#in-months'), pct: val('#in-pct') };
+}
+function previewParams() {
+  const f = readForm(), t = D.types[editing.type];
+  const ovr = { km: f.km ?? t.km, months: f.months ?? t.months, pct: f.pct ?? t.pct };
+  if ([ovr.km, ovr.months, ovr.pct].some((n) => Number.isNaN(n))) return;
+  const e = evaluate(editing, ovr);
+  $('#dp-preview').innerHTML = `<div class="rt-title"><span class="muted" style="font-weight:700;font-size:13px">${editing.plate}</span>${pill(e.status, e.status === 'ok' ? null : e.trigger)}</div>
+    ${e.kmPct != null ? track('km', e.kmPct, ovr.pct, remKm(e.remKm), statusCls(SEV[e.kmPct >= 100 ? 2 : e.kmPct >= 100 - ovr.pct ? 1 : 0])) : ''}
+    ${e.timePct != null ? track('time', e.timePct, ovr.pct, remD(e.remDays), statusCls(SEV[e.timePct >= 100 ? 2 : e.timePct >= 100 - ovr.pct ? 1 : 0])) : ''}`;
+}
+function openParams(id) {
+  editing = D.routines.find((y) => y.id === id); const t = D.types[editing.type];
+  $('#dp-title').textContent = t.name; $('#dp-ico').innerHTML = ms(t.icon);
+  $('#in-km').placeholder = fmtN.format(t.km); $('#in-months').placeholder = t.months; $('#in-pct').placeholder = t.pct;
+  $('#in-km').value = editing.ovr?.km != null ? fmtN.format(editing.ovr.km) : '';
+  $('#in-months').value = editing.ovr?.months ?? ''; $('#in-pct').value = editing.ovr?.pct ?? '';
+  clearErr(); previewParams(); dlgP.showModal(); $('#in-km').focus();
+}
+function clearErr() { $('#dp-err').hidden = true; $$('#dlg-params .field').forEach((f) => { f.classList.remove('is-invalid'); $('input', f).removeAttribute('aria-invalid'); $('input', f).removeAttribute('aria-describedby'); }); }
+function fieldErr(fid, msg) {
+  const f = $(fid); f.classList.add('is-invalid'); const i = $('input', f); i.setAttribute('aria-invalid', 'true'); i.setAttribute('aria-describedby', 'dp-err');
+  $('#dp-err').textContent = msg; $('#dp-err').hidden = false; i.focus();
+}
+dlgP.addEventListener('input', previewParams);
+$('#dp-reset').addEventListener('click', () => { $('#in-km').value = ''; $('#in-months').value = ''; $('#in-pct').value = ''; clearErr(); previewParams(); });
+$('#form-params').addEventListener('submit', (e) => {
+  e.preventDefault(); clearErr();
+  const f = readForm(), t = D.types[editing.type];
+  if (f.km != null && (!Number.isInteger(f.km) || f.km <= 0)) return fieldErr('#f-km', 'Usa un número entero de kilómetros mayor que 0.');
+  if (f.months != null && (!Number.isInteger(f.months) || f.months <= 0 || f.months > 120)) return fieldErr('#f-months', 'Usa entre 1 y 120 meses.');
+  if (f.pct != null && (Number.isNaN(f.pct) || f.pct < 0 || f.pct > 100)) return fieldErr('#f-pct', 'El aviso va de 0 a 100 %.');
+  const btn = $('#dp-save'); btn.setAttribute('aria-busy', 'true'); btn.textContent = 'Guardando…';
+  setTimeout(() => {
+    const same = (f.km ?? t.km) === t.km && (f.months ?? t.months) === t.months && (f.pct ?? t.pct) === t.pct;
+    editing.ovr = same ? null : { km: f.km ?? t.km, months: f.months ?? t.months, pct: f.pct ?? t.pct };
+    btn.removeAttribute('aria-busy'); btn.textContent = 'Guardar'; dlgP.close();
+    announce(reconcile()); render(false); toast(`${t.name} actualizada`);
+  }, 700);
+});
+$$('[data-close]').forEach((b) => b.addEventListener('click', () => b.closest('dialog').close()));
+
+/* D · Vehículo */
+const dlgV = $('#dlg-veh'); let deact = null;
+function openDeactivate(x) {
+  deact = x;
+  const open = D.orders.filter((o) => o.plate === x.plate && OPEN.includes(o.status)).length;
+  const rts = D.routines.filter((y) => y.plate === x.plate && y.active).length;
+  $('#dv-title').textContent = 'Desactivar ' + x.plate;
+  $('#dv-impact').innerHTML = `<li>${ms('assignment')}<span class="tabular">${open} ${open === 1 ? 'orden pasa' : 'órdenes pasan'} a en pausa</span></li>
+    <li>${ms('event_busy')}<span class="tabular">${rts} ${rts === 1 ? 'rutina deja' : 'rutinas dejan'} de evaluarse</span></li>
+    <li>${ms('speed')}<span>El odómetro sigue registrándose</span></li>`;
+  dlgV.showModal();
+}
+$('#dv-confirm').addEventListener('click', () => {
+  const b = $('#dv-confirm'); b.setAttribute('aria-busy', 'true'); b.textContent = 'Desactivando…';
+  setTimeout(() => {
+    deact.active = false;
+    D.orders.filter((o) => o.plate === deact.plate && OPEN.includes(o.status)).forEach((o) => { o.before = o.status; o.status = 'OnHold'; });
+    b.removeAttribute('aria-busy'); b.textContent = 'Desactivar'; dlgV.close(); render(false); toast(`<span class="mono">${deact.plate}</span> inactivo`, { icon: 'pause_circle' });
+  }, 700);
+});
+function reactivate(x) {
+  x.active = true;
+  D.orders.filter((o) => o.plate === x.plate && o.status === 'OnHold').forEach((o) => { o.status = o.before; delete o.before; });
+  const ev = reconcile(); render(false); toast(`<span class="mono">${x.plate}</span> activo`); announce(ev);
+}
+
+/* Barra superior */
+$('#cust').addEventListener('change', (e) => { D.customer = e.target.value; render(false); });
+$('#profile').addEventListener('change', (e) => { D.profile = e.target.value; render(false); });
+$('#btn-refresh').addEventListener('click', (e) => {
+  const b = e.currentTarget; b.classList.add('is-spinning'); b.setAttribute('aria-busy', 'true');
+  setTimeout(() => { b.classList.remove('is-spinning'); b.removeAttribute('aria-busy'); announce(reconcile()); render(false); toast('Flota reevaluada'); }, 900);
+});
+
+/* Instrumentación */
+$('#mk-state').addEventListener('change', (e) => setState(e.target.value));
+$('#mk-width').addEventListener('change', (e) => { $('#mk-frame').style.maxWidth = e.target.value; });
+$('#mk-tags').addEventListener('change', (e) => document.body.classList.toggle('mk-show-tags', e.target.checked));
+$('#mk-dark').addEventListener('change', (e) => { document.documentElement.dataset.theme = e.target.checked ? 'dark' : 'light'; });
+$('#retry').addEventListener('click', (e) => { e.currentTarget.setAttribute('aria-busy', 'true'); setState('loading'); setTimeout(() => { $('#retry').removeAttribute('aria-busy'); setState('default'); render(); }, 900); });
+$('#mk-reading').addEventListener('click', () => {
+  const x = veh('RVA102'); if (mkState === 'offline') return;
+  const from = x.odo; x.odo += 700; x.readAt = 'ahora';
+  x.readings.unshift({ km: x.odo, at: fmtD(D.today) + ' ' + new Date().toTimeString().slice(0, 5), ok: true });
+  const ev = reconcile(); render(false); flash('RVA102'); countUp($('#odo'), from, x.odo); announce(ev);
+});
+$('#mk-day').addEventListener('click', () => {
+  D.today = new Date(D.today.getTime() + 7 * DAY);
+  const ev = reconcile(); render(false); announce(ev); if (!ev.length) toast('Revisión diaria sin cambios', { icon: 'event_available' });
+});
+
+window.addEventListener('hashchange', () => render(true));
+D.loadDate = new Date(2026, 10, 12);
+setState('default');
+render(false);
+</script>
+</body>
+</html>

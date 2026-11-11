@@ -1,0 +1,58 @@
+schema: spec-driven
+
+context: |
+  Proyecto: RutaViva CRM de Mantenimiento Preventivo. Reto técnico para ascenso a Desarrollador Senior.
+  Entrega: jueves 2026-11-12 antes de las 05:00 (último commit y enlace al repositorio público).
+  Fuentes de verdad (leer por sección, nunca completas): docs/architecture/analisis-del-reto.md,
+  docs/architecture/data-model.md, docs/adr/README.md (solo ADRs en estado Proposed; los Superseded no aplican),
+  mockups/crm-flota.handoff.md, mockups/design-system/MASTER.md y samples/README.md.
+  Regla de precedencia ante contradicciones: prevalece el ADR vigente más reciente sobre el análisis, el modelo de datos,
+  el handoff y las muestras.
+  Stack: .NET 10 / C# 14, ASP.NET Core Minimal API, EF Core 10 sobre SQL Server localhost (una BD RutaViva, un schema y un
+  usuario por servicio), EventBus propio (SignalR como aviso + SQL Server como log, ADR-0024), YARP, .NET Aspire,
+  Angular 22 (standalone, signals, zoneless), xUnit v3, AwesomeAssertions, NSubstitute, SQL Server local con BD de prueba desechable (ADR-0027), NetArchTest,
+  Verify, Reqnroll y Playwright.
+  Arquitectura: microservicios por bounded context (ADR-0010) con Clean Architecture interna (Domain, Application,
+  Infrastructure, Api), DDD táctico, CQRS sin MediatR, Result<T> en lugar de excepciones de negocio, Transactional Outbox,
+  checkpoints por suscriptor y réplicas locales *Reference alimentadas por eventos. Ningún tipo de dominio se comparte
+  entre servicios: solo BuildingBlocks y RutaViva.IntegrationContracts.
+  Bounded contexts: Customers, Workshops, Fleet (soporte), Maintenance y ServiceOrders (core), DataImport (soporte),
+  Reporting (read model), más RutaViva.ApiGateway, RutaViva.Notifications.Hub y RutaViva.EventBus.Hub (técnicos), y la
+  SPA rutaviva-fleet-maintenance-ui.
+  Nombres (ADR-0026): RutaViva.{Componente}.{Capa o tipo}; el host dice qué expone (.Api REST, .Hub SignalR, ApiGateway);
+  librerías con nombre de contenido (prohibidos Common, Shared, Utils, Core); pruebas {proyecto}.{UnitTests|IntegrationTests}
+  o RutaViva.{Ámbito}.Tests; carpetas de src/ por tipo: BuildingBlocks, Contracts, Services, Gateways, Platform, Web.
+  Idioma: documentación y explicaciones en español; código, nombres, rutas, logs estructurados y contratos en inglés.
+
+rules:
+  proposal:
+    - Citar los ADRs y supuestos (A-nn, RN-n, RQ-nn) que justifican cada capacidad
+    - Incluir una sección "Fuera de alcance" y marcar lo recortable según el orden de recorte del análisis §10
+  specs:
+    - Cada requisito usa SHALL/MUST y tiene al menos un escenario Given/When/Then verificable con una prueba concreta
+    - Los requisitos recortables llevan la etiqueta "(Recortable)" en el título
+    - Los casos borde de ADR-0009 IMP-001 e IMP-002 se escriben como escenarios explícitos
+    - Nombres de endpoints, eventos, enums y tablas en inglés y exactamente como en los ADRs y en el modelo de datos
+  design:
+    - Incluir el registro de contratos que consume y produce el change (interfaces, eventos, DTOs y endpoints) con firmas
+    - Declarar la semántica de los eventos (quién emite, en qué orden, quién reacciona) y los patrones GoF y DDD aplicados con su justificación
+    - Enumerar los antipatrones que se evitan y cómo (modelo anémico, objeto dios, números mágicos, copy-paste)
+  tasks:
+    - Cada tarea nombra los archivos que crea o modifica y termina con un criterio "Verificar con ..." ejecutable
+    - Contratos (interfaces, entidades, eventos) antes que implementaciones y consumidores
+    - Ninguna tarea agrega un miembro a una interfaz cuya implementación quede en otra tarea paralela
+    - Las tareas recortables van al final, en una sección propia
+    - Tareas de tamaño 30 a 90 minutos; dividir las mayores
+
+operations:
+  apply:
+    guidance:
+      - "Prohibido usar var en C#: tipos explícitos siempre (.editorconfig con csharp_style_var_*=false:error y TreatWarningsAsErrors)"
+      - Sin comentarios en el código; los literales de texto van como constantes en la misma clase; sin números mágicos
+      - Métodos pequeños de responsabilidad única; guard clauses en lugar de ifs anidados
+      - Ningún host (API, scheduler, suscriptor) accede a datos directamente; todo pasa por puertos de Application
+      - Modelo de dominio rico (invariantes dentro de agregados y VOs); evitar modelo anémico, objetos dios, copy-paste, lava flow y golden hammer
+      - Enums con valores explícitos desde 1, persistidos por nombre (varchar(20) + CHECK) y serializados como texto
+      - Nombres de pruebas Method_Should_Result_When_Condition con Test Data Builders
+      - No modificar nada fuera del alcance de la tarea; si hace falta, reportarlo como bloqueo
+      - Sin commits ni ramas salvo autorización explícita
