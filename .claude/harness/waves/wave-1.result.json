@@ -2,176 +2,119 @@
   "wave": "1",
   "verified": [
     "2.1",
-    "2.3",
-    "2.4",
     "2.2",
-    "3.1",
-    "3.3",
-    "8.1",
-    "3.2"
+    "2.3",
+    "10.2",
+    "10.1"
   ],
   "escalated": [],
   "unaccounted": [],
   "handoff": {
     "exports": {
-      "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain": "Primitives: Entity<TId>, AggregateRoot<TId>(DomainEvents, Raise, ClearDomainEvents), abstract record ValueObject. Events: IDomainEvent. Results: Error(Code,Message,Type), ErrorType, Result, Result<T>. Guards: Guard.NotNull/NotNullOrWhiteSpace/NotDefault/Positive",
-      "IntegrationEventEnvelope.cs / EventBus / Abstractions": "sealed record IntegrationEventEnvelope{Id:Guid,Source,Type,Subject,Time:DateTimeOffset,TraceParent?,Data:JsonElement; consts CloudEventsSpecVersion,JsonContentType}; record EventRecord(long Offset,string Stream,IntegrationEventEnvelope Envelope); record EventMetadata(Guid MessageId,long Offset,string Type,string Subject,DateTimeOffset OccurredAt); EventBusHubMethods consts incl. HubPath",
-      "Events V1": "all sealed records implement IIntegrationEvent with const EventName and const Stream; snapshot events also IRoutineSnapshotEvent{Routine} / IServiceOrderSnapshotEvent{Order}; Ids are Guid, km/amounts decimal, dates DateOnly in RoutineSnapshot",
-      "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/*.cs (ns RutaViva.BuildingBlocks.Application.Abstractions)": "ICommand<TResult>; IQuery<TResult>; ICommandHandler<in TCommand,TResult>.HandleAsync(command,ct):Task<Result<TResult>>; IQueryHandler<,>; IUnitOfWork.SaveChangesAsync(ct):Task<Result>; IClock{UtcNow;TodayIn(TimeZoneInfo):DateOnly}; IDomainEventHandler<in TEvent>; IIntegrationEventMapper<in T>.Map; IIntegrationEventHandler<in T>.HandleAsync(evt,EventMetadata,ct):Task<Result>; IIntegrationEventPublisher.Enqueue(evt,subject); IEventCheckpointStore{GetLastOffsetAsync;SaveAsync}",
-      "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/DependencyInjection/CommandHandlerServiceCollectionExtensions.cs": "namespace RutaViva.BuildingBlocks.Application.DependencyInjection; static IServiceCollection AddCommandHandlers(this IServiceCollection services, Assembly assembly)",
-      "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Decorators/*.cs (ns ...Application.Decorators)": "sealed ValidationCommandHandlerDecorator<TCommand,TResult>(ICommandHandler inner, IEnumerable<IValidator<TCommand>>); sealed LoggingCommandHandlerDecorator<TCommand,TResult>(ICommandHandler inner, ILogger<...>)",
-      "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/BulkRegistrationHandler.cs (ns ...Application.Bulk)": "abstract BulkRegistrationHandler<TRow,TCommand>(ICommandHandler<TCommand,Guid>) where TCommand:ICommand<Guid>; Task<IReadOnlyList<BulkRowResult>> ExecuteAsync(IReadOnlyList<TRow>, ct); protected abstract int RowNumberOf(TRow); string NaturalKey(TRow); Task<Result<TCommand>> ResolveCommandAsync(TRow,ct); Task<bool> ExistsAsync(string naturalKey,ct)",
-      "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/ (scope)": "IBulkExecutionScope.Resolve(IUnitOfWork real):IUnitOfWork; sealed DryRunUnitOfWork:IUnitOfWork; sealed CommittingBulkExecutionScope; sealed DryRunBulkExecutionScope; static BulkExecutionScope.For(bool dryRun):IBulkExecutionScope",
-      "SystemClock.cs": "public sealed class SystemClock(TimeProvider timeProvider) : IClock",
-      "FakeClock.cs": "public sealed class FakeClock(DateTimeOffset initialUtcNow) : IClock { void Set(DateTimeOffset); void Advance(TimeSpan); }",
-      "SqlServerTestDatabase.cs": "public sealed class SqlServerTestDatabase : IAsyncLifetime { string DatabaseName, ConnectionString, MasterConnectionString; Task<TContext> CreateDbContextAsync<TContext>(CancellationToken) where TContext : DbContext }"
+      "Common/MaintenanceErrors.cs": "static class MaintenanceErrors: static readonly Error MaintenancePlanNotFound, RoutineTypeNotFound, RoutineNotFound, AlertNotFound, RoutineAlreadyExists, RoutineLastServiceKmAboveOdometer, RoutineIncompleteLastService, BulkDuplicateInBatch, AlertInvalidTransition, AlertAcknowledgedByRequired, UpdatedByRequired, RoutineTypeNameRequired, IdentifierEmpty, LicensePlateInvalid, RoutineTypeCodeInvalid, OdometerKilometersNegative, OdometerReadingKilometersNegative, MaintenanceIntervalEmpty/KilometersNotPositive/MonthsNotPositive/MonthsTooLarge, DueSoonThresholdOutOfRange, MaintenanceCycleNumberInvalid/StartKmNegative, ServiceRecordKilometersNegative, EvaluationContextKilometersNegative",
+      "Common/VehicleId.cs (same shape: RoutineId, RoutineTypeId, AlertId, CustomerId)": "readonly record struct VehicleId { VehicleId(Guid value) /*throws on empty*/; Guid Value; static VehicleId New(); static Result<VehicleId> Create(Guid) }",
+      "Common/MaintenanceTimeZone.cs": "static class: const string BogotaId; static readonly TimeZoneInfo Bogota; static DateOnly ToLocalDate(DateTimeOffset)",
+      "Plans/ValueObjects/*.cs": "LicensePlate.Create(string?) Value; Odometer.Create(long,DateTimeOffset) Kilometers ReadAt IsAdvancedBy(OdometerReading) Advance(OdometerReading); OdometerReading.Create(long,DateTimeOffset); MaintenanceInterval.Create(int?,int?) Kilometers Months HasDistance HasTime; DueSoonThreshold.Create(decimal) Percent Of(decimal); RoutineOverrides.Create(int? km,int? months,decimal? pct) IntervalKm IntervalMonths DueSoonPercent None",
+      "Plans/ValueObjects/EffectiveRoutineParameters.cs": "static Result<EffectiveRoutineParameters> Resolve(MaintenanceInterval typeInterval, DueSoonThreshold typeThreshold, RoutineOverrides overrides); Interval; DueSoonThreshold; IntervalKilometersSource; IntervalMonthsSource; DueSoonSource (ParameterSource)",
+      "Plans/ValueObjects/MaintenanceCycle.cs": "Number StartKm(long) StartDate; static Result<MaintenanceCycle> Create(int,long,DateOnly); static Result<MaintenanceCycle> Start(long,DateOnly); MaintenanceCycle Next(ServiceRecord)",
+      "Plans/ValueObjects/NextDue.cs, ServiceRecord.cs, EvaluationContext.cs": "NextDue.Calculate(MaintenanceCycle, MaintenanceInterval) -> long? Kilometers, DateOnly? Date; ServiceRecord.Create(long,DateOnly) Kilometers Date; EvaluationContext.Create(long odometerKm, DateOnly effectiveDate) OdometerKm EffectiveDate",
+      "RoutineTypes/ValueObjects/RoutineTypeCode.cs": "namespace ...Domain.RoutineTypes.ValueObjects; RoutineTypeCode.Create(string?) Value (trim + upper, ^[A-Z][A-Z0-9_]{0,29}$)",
+      "Enums (Plans/Alerts/RoutineTypes)": "RoutineTypeStatus{Active,Inactive} MaintenancePlanStatus{Active,Suspended} RoutineState{Active,Inactive} RoutineDueStatus{UpToDate,DueSoon,Overdue} DueDimension{Distance,Time} OdometerReadingOutcome{Accepted,Ignored} OdometerReadingIgnoredReason{NotGreaterThanCurrent,UnknownVehicle} ParameterSource{RoutineType,Override} AlertType{DueSoon,Overdue} AlertTrigger{Distance,Time,DistanceAndTime} AlertStatus{Active,Acknowledged,Resolved} AlertResolutionReason{RoutineRestarted,EscalatedToOverdue,ParametersChanged,RoutineDeactivated}",
+      "Plans/Events/RoutineStatusSnapshot.cs": "sealed record RoutineStatusSnapshot(RoutineId RoutineId, VehicleId VehicleId, LicensePlate Plate, CustomerId CustomerId, RoutineTypeCode RoutineTypeCode, string RoutineName, RoutineState State, RoutineDueStatus DueStatus, int CycleNumber, long CycleStartKm, DateOnly CycleStartDate, int? IntervalKm, int? IntervalMonths, decimal EffectiveDueSoonPercent, NextDue NextDue, long OdometerKm, decimal ConsumedPercent)",
+      "Plans/Events/*.cs": "RoutineRegistered(Snapshot, OccurredAt); RoutineBecameDueSoon(Snapshot, AlertTrigger Trigger, bool IsFirstNoticeInCycle, OccurredAt); RoutineBecameOverdue(Snapshot, AlertTrigger Trigger, OccurredAt); RoutineDueStatusReverted(Snapshot, OccurredAt); RoutineRestarted(Snapshot, Guid ServiceOrderId, ServiceRecord Service, OccurredAt); RoutineStateChanged(Snapshot, OccurredAt); RoutineParametersChanged(Snapshot, OccurredAt); MaintenancePlanStatusChanged(VehicleId, LicensePlate Plate, CustomerId, MaintenancePlanStatus Status, OccurredAt)",
+      "Alerts/Events/AlertRaised.cs": "sealed record AlertRaised(AlertId AlertId, VehicleId VehicleId, LicensePlate Plate, CustomerId CustomerId, RoutineId RoutineId, string RoutineName, int CycleNumber, AlertType Type, AlertTrigger Trigger, AlertStatus Status, DateTimeOffset RaisedAt, DateTimeOffset OccurredAt)",
+      "Alerts/Events/AlertStatusChanged.cs": "sealed record AlertStatusChanged(AlertId AlertId, VehicleId VehicleId, LicensePlate Plate, CustomerId CustomerId, RoutineId RoutineId, AlertType Type, AlertTrigger Trigger, AlertStatus Status, DateTimeOffset? AcknowledgedAt, string? AcknowledgedBy, DateTimeOffset? ResolvedAt, AlertResolutionReason? ResolutionReason, DateTimeOffset OccurredAt)",
+      "RoutineTypes/Events/RoutineTypeParametersChanged.cs": "sealed record RoutineTypeParametersChanged(RoutineTypeId RoutineTypeId, DateTimeOffset OccurredAt)"
     },
     "decisions": [
-      "Domain types live in folders Primitives/, Events/, Results/, Guards/ with matching namespaces RutaViva.BuildingBlocks.Domain.{Primitives,Events,Results,Guards} (IDE0130).",
-      "Se eligieron Guid para IDs, decimal para km e importes, DateOnly para fechas de ciclo/vencimiento y RoutineBulkRow.LastServiceDate.",
-      "EventRecord es (Offset, Stream, Envelope); IntegrationEventEnvelope.Data es JsonElement con JsonPropertyName en minuscula CloudEvents.",
-      "BulkErrorCodes expone un const por codigo (p. ej. VehicleOwnerNotFound = Vehicle.OwnerNotFound).",
-      "BulkRegistrationHandler fija TCommand : ICommand<Guid>: los commands de alta usados en lote deben devolver Guid, porque la firma de 2 genericos no admite TResult.",
-      "Se agrego protected abstract RowNumberOf(TRow): las filas de contratos no comparten interfaz, asi el handler obtiene el numero de fila.",
-      "Para dryRun, el DI debe registrar IUnitOfWork con BulkExecutionScope.For(dryRun).Resolve(realUow); los command handlers reciben ese IUnitOfWork.",
-      "IClock assumed in namespace RutaViva.BuildingBlocks.Application.Abstractions; if agent C uses another namespace, fix the using in my 3 files.",
-      "SystemClock requires a TimeProvider in its constructor (register TimeProvider.System in DI)."
+      "MaintenanceErrors es plana: MaintenanceErrors.RoutineAlreadyExists, .MaintenancePlanNotFound, etc. (nombre = codigo sin punto). Tambien UpdatedByRequired, RoutineTypeNameRequired, AlertAcknowledgedByR…",
+      "ValueObject del repo es abstract record sin GetEqualityComponents: los VOs son sealed record con ctor privado y propiedades get-only. Km como long; intervalos y overrides como int?.",
+      "EffectiveRoutineParameters.Resolve recibe (MaintenanceInterval, DueSoonThreshold, RoutineOverrides), no RoutineTypeParameters; expone Interval/DueSoonThreshold y 3 fuentes. Meses de intervalo max 1200…",
+      "AlertRaised y AlertStatusChanged llevan campos planos (ids, placa, ruta, ciclo) en vez de AlertOrigin, para no depender de ese VO; Alert debe volcarlos al emitir.",
+      "Se asumen enums de Plans y Alerts en sus namespaces raiz, ids en Common, LicensePlate/NextDue/ServiceRecord en Plans.ValueObjects y RoutineTypeCode en RoutineTypes.ValueObjects.",
+      "RoutineStatusSnapshot usa NextDue (VO) en vez de NextDueKm/NextDueDate; EffectiveDueSoonPercent es decimal. El mapper convierte al contrato."
     ]
   },
   "implemented": [
     {
-      "agent": "A",
+      "agent": "M",
       "status": "complete",
-      "notes": "The source files already existed at the project root; I moved them into subfolders so namespaces match folders. The old root paths no longer exist. Added the four test files. Nothing compiled or run.",
+      "notes": "No compile ni ejecuté pruebas (lo hace la compuerta). Ids: ctor publico lanza ArgumentException con Guid vacio; Create devuelve Result con Identifier.Empty. Se agregaron Odometer.Advance, DueSoonThreshold.Of y MaintenanceCycle.Start como apoyo. Pruebas de ids y MaintenanceTimeZone viven en ValueObjects/StrongIdTests.cs por restriccion de carpetas. No se creo nada en Events/.",
       "files": [
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Primitives/AggregateRoot.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Primitives/Entity.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Primitives/ValueObject.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Events/IDomainEvent.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Results/Error.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Results/ErrorType.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Results/Result.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Results/ResultOfT.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/Guards/Guard.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/ValueObjectTests.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/AggregateRootTests.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/ResultTests.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/GuardTests.cs"
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineTypeStatus.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/MaintenancePlanStatus.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/RoutineState.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/RoutineDueStatus.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/DueDimension.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/OdometerReadingOutcome.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/OdometerReadingIgnoredReason.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ParameterSource.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/AlertType.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/AlertTrigger.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/AlertStatus.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/AlertResolutionReason.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/VehicleId.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/RoutineId.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/RoutineTypeId.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/AlertId.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/CustomerId.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/MaintenanceTimeZone.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/MaintenanceErrors.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/LicensePlate.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/Odometer.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/OdometerReading.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/MaintenanceInterval.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/DueSoonThreshold.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/RoutineOverrides.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/EffectiveRoutineParameters.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/MaintenanceCycle.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/NextDue.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/ServiceRecord.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/EvaluationContext.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/ValueObjects/RoutineTypeCode.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/LicensePlateTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/OdometerTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/MaintenanceIntervalTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/DueSoonThresholdTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/RoutineOverridesTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/EffectiveRoutineParametersTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/MaintenanceCycleTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/NextDueTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/EvaluationContextTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/RoutineTypeCodeTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/MaintenanceErrorsTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/StrongIdTests.cs"
       ]
     },
     {
-      "agent": "B",
+      "agent": "V",
       "status": "complete",
-      "notes": "47 archivos creados. dotnet build del proyecto en verde, 0 advertencias. Sin referencias a otros proyectos. Tipos de campos no fijados por design.md fueron inferidos.",
+      "notes": "Se creo un archivo por evento mas RoutineStatusSnapshot. Todos son sealed record con IDomainEvent y OccurredAt como ultimo parametro. Sin compilar. Si RoutineTypeCode o los enums quedan en otro namespace, ajustar los usings de RoutineStatusSnapshot.cs.",
       "files": [
-        "src/Contracts/RutaViva.IntegrationContracts/Abstractions/EventMetadata.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Abstractions/IIntegrationEvent.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Abstractions/IRoutineSnapshotEvent.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Abstractions/IServiceOrderSnapshotEvent.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Bulk/ApproverBulkRow.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Bulk/BulkErrorCodes.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Bulk/BulkRequest.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Bulk/BulkRowError.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Bulk/BulkRowOutcome.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Bulk/BulkRowResult.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Bulk/CustomerBulkRow.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Bulk/RoutineBulkRow.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Bulk/VehicleBulkRow.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Bulk/WorkshopBulkRow.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Customers/ApproverRegisteredV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Customers/ApproverStatusChangedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Customers/CustomerRegisteredV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Customers/CustomerStatusChangedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/EventBus/EventBusHubMethods.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/EventBus/EventRecord.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Fleet/VehicleRegisteredV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Fleet/VehicleResponsibleAssignedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Fleet/VehicleStatusChangedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/IntegrationEventEnvelope.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/AlertRaisedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/AlertStatusChangedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenancePlanStatusChangedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineDueSoonV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineDueStatusRevertedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineOverdueV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineParametersChangedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineRegisteredV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineRestartedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/MaintenanceRoutineStateChangedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/OdometerReadingRecordedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Maintenance/RoutineSnapshot.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderAppointmentScheduledV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderApprovalRequestedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderCompletedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderCreatedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderLinesChangedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderLineSnapshot.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderSnapshot.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/ServiceOrders/ServiceOrderStatusChangedV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Streams.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Workshops/WorkshopRegisteredV1.cs",
-        "src/Contracts/RutaViva.IntegrationContracts/Workshops/WorkshopStatusChangedV1.cs"
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineStatusSnapshot.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineRegistered.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineBecameDueSoon.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineBecameOverdue.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineDueStatusReverted.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineRestarted.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineStateChanged.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineParametersChanged.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/MaintenancePlanStatusChanged.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/Events/AlertRaised.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/Events/AlertStatusChanged.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/Events/RoutineTypeParametersChanged.cs"
       ]
     },
     {
-      "agent": "C",
+      "agent": "S",
       "status": "complete",
-      "notes": "No compile ni ejecute pruebas. Namespaces: Abstractions, Decorators, DependencyInjection, Bulk bajo RutaViva.BuildingBlocks.Application. Validacion devuelve Error Code Validation.Failed con mensajes unidos por \"; \". Clave natural comparada con OrdinalIgnoreCase; se registra al primer uso (fila Skipped repetida => DuplicateInBatch). Las pruebas dependen de Microsoft.Extensions.DependencyInjection (llega transitivo via EF Core del proyecto de pruebas). Orden de decoradores: Validation interno, Logging externo.",
+      "notes": "The repo is not a git repository, so I deleted samples/kafka/ with rm instead of git rm. Section 3 of the README now cites ADR-0014 and ADR-0017. Searching samples/ for 'kafka' finds nothing. The README's other sections are unchanged.",
       "files": [
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/ICommand.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IQuery.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/ICommandHandler.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IQueryHandler.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IUnitOfWork.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IClock.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IDomainEventHandler.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IIntegrationEventMapper.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IIntegrationEventHandler.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IIntegrationEventPublisher.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Abstractions/IEventCheckpointStore.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Decorators/ValidationCommandHandlerDecorator.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Decorators/LoggingCommandHandlerDecorator.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/DependencyInjection/CommandHandlerServiceCollectionExtensions.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/IBulkExecutionScope.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/DryRunUnitOfWork.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/CommittingBulkExecutionScope.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/DryRunBulkExecutionScope.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/BulkExecutionScope.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Application/Bulk/BulkRegistrationHandler.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/SampleCommand.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/SampleCommandValidator.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/SampleCommandHandler.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/CapturingLogger.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/ValidationCommandHandlerDecoratorTests.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/LoggingCommandHandlerDecoratorTests.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/CommandHandlerRegistrationTests.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/BulkRow.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/BulkCommand.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/SavingBulkCommandHandler.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/TestBulkRegistrationHandler.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/BulkRegistrationHandlerTests.cs"
-      ]
-    },
-    {
-      "agent": "D",
-      "status": "complete",
-      "notes": "Single WHILE loop over 8 schemas with dynamic SQL and QUOTENAME; inner cursor emits DENY for the other 7. Passwords via sqlcmd variables ($(CustomersAppPassword) etc.). Idempotent via existence checks. Not executed.",
-      "files": [
-        "deploy/local/sql/00-database.sql",
-        "deploy/local/sql/01-schemas-and-users.sql",
-        "deploy/local/sql/README.md"
-      ]
-    },
-    {
-      "agent": "E",
-      "status": "complete",
-      "notes": "Not compiled. Assumes a DbContext with a public constructor taking DbContextOptions<T>. The SQL Server integration test needs a local server.",
-      "files": [
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Time/SystemClock.cs",
-        "tests/RutaViva.Testing.Common/FakeClock.cs",
-        "tests/RutaViva.Testing.Common/SqlServerTestDatabase.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Infrastructure/SystemClockTests.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Testing/SqlServerTestDatabaseTests.cs"
+        "samples/http/odometer-readings.http",
+        "samples/http/time-evaluations.http",
+        "samples/README.md",
+        "samples/kafka/maintenance-time-evaluation-requested.v1.jsonl",
+        "samples/kafka/telemetry-odometer-readings.v1.jsonl"
       ]
     }
   ],
@@ -179,9 +122,34 @@
     {
       "round": 0,
       "gate": {
-        "passed": false,
-        "failedCheck": "4-build"
+        "passed": true,
+        "failedCheck": null
       }
+    },
+    {
+      "round": 0,
+      "verdict": [
+        {
+          "taskId": "2.1",
+          "passed": true
+        },
+        {
+          "taskId": "2.2",
+          "passed": true
+        },
+        {
+          "taskId": "2.3",
+          "passed": true
+        },
+        {
+          "taskId": "10.1",
+          "passed": false
+        },
+        {
+          "taskId": "10.2",
+          "passed": true
+        }
+      ]
     },
     {
       "round": 1,
@@ -194,35 +162,7 @@
       "round": 1,
       "verdict": [
         {
-          "taskId": "2.1",
-          "passed": true
-        },
-        {
-          "taskId": "2.3",
-          "passed": true
-        },
-        {
-          "taskId": "2.4",
-          "passed": true
-        },
-        {
-          "taskId": "2.2",
-          "passed": true
-        },
-        {
-          "taskId": "3.1",
-          "passed": true
-        },
-        {
-          "taskId": "3.3",
-          "passed": true
-        },
-        {
-          "taskId": "8.1",
-          "passed": true
-        },
-        {
-          "taskId": "3.2",
+          "taskId": "10.1",
           "passed": true
         }
       ]

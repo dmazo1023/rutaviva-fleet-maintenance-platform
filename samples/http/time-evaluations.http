@@ -1,0 +1,17 @@
+@gateway = http://localhost:5000
+
+### As of 2027-01-20 - RVA103 and EVA30D oil Overdue, 2 orders
+POST {{gateway}}/api/v1/maintenance/time-evaluations
+Content-Type: application/json
+
+{
+  "asOfDate": "2027-01-20"
+}
+
+### As of 2027-02-10 - RVA101 brakes DueSoon, EVA302 brakes Overdue, 1 order
+POST {{gateway}}/api/v1/maintenance/time-evaluations
+Content-Type: application/json
+
+{
+  "asOfDate": "2027-02-10"
+}

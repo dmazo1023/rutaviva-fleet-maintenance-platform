@@ -65,13 +65,13 @@ Se cargan **después** de la carga válida para mostrar la vista previa de error
 | | RVA104 · TIRES | ❌ Intervalo de km debe ser mayor que 0 | Formato |
 | | RVA101 · OIL_CHANGE | ⏭️ Omitida: la rutina ya existe para el vehículo | Negocio (dry-run) |
 
-## 3. Eventos de Kafka (`samples/kafka/`)
+## 3. Eventos de telemetría y evaluación (`samples/http/`)
 
-Se publican desde Kafka UI o desde el endpoint de Simulators (ADR-0017). El formato es `{ key, value }` por línea.
+Se envían por HTTP a través del ApiGateway, con la variable `@gateway` al inicio de cada archivo ([ADR-0014](../docs/adr/adr-0014-data-odometer-ingestion-acl.md) y [ADR-0017](../docs/adr/adr-0017-arch-time-evaluation-trigger.md)). El resultado esperado va en el nombre de cada petición.
 
-### `telemetry-odometer-readings.v1.jsonl` (topic `telemetry.odometer-readings.v1`, clave = placa)
+### `odometer-readings.http` (`POST /api/v1/maintenance/odometer-readings`)
 
-| # | Mensaje | Resultado esperado |
+| # | Petición | Resultado esperado |
 |---|---|---|
 | 1 | RVA101 · 53.000 km | ✅ Aceptada. El aceite queda en 80 %, al día |
 | 2 | RVA101 · 53.000 km (repetida) | ⏭️ Ignorada: no es mayor (RN-6) |
@@ -79,9 +79,9 @@ Se publican desde Kafka UI o desde el endpoint de Simulators (ADR-0017). El form
 | 4 | RVA101 · 54.100 km | 🟡 Aceite por vencer (91 %). Alerta `DueSoon` |
 | 5 | RVA101 · 55.050 km | 🔴 Aceite vencido. La alerta `DueSoon` se resuelve por escalamiento y se crean una alerta `Overdue` y una **orden** |
 | 6 | RVA102 · 82.100 km | 🔴 Aceite vencido (estaba por vencer). Se escala y se crea una **orden** |
-| 7 | XYZ999 · 15.000 km | ⏭️ Vehículo desconocido: se reintenta unos segundos y luego se ignora con log (A-13) |
+| 7 | XYZ999 · 15.000 km | ⏭️ Ignorada: vehículo desconocido (`UnknownVehicle`, A-13) |
 
-### `maintenance-time-evaluation-requested.v1.jsonl` (revisión por fecha, ADR-0017)
+### `time-evaluations.http` (`POST /api/v1/maintenance/time-evaluations`)
 
 | `asOfDate` | Resultado esperado |
 |---|---|

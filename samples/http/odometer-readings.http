@@ -1,0 +1,78 @@
+@gateway = http://localhost:5000
+
+### 1 RVA101 53000 km - Accepted, oil at 80 percent
+POST {{gateway}}/api/v1/maintenance/odometer-readings
+Content-Type: application/json
+
+{
+  "plate": "RVA101",
+  "odometerKm": 53000,
+  "readAt": "2026-11-12T08:00:00-05:00",
+  "deviceId": "GPS-0101"
+}
+
+### 2 RVA101 53000 km repeated - Ignored NotGreaterThanCurrent
+POST {{gateway}}/api/v1/maintenance/odometer-readings
+Content-Type: application/json
+
+{
+  "plate": "RVA101",
+  "odometerKm": 53000,
+  "readAt": "2026-11-12T08:00:00-05:00",
+  "deviceId": "GPS-0101"
+}
+
+### 3 RVA101 52950 km out of order - Ignored NotGreaterThanCurrent
+POST {{gateway}}/api/v1/maintenance/odometer-readings
+Content-Type: application/json
+
+{
+  "plate": "RVA101",
+  "odometerKm": 52950,
+  "readAt": "2026-11-12T07:55:00-05:00",
+  "deviceId": "GPS-0101"
+}
+
+### 4 RVA101 54100 km - Accepted, oil DueSoon alert
+POST {{gateway}}/api/v1/maintenance/odometer-readings
+Content-Type: application/json
+
+{
+  "plate": "RVA101",
+  "odometerKm": 54100,
+  "readAt": "2026-11-12T09:30:00-05:00",
+  "deviceId": "GPS-0101"
+}
+
+### 5 RVA101 55050 km - Accepted, oil Overdue alert and order
+POST {{gateway}}/api/v1/maintenance/odometer-readings
+Content-Type: application/json
+
+{
+  "plate": "RVA101",
+  "odometerKm": 55050,
+  "readAt": "2026-11-12T11:00:00-05:00",
+  "deviceId": "GPS-0101"
+}
+
+### 6 RVA102 82100 km - Accepted, oil Overdue escalation and order
+POST {{gateway}}/api/v1/maintenance/odometer-readings
+Content-Type: application/json
+
+{
+  "plate": "RVA102",
+  "odometerKm": 82100,
+  "readAt": "2026-11-12T10:00:00-05:00",
+  "deviceId": "GPS-0102"
+}
+
+### 7 XYZ999 15000 km - Ignored UnknownVehicle
+POST {{gateway}}/api/v1/maintenance/odometer-readings
+Content-Type: application/json
+
+{
+  "plate": "XYZ999",
+  "odometerKm": 15000,
+  "readAt": "2026-11-12T10:05:00-05:00",
+  "deviceId": "GPS-9999"
+}

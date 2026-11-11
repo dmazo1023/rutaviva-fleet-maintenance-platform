@@ -8,9 +8,9 @@
 
 ## 2. Contratos de dominio
 
-- [ ] 2.1 Enums (`RoutineTypeStatus`, `MaintenancePlanStatus`, `RoutineState`, `RoutineDueStatus`, `DueDimension`, `AlertType`, `AlertTrigger`, `AlertStatus`, `AlertResolutionReason`, `OdometerReadingOutcome`, `OdometerReadingIgnoredReason`, `ParameterSource`), IDs fuertemente tipados, `MaintenanceTimeZone` y catálogo `MaintenanceErrors` con los códigos de CN-03, en `{D}/Common/`, `{D}/Plans/`, `{D}/Alerts/`, `{D}/RoutineTypes/`. Verificar con `dotnet build` y la prueba de arquitectura de enums que empiezan en 1
-- [ ] 2.2 Objetos de valor `LicensePlate`, `Odometer`, `OdometerReading`, `MaintenanceInterval`, `DueSoonThreshold`, `RoutineOverrides`, `EffectiveRoutineParameters`, `MaintenanceCycle`, `NextDue`, `ServiceRecord`, `EvaluationContext` en `{D}/Plans/ValueObjects/` (design D-02). Verificar con pruebas en `{TD}/ValueObjects/` (normalización de placa, `IsAdvancedBy` con igual y menor, intervalos sin valores, `0 < % < 100`, `MaintenanceCycle.Next`)
-- [ ] 2.3 Eventos de dominio y `RoutineStatusSnapshot` en `{D}/Plans/Events/`, `{D}/Alerts/Events/`, `{D}/RoutineTypes/Events/` (design D-05). Verificar con `dotnet build`
+- [x] 2.1 Enums (`RoutineTypeStatus`, `MaintenancePlanStatus`, `RoutineState`, `RoutineDueStatus`, `DueDimension`, `AlertType`, `AlertTrigger`, `AlertStatus`, `AlertResolutionReason`, `OdometerReadingOutcome`, `OdometerReadingIgnoredReason`, `ParameterSource`), IDs fuertemente tipados, `MaintenanceTimeZone` y catálogo `MaintenanceErrors` con los códigos de CN-03, en `{D}/Common/`, `{D}/Plans/`, `{D}/Alerts/`, `{D}/RoutineTypes/`. Verificar con `dotnet build` y la prueba de arquitectura de enums que empiezan en 1
+- [x] 2.2 Objetos de valor `LicensePlate`, `Odometer`, `OdometerReading`, `MaintenanceInterval`, `DueSoonThreshold`, `RoutineOverrides`, `EffectiveRoutineParameters`, `MaintenanceCycle`, `NextDue`, `ServiceRecord`, `EvaluationContext` en `{D}/Plans/ValueObjects/` (design D-02). Verificar con pruebas en `{TD}/ValueObjects/` (normalización de placa, `IsAdvancedBy` con igual y menor, intervalos sin valores, `0 < % < 100`, `MaintenanceCycle.Next`)
+- [x] 2.3 Eventos de dominio y `RoutineStatusSnapshot` en `{D}/Plans/Events/`, `{D}/Alerts/Events/`, `{D}/RoutineTypes/Events/` (design D-05). Verificar con `dotnet build`
 
 ## 3. Evaluación (núcleo de RN-1 y RN-2)
 
@@ -62,8 +62,8 @@
 
 ## 10. Muestras de la demo
 
-- [ ] 10.1 Crear `samples/http/odometer-readings.http` (los 7 casos con el resultado esperado en el nombre de cada petición) y `samples/http/time-evaluations.http` (2027-01-20 y 2027-02-10), con la URL base del Gateway como variable. Verificar ejecutándolos contra el servicio local después de la carga y comparando con `samples/README.md`
-- [ ] 10.2 Actualizar la sección 3 de `samples/README.md` de Kafka a HTTP y retirar `samples/kafka/` (C-01 de foundation). Verificar con una búsqueda de `kafka` en `samples/` sin resultados
+- [x] 10.1 Crear `samples/http/odometer-readings.http` (los 7 casos con el resultado esperado en el nombre de cada petición) y `samples/http/time-evaluations.http` (2027-01-20 y 2027-02-10), con la URL base del Gateway como variable. Verificar ejecutándolos contra el servicio local después de la carga y comparando con `samples/README.md`
+- [x] 10.2 Actualizar la sección 3 de `samples/README.md` de Kafka a HTTP y retirar `samples/kafka/` (C-01 de foundation). Verificar con una búsqueda de `kafka` en `samples/` sin resultados
 
 ## 11. Recortables
 
