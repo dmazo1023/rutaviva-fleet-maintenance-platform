@@ -1,219 +1,76 @@
 {
   "wave": "2",
-  "verified": [],
-  "escalated": [
-    {
-      "taskId": "7.2",
-      "reason": "Compuerta fallida (5-tests): verify-wave ejecutado desde C:/Satrack/DevI con el comando indicado (sin modificar archivos). Resultados por chequeo:\nVERIFY-WAVE OK [1-ownership]\nVERIFY-WAVE OK [2-forbidden-patterns]\nVERIFY-WAVE OK [3-openspec]\nVERIFY-WAVE OK [4-build]\nVERIFY-WAVE FAILED [5-tests]\nError: failed RutaViva.IntegrationContracts.Tests.IntegrationEventContractTests.Event_Should_MatchApprovedSnapshot_When_WrappedInEnvelope(eventName: \"ServiceOrderCompleted\") (385ms)\nEnsamblado: C:\\Satrack\\DevI\\tests\\RutaViva.IntegrationContracts.Tests\\bin\\Debug\\net10.0\\RutaViva.IntegrationContracts.Tests.dll (net10.0|x64) failed with 1 error(s) (3s 431ms)\nTest run summary: Failed! failed: 1\nArchivo del test fallido (buscado con Grep por nombre de método): tests\\RutaViva.IntegrationContracts.Tests\\IntegrationEventContractTests.cs\nCódigo de salida: 1",
-      "attempts": 2,
-      "contextExhausted": false
-    },
-    {
-      "taskId": "7.3",
-      "reason": "Compuerta fallida (5-tests): verify-wave ejecutado desde C:/Satrack/DevI con el comando indicado (sin modificar archivos). Resultados por chequeo:\nVERIFY-WAVE OK [1-ownership]\nVERIFY-WAVE OK [2-forbidden-patterns]\nVERIFY-WAVE OK [3-openspec]\nVERIFY-WAVE OK [4-build]\nVERIFY-WAVE FAILED [5-tests]\nError: failed RutaViva.IntegrationContracts.Tests.IntegrationEventContractTests.Event_Should_MatchApprovedSnapshot_When_WrappedInEnvelope(eventName: \"ServiceOrderCompleted\") (385ms)\nEnsamblado: C:\\Satrack\\DevI\\tests\\RutaViva.IntegrationContracts.Tests\\bin\\Debug\\net10.0\\RutaViva.IntegrationContracts.Tests.dll (net10.0|x64) failed with 1 error(s) (3s 431ms)\nTest run summary: Failed! failed: 1\nArchivo del test fallido (buscado con Grep por nombre de método): tests\\RutaViva.IntegrationContracts.Tests\\IntegrationEventContractTests.cs\nCódigo de salida: 1",
-      "attempts": 2,
-      "contextExhausted": false
-    },
-    {
-      "taskId": "9.1",
-      "reason": "El agente de corrección también se quedó sin contexto",
-      "attempts": 2,
-      "contextExhausted": true
-    },
-    {
-      "taskId": "4.1",
-      "reason": "Sin verificar: la ola se detuvo porque otras tareas agotaron sus reintentos o quedaron bloqueadas y la compuerta no pudo pasar. Su código puede estar bien, pero nadie lo verificó.",
-      "attempts": 0,
-      "contextExhausted": false
-    },
-    {
-      "taskId": "4.2",
-      "reason": "Sin verificar: la ola se detuvo porque otras tareas agotaron sus reintentos o quedaron bloqueadas y la compuerta no pudo pasar. Su código puede estar bien, pero nadie lo verificó.",
-      "attempts": 0,
-      "contextExhausted": false
-    },
-    {
-      "taskId": "4.4",
-      "reason": "Sin verificar: la ola se detuvo porque otras tareas agotaron sus reintentos o quedaron bloqueadas y la compuerta no pudo pasar. Su código puede estar bien, pero nadie lo verificó.",
-      "attempts": 0,
-      "contextExhausted": false
-    },
-    {
-      "taskId": "5.1",
-      "reason": "Sin verificar: la ola se detuvo porque otras tareas agotaron sus reintentos o quedaron bloqueadas y la compuerta no pudo pasar. Su código puede estar bien, pero nadie lo verificó.",
-      "attempts": 1,
-      "contextExhausted": false
-    },
-    {
-      "taskId": "7.1",
-      "reason": "Sin verificar: la ola se detuvo porque otras tareas agotaron sus reintentos o quedaron bloqueadas y la compuerta no pudo pasar. Su código puede estar bien, pero nadie lo verificó.",
-      "attempts": 1,
-      "contextExhausted": false
-    }
+  "verified": [
+    "3.1",
+    "3.2",
+    "3.3",
+    "4.4"
   ],
+  "escalated": [],
   "unaccounted": [],
   "handoff": {
     "exports": {
-      "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence (ns RutaViva.BuildingBlocks.Infrastructure.Persistence)": "interface IHasRowVersion { byte[] RowVersion { get; } }; static class RutaVivaModelBuilderExtensions { static ModelBuilder ApplyRutaVivaConventions(this ModelBuilder) }; sealed class EfUnitOfWork<TContext>(TContext context) : IUnitOfWork where TContext : DbContext; static class ConcurrencyErrors { static readonly Error Conflict }",
-      "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/OutboxMessage.cs": "sealed class OutboxMessage(Guid id, string stream, string eventType, string subject, string payload, DateTimeOffset occurredAt) { Id, Stream, EventType, Subject, Payload, OccurredAt, ProcessedAt?, Attempts, LastError? (private set); MarkProcessed(DateTimeOffset); RegisterFailure(string) }; sealed class OutboxMessageConfiguration(string schema) : IEntityTypeConfiguration<OutboxMessage>",
-      "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/EventCheckpoint.cs": "sealed class EventCheckpoint(string subscriberName, long lastOffset, DateTimeOffset updatedAt) { MoveTo(long, DateTimeOffset) }; sealed class EventCheckpointConfiguration(string schema)",
-      "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/IntegrationEventEnvelopeFactory.cs": "sealed class IntegrationEventEnvelopeFactory(IClock clock, IntegrationEventSettings settings) { IntegrationEventEnvelope Create(IIntegrationEvent integrationEvent, string subject) }; sealed record IntegrationEventSettings { required string ServiceName { get; init; } }; static class IntegrationEventJson { static readonly JsonSerializerOptions Options (Web) }",
-      "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/OutboxMessageFactory.cs": "sealed class OutboxMessageFactory(IntegrationEventEnvelopeFactory envelopeFactory) { OutboxMessage Create(IIntegrationEvent integrationEvent, string subject) }",
-      "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/OutboxIntegrationEventPublisher.cs": "sealed class OutboxIntegrationEventPublisher(DbContext context, OutboxMessageFactory messageFactory) : IIntegrationEventPublisher; sealed class EfEventCheckpointStore<TContext>(TContext context, IClock clock) : IEventCheckpointStore where TContext : DbContext",
-      "src/Platform/EventBus/RutaViva.EventBus.Application/Abstractions/IEventStore.cs": "namespace RutaViva.EventBus.Application.Abstractions; interface IEventStore { Task<long> AppendAsync(string stream, IntegrationEventEnvelope envelope, CancellationToken ct); Task<IReadOnlyList<EventRecord>> ReadAsync(IReadOnlyCollection<string> streams, long afterOffset, int max, CancellationToken ct); Task<long> GetLatestOffsetAsync(CancellationToken ct); Task AddDeadLetterAsync(string subscriberName, long offset, string error, CancellationToken ct); }",
-      "src/Platform/EventBus/RutaViva.EventBus.Application/Publishing/PublishEventCommand.cs": "record PublishEventCommand(string Stream, IntegrationEventEnvelope Envelope) : ICommand<long>; PublishEventCommandHandler(IEventStore) : ICommandHandler<PublishEventCommand,long>  [ns ...Application.Publishing]",
-      "src/Platform/EventBus/RutaViva.EventBus.Application/Queries/GetEventsQuery.cs": "record GetEventsQuery(IReadOnlyCollection<string> Streams, long AfterOffset, int Max) : IQuery<IReadOnlyList<EventRecord>>; const MaxPageSize=100; GetEventsQueryHandler; GetLatestOffsetQuery : IQuery<long>; GetLatestOffsetQueryHandler  [ns ...Application.Queries]",
-      "src/Platform/EventBus/RutaViva.EventBus.Application/Failures/ReportFailureCommand.cs": "record ReportFailureCommand(string Subscriber, long Offset, string Error) : ICommand<bool>; ReportFailureCommandHandler  [ns ...Application.Failures]",
-      "src/Platform/EventBus/RutaViva.EventBus.Application/EventBusErrors.cs": "static class EventBusErrors (ns RutaViva.EventBus.Application) with static Error properties; EnvelopeValidator.Validate(IntegrationEventEnvelope?) : Result  [ns ...Application.Validation]",
-      "src/BuildingBlocks/RutaViva.BuildingBlocks.Api": "namespace RutaViva.BuildingBlocks.Api.Results: static ResultExtensions { IResult ToHttpResult(this Result); IResult ToHttpResult<T>(this Result<T>) }\nnamespace RutaViva.BuildingBlocks.Api.Correlation: sealed CorrelationIdMiddleware { const string HeaderName = \"X-Correlation-Id\"; Task InvokeAsync(HttpContext) }; static CorrelationIdApplicationBuilderExtensions { IApplicationBuilder UseCorrelationId(this IApplicationBuilder) }\nnamespace RutaViva.BuildingBlocks.Api.Endpoints: interface IEndpointModule { void MapEndpoints(IEndpointRouteBuilder app) }; static EndpointModuleExtensions { IEndpointRouteBuilder MapEndpointModules(this IEndpointRouteBuilder, Assembly) }\nnamespace RutaViva.BuildingBlocks.Api.Serialization: static JsonServiceCollectionExtensions { IServiceCollection AddApiJsonConventions(this IServiceCollection) }",
-      "tests/RutaViva.Architecture.Tests/ArchitectureAssemblies.cs": "public static class ArchitectureAssemblies { TheoryData<string> All, Layered, Domain, Application; Assembly Load(string); string LayerOf(string); string ComponentPrefixOf(string) }",
-      "tests/RutaViva.IntegrationContracts.Tests/ContractSnapshot.cs": "internal static class ContractSnapshot { JsonSerializerOptions Options; string Serialize(object); void Verify(string eventName, string actualJson) }",
-      "src/Platform/RutaViva.ServiceDefaults/ServiceDefaultsExtensions.cs": "public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder; public static WebApplication MapDefaultEndpoints(this WebApplication app)",
-      "src/Platform/RutaViva.ServiceDefaults/SqlServerHealthCheck.cs": "public sealed class SqlServerHealthCheck(IConfiguration configuration) : IHealthCheck"
+      "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/*.cs": "ns RutaViva.Maintenance.Domain.Plans.Evaluation: interface IDueDimensionEvaluator{DueDimension Dimension; DimensionAssessment? Assess(MaintenanceCycle,EffectiveRoutineParameters,EvaluationContext)}; sealed DistanceDueEvaluator, TimeDueEvaluator (parameterless ctor); record DimensionAssessment(DueDimension Dimension,RoutineDueStatus Status,decimal ConsumedPercent,long Remaining,decimal DueSoonWindowPercent); record RoutineAssessment(RoutineDueStatus Status,AlertTrigger Trigger,decimal ConsumedPercent,NextDue? NextDue); static DueStatusPolicy.Combine(IReadOnlyList<DimensionAssessment>,NextDue? nextDue=null)->RoutineAssessment; enum RoutineTransitionType{None=1,BecameDueSoon,BecameOverdue,RevertedToUpToDate}; record RoutineTransition(RoutineTransitionType Type,RoutineDueStatus Status,AlertTrigger Trigger){bool HasChanged}; static RoutineTransitionPolicy.Decide(RoutineDueStatus current,RoutineAssessment assessment)->RoutineTransition",
+      "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineType.cs": "ns RutaViva.Maintenance.Domain.RoutineTypes; sealed class RoutineType : AggregateRoot<RoutineTypeId> { Code, Name, DefaultInterval, DueSoonThreshold, Status, UpdatedBy, UpdatedAt; static Result<RoutineType> Create(RoutineTypeId id, RoutineTypeCode code, string name, MaintenanceInterval defaultInterval, DueSoonThreshold dueSoonThreshold, string updatedBy, DateTimeOffset at); Result UpdateParameters(MaintenanceInterval, DueSoonThreshold, string updatedBy, DateTimeOffset at); RoutineTypeParameters ToParameters() }",
+      "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineTypeParameters.cs": "sealed record RoutineTypeParameters(RoutineTypeCode Code, string Name, MaintenanceInterval Interval, DueSoonThreshold Threshold)",
+      "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineParameterCatalog.cs": "sealed class RoutineParameterCatalog { ctor(IEnumerable<KeyValuePair<RoutineTypeId, RoutineTypeParameters>>); int Count; static From(IEnumerable<RoutineType>); Result<RoutineTypeParameters> Find(RoutineTypeId); Find(RoutineTypeCode); FindByCode(RoutineTypeCode) }",
+      "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/Alert.cs": "sealed class Alert : AggregateRoot<AlertId> { VehicleId VehicleId; LicensePlate Plate; CustomerId CustomerId; RoutineId RoutineId; string RoutineName; int CycleNumber; AlertType Type; AlertTrigger Trigger; AlertStatus Status; DateTimeOffset RaisedAt; DateTimeOffset? AcknowledgedAt; string? AcknowledgedBy; DateTimeOffset? ResolvedAt; AlertResolutionReason? ResolutionReason; static Alert Raise(AlertOrigin origin, AlertType type, AlertTrigger trigger, DateTimeOffset raisedAt); Result Acknowledge(string acknowledgedBy, DateTimeOffset at); Result Resolve(AlertResolutionReason reason, DateTimeOffset at) } (all setters private; private parameterless ctor for EF)",
+      "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/AlertOrigin.cs": "sealed record AlertOrigin(VehicleId VehicleId, LicensePlate Plate, CustomerId CustomerId, RoutineId RoutineId, string RoutineName, int CycleNumber) in RutaViva.Maintenance.Domain.Alerts"
     },
     "decisions": [
-      "IHasRowVersion lives in Infrastructure.Persistence (not Domain): aggregates implementing it need a reference to Infrastructure; ask orchestrator if it should move to Domain.",
-      "Task 4.3 interceptor should call OutboxMessageFactory.Create(event, subject) and add it to the context; stream/EventName are read from the event's const fields.",
-      "Publisher takes plain DbContext (DI must map DbContext to the service context); EfEventCheckpointStore.SaveAsync only stages, the unit of work commits.",
-      "ReportFailureCommand returns ICommand<bool> (true on success) because BuildingBlocks has no Unit type.",
-      "Handlers are plain classes without DI registration; Hub/composition must register them (or use AddCommandHandlers) and the IEventStore.",
-      "Handlers also validate stream/streams non-empty, offsets >= 0, max >= 1; error text is truncated to 2000 chars.",
-      "Services must call services.AddApiJsonConventions() and app.UseCorrelationId() explicitly; they are not wired automatically.",
-      "ToHttpResult on a successful Result returns 204 NoContent; on Result<T> returns 200 Ok(value). ProblemDetails title is the ErrorType name.",
-      "IEndpointModule implementations need a public parameterless constructor (Activator.CreateInstance).",
-      "Future services are added by appending assembly names to ArchitectureAssemblies.AssemblyNames; the layer, isolation, setter, enum and naming rules pick them up by suffix.",
-      "Snapshot comparison is semantic (JsonNode.DeepEquals), so formatting differences in the .approved.json files do not fail the test."
+      "RoutineTransitionPolicy.Decide(current, RoutineAssessment) replaces design's (current, assessed, bool dueSoonNotified): the trigger needs the assessment and dueSoonNotified is the aggregate's alert de…",
+      "DueStatusPolicy.Combine takes optional NextDue? (default null) because NextDue needs cycle+interval; caller does NextDue.Calculate(cycle, interval) and passes it; RoutineAssessment.NextDue is nullable…",
+      "New enum RoutineTransitionType (None=1) added in Evaluation/. On None, RoutineTransition.Status = current status (Overdue stays Overdue). DueSoonWindowPercent = threshold percent.",
+      "Catalog exposes Find(RoutineTypeId), Find(RoutineTypeCode) and FindByCode, covering both the task and design.md D-02 (map by id). Missing key returns MaintenanceErrors.RoutineTypeNotFound.",
+      "RoutineTypeParameters has exactly Code, Name, Interval, Threshold (no Id); the catalog gets ids via KeyValuePair entries or RoutineParameterCatalog.From(IEnumerable<RoutineType>).",
+      "UpdateParameters with identical values returns Success without raising an event or touching UpdatedBy/UpdatedAt; Create always sets Status=Active.",
+      "AlertOrigin (named in design.md D-02 but absent from the task contracts) was created by me in Alerts/AlertOrigin.cs as a plain sealed record; the plan/application agent must construct it for Alert.Rai…",
+      "Alert.Resolve returns Result (as the task requires; design.md says void). It always succeeds in practice: resolving an already Resolved alert returns Success with no change and no event.",
+      "Acknowledge validates acknowledgedBy first (AlertAcknowledgedByRequired), then the transition table (AlertInvalidTransition for Acknowledged or Resolved)."
     ]
   },
   "implemented": [
     {
-      "agent": "F",
+      "agent": "E",
       "status": "complete",
-      "notes": "Not compiled. ApplyRutaVivaConventions must be called last in OnModelCreating (after ApplyConfiguration). Enum columns use SetProviderClrType(string) plus varchar(20); datetimeoffset uses precision 0; decimal uses precision 18 scale 2. Integration tests use a TestDbContext in schema 'testing'. DI needs IntegrationEventSettings registered per service.",
+      "notes": "Not compiled (the gate does that). DueStatusClassifier is an internal helper shared by both evaluators. Time window = floor(totalDays x %/100); km window is not rounded. Combine with an empty list returns UpToDate with trigger Distance, a case that cannot occur because MaintenanceInterval needs at least one dimension. Consumed percent is not rounded.",
       "files": [
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/IHasRowVersion.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/ConcurrencyErrors.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/EfUnitOfWork.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/RutaVivaModelBuilderExtensions.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/OutboxMessage.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/OutboxMessageConfiguration.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/EventCheckpoint.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/EventCheckpointConfiguration.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/IntegrationEventSettings.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/IntegrationEventJson.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/IntegrationEventTypeInfo.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/IntegrationEventEnvelopeFactory.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/OutboxMessageFactory.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/OutboxIntegrationEventPublisher.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/EfEventCheckpointStore.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/TestOrderStatus.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/TestOrder.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/TestOrderBuilder.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/TestDbContext.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/SqlSchemaReader.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/RutaVivaConventionsTests.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/EfUnitOfWorkTests.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Messaging/SampleHappenedV1.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Messaging/OutboxIntegrationEventPublisherTests.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Messaging/EfEventCheckpointStoreTests.cs"
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/IDueDimensionEvaluator.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/DimensionAssessment.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/DueStatusClassifier.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/DistanceDueEvaluator.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/TimeDueEvaluator.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/RoutineAssessment.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/DueStatusPolicy.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/RoutineTransitionType.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/RoutineTransition.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/RoutineTransitionPolicy.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Evaluation/DistanceDueEvaluatorTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Evaluation/TimeDueEvaluatorTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Evaluation/DueStatusPolicyTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Evaluation/RoutineTransitionPolicyTests.cs"
       ]
     },
     {
-      "agent": "H",
+      "agent": "R",
       "status": "complete",
-      "notes": "Not compiled. Used Write tool because bash heredocs failed. Query handlers are not covered by AddCommandHandlers (commands only); registration of query handlers is left to the Hub composition.",
+      "notes": "RoutineType.Create adds an id parameter and updatedBy/at (audit) beyond design D-02. Name and updatedBy are trimmed and validated with MaintenanceErrors.RoutineTypeNameRequired and UpdatedByRequired. Private parameterless constructor for EF; setters are private. Not compiled, per instructions.",
       "files": [
-        "src/Platform/EventBus/RutaViva.EventBus.Application/Abstractions/IEventStore.cs",
-        "src/Platform/EventBus/RutaViva.EventBus.Application/EventBusErrors.cs",
-        "src/Platform/EventBus/RutaViva.EventBus.Application/Validation/EnvelopeValidator.cs",
-        "src/Platform/EventBus/RutaViva.EventBus.Application/Publishing/PublishEventCommand.cs",
-        "src/Platform/EventBus/RutaViva.EventBus.Application/Publishing/PublishEventCommandHandler.cs",
-        "src/Platform/EventBus/RutaViva.EventBus.Application/Queries/GetEventsQuery.cs",
-        "src/Platform/EventBus/RutaViva.EventBus.Application/Queries/GetEventsQueryHandler.cs",
-        "src/Platform/EventBus/RutaViva.EventBus.Application/Queries/GetLatestOffsetQuery.cs",
-        "src/Platform/EventBus/RutaViva.EventBus.Application/Queries/GetLatestOffsetQueryHandler.cs",
-        "src/Platform/EventBus/RutaViva.EventBus.Application/Failures/ReportFailureCommand.cs",
-        "src/Platform/EventBus/RutaViva.EventBus.Application/Failures/ReportFailureCommandHandler.cs",
-        "tests/Platform/RutaViva.EventBus.Application.UnitTests/IntegrationEventEnvelopeBuilder.cs",
-        "tests/Platform/RutaViva.EventBus.Application.UnitTests/PublishEventCommandHandlerTests.cs",
-        "tests/Platform/RutaViva.EventBus.Application.UnitTests/GetEventsQueryHandlerTests.cs",
-        "tests/Platform/RutaViva.EventBus.Application.UnitTests/ReportFailureCommandHandlerTests.cs",
-        "tests/Platform/RutaViva.EventBus.Application.UnitTests/GetLatestOffsetQueryHandlerTests.cs"
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineType.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineTypeParameters.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineParameterCatalog.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/RoutineTypes/RoutineTypeTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/RoutineTypes/RoutineParameterCatalogTests.cs"
       ]
     },
     {
-      "agent": "I",
+      "agent": "L",
       "status": "complete",
-      "notes": "Tests use WebApplication + UseTestServer (Microsoft.AspNetCore.TestHost, expected transitively via Mvc.Testing). ApiTestHost fixture and a capturing logger verify the correlation scope. Nothing compiled or run. Inline Bash heredocs failed once; files were rewritten with the Write tool.",
+      "notes": "Not compiled, per instructions. Transitions use a FrozenSet of (From, To) pairs. AlertRaised.OccurredAt equals raisedAt; AlertStatusChanged.OccurredAt equals the at argument. The Alert id is generated with AlertId.New() inside Raise. I did not need any new error constants.",
       "files": [
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Api/Endpoints/IEndpointModule.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Api/Endpoints/EndpointModuleExtensions.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Api/Results/ResultExtensions.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Api/Correlation/CorrelationIdMiddleware.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Api/Correlation/CorrelationIdApplicationBuilderExtensions.cs",
-        "src/BuildingBlocks/RutaViva.BuildingBlocks.Api/Serialization/JsonServiceCollectionExtensions.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Api/ApiTestStatus.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Api/ApiTestRequest.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Api/CapturingLoggerProvider.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Api/ApiTestEndpointModule.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Api/ApiTestHost.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Api/ApiConventionsTests.cs"
-      ]
-    },
-    {
-      "agent": "J",
-      "status": "complete",
-      "notes": "Nothing was compiled or run. The 26 .approved.json files were generated with a Node script from hand-written sample values, not from the C# code, so run the tests once to confirm they match. If one fails, the helper rewrites the file only when it is missing. The Architecture.Tests csproj already lists every assembly I load, so there are no blockers.",
-      "files": [
-        "tests/RutaViva.Architecture.Tests/ArchitectureAssemblies.cs",
-        "tests/RutaViva.Architecture.Tests/LayerDependencyTests.cs",
-        "tests/RutaViva.Architecture.Tests/ApplicationPurityTests.cs",
-        "tests/RutaViva.Architecture.Tests/ServiceIsolationTests.cs",
-        "tests/RutaViva.Architecture.Tests/DomainEncapsulationTests.cs",
-        "tests/RutaViva.Architecture.Tests/DomainEnumTests.cs",
-        "tests/RutaViva.Architecture.Tests/NamingConventionTests.cs",
-        "tests/RutaViva.Architecture.Tests/RepositoryLocator.cs",
-        "tests/RutaViva.IntegrationContracts.Tests/ContractSnapshot.cs",
-        "tests/RutaViva.IntegrationContracts.Tests/IntegrationEventCatalog.cs",
-        "tests/RutaViva.IntegrationContracts.Tests/SampleValues.cs",
-        "tests/RutaViva.IntegrationContracts.Tests/IntegrationEventSamples.cs",
-        "tests/RutaViva.IntegrationContracts.Tests/IntegrationEventContractTests.cs",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/AlertRaised.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/AlertStatusChanged.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/ApproverRegistered.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/ApproverStatusChanged.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/CustomerRegistered.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/CustomerStatusChanged.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/MaintenancePlanStatusChanged.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/MaintenanceRoutineDueSoon.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/MaintenanceRoutineDueStatusReverted.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/MaintenanceRoutineOverdue.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/MaintenanceRoutineParametersChanged.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/MaintenanceRoutineRegistered.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/MaintenanceRoutineRestarted.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/MaintenanceRoutineStateChanged.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/OdometerReadingRecorded.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/ServiceOrderAppointmentScheduled.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/ServiceOrderApprovalRequested.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/ServiceOrderCompleted.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/ServiceOrderCreated.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/ServiceOrderLinesChanged.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/ServiceOrderStatusChanged.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/VehicleRegistered.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/VehicleResponsibleAssigned.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/VehicleStatusChanged.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/WorkshopRegistered.approved.json",
-        "tests/RutaViva.IntegrationContracts.Tests/Snapshots/WorkshopStatusChanged.approved.json"
-      ]
-    },
-    {
-      "agent": "P",
-      "status": "complete",
-      "notes": "Namespace RutaViva.ServiceDefaults (IDE0130). Test uses UseTestServer (Microsoft.AspNetCore.TestHost via Mvc.Testing) and the project's Fixtures. The csproj is untouched; if OpenTelemetry.Logs or AddOpenTelemetry on ILoggingBuilder fails to compile, the cause is a missing package.",
-      "files": [
-        "src/Platform/RutaViva.ServiceDefaults/SqlServerHealthCheck.cs",
-        "src/Platform/RutaViva.ServiceDefaults/ServiceDefaultsExtensions.cs",
-        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/ServiceDefaults/ServiceDefaultsHealthTests.cs"
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/Alert.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/AlertOrigin.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Alerts/AlertTests.cs"
       ]
     }
   ],
@@ -228,16 +85,30 @@
     {
       "round": 1,
       "gate": {
-        "passed": false,
-        "failedCheck": "4-build"
+        "passed": true,
+        "failedCheck": null
       }
     },
     {
-      "round": 2,
-      "gate": {
-        "passed": false,
-        "failedCheck": "5-tests"
-      }
+      "round": 1,
+      "verdict": [
+        {
+          "taskId": "3.1",
+          "passed": true
+        },
+        {
+          "taskId": "3.2",
+          "passed": true
+        },
+        {
+          "taskId": "3.3",
+          "passed": true
+        },
+        {
+          "taskId": "4.4",
+          "passed": true
+        }
+      ]
     }
   ]
 }

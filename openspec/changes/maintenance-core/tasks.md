@@ -14,9 +14,9 @@
 
 ## 3. Evaluación (núcleo de RN-1 y RN-2)
 
-- [ ] 3.1 `IDueDimensionEvaluator`, `DistanceDueEvaluator`, `TimeDueEvaluator` y `DimensionAssessment` en `{D}/Plans/Evaluation/` (design D-03). Verificar con pruebas en `{TD}/Evaluation/`: 8.999 → `UpToDate`, 9.000 → `DueSoon`, 10.000 → `Overdue`; 184 días con 10 % → ventana 18 y 13 días restantes = `DueSoon`; 365 días con 33 restantes = `DueSoon`; fecha igual al vencimiento = `Overdue`; consumo > 100 %
-- [ ] 3.2 `DueStatusPolicy`, `RoutineAssessment`, `RoutineTransitionPolicy` y `RoutineTransition` en `{D}/Plans/Evaluation/`. Verificar con pruebas parametrizadas de la tabla de transiciones (A-03 salto directo, A-04 `DistanceAndTime`, A-16 `Overdue` no retrocede, `DueSoon → UpToDate` revierte) y `ConsumedPercent` = máximo de dimensiones
-- [ ] 3.3 Agregado `RoutineType`, `RoutineTypeParameters` y `RoutineParameterCatalog` en `{D}/RoutineTypes/`. Verificar con pruebas en `{TD}/RoutineTypes/`: validaciones, `RoutineTypeParametersChanged` emitido, búsqueda por código inexistente
+- [x] 3.1 `IDueDimensionEvaluator`, `DistanceDueEvaluator`, `TimeDueEvaluator` y `DimensionAssessment` en `{D}/Plans/Evaluation/` (design D-03). Verificar con pruebas en `{TD}/Evaluation/`: 8.999 → `UpToDate`, 9.000 → `DueSoon`, 10.000 → `Overdue`; 184 días con 10 % → ventana 18 y 13 días restantes = `DueSoon`; 365 días con 33 restantes = `DueSoon`; fecha igual al vencimiento = `Overdue`; consumo > 100 %
+- [x] 3.2 `DueStatusPolicy`, `RoutineAssessment`, `RoutineTransitionPolicy` y `RoutineTransition` en `{D}/Plans/Evaluation/`. Verificar con pruebas parametrizadas de la tabla de transiciones (A-03 salto directo, A-04 `DistanceAndTime`, A-16 `Overdue` no retrocede, `DueSoon → UpToDate` revierte) y `ConsumedPercent` = máximo de dimensiones
+- [x] 3.3 Agregado `RoutineType`, `RoutineTypeParameters` y `RoutineParameterCatalog` en `{D}/RoutineTypes/`. Verificar con pruebas en `{TD}/RoutineTypes/`: validaciones, `RoutineTypeParametersChanged` emitido, búsqueda por código inexistente
 
 ## 4. Agregados del plan y de alertas
 
@@ -25,7 +25,7 @@
 - [ ] 4.1 `MaintenanceRoutine` y `MaintenancePlan` con `Create`, `RegisterRoutine` (A-01, `Routine.AlreadyExists`, `Routine.LastServiceKmAboveOdometer`, `Routine.IncompleteLastService`) y construcción de snapshots, en `{D}/Plans/`. Verificar con pruebas en `{TD}/Plans/RegisterRoutineTests.cs` usando `MaintenancePlanBuilder`: alta vencida emite `RoutineRegistered` y luego `RoutineBecameOverdue`; EVA30D con 20 % queda `DueSoon` y con 10 % `UpToDate`
 - [ ] 4.2 `RecordOdometerReading` y `Reevaluate` (fecha efectiva de design D-04, `CanBeEvaluated`, rutinas inactivas omitidas). Verificar con pruebas en `{TD}/Plans/EvaluationScenariosTests.cs` que reproducen la tabla de carga de `samples/README.md` (4 `DueSoon`, 4 `Overdue`), los casos de telemetría 1 a 6 y las fechas 2027-01-20 y 2027-02-10
 - [ ] 4.3 `UpdateRoutineOverrides`, `ChangeRoutineState`, `RestartRoutine` (A-08), `Suspend` y `Resume` (idempotentes). Verificar con pruebas en `{TD}/Plans/`: A-16 (reversión y aviso no repetido), A-17 (desactivar no toca la orden y emite `RoutineStateChanged`), A-18 (suspendido registra odómetro sin evaluar; reanudar reevalúa), RN-5 (ciclo 2, odómetro actualizado)
-- [ ] 4.4 Agregado `Alert` (`Raise`, `Acknowledge`, `Resolve` idempotente) en `{D}/Alerts/`. Verificar con pruebas en `{TD}/Alerts/AlertTests.cs` de las 4 transiciones válidas y `Alert.InvalidTransition`
+- [x] 4.4 Agregado `Alert` (`Raise`, `Acknowledge`, `Resolve` idempotente) en `{D}/Alerts/`. Verificar con pruebas en `{TD}/Alerts/AlertTests.cs` de las 4 transiciones válidas y `Alert.InvalidTransition`
 
 ## 5. Contratos de Application
 
