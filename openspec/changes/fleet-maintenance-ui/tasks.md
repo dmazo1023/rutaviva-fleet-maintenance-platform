@@ -6,11 +6,11 @@
 
 ## 2. Contratos de la SPA (primero)
 
-- [ ] 2.1 `core/models/enums.ts` con los tipos literales espejo de data-model §5 (más `OdometerReadingOutcome`, `OdometerReadingIgnoredReason`, `ServiceOrderAction`, `ServiceOrderBlockedReason`, `Profile`) y `core/models/enum-labels.ts` con el mapa único en español. Verificar con prueba que cada valor de cada tipo tiene etiqueta (tabla exhaustiva tipada con `Record<T, string>`)
-- [ ] 2.2 `core/api/api-routes.ts` con todas las rutas del registro de `foundation-platform` (D-09) y de CR-01 a CR-09 como funciones puras. Verificar con prueba unitaria de 5 rutas representativas (con y sin parámetros de consulta)
-- [ ] 2.3 `core/realtime/hub-methods.ts` y `core/realtime/realtime-events.ts` (nombres y payloads del hub, ADR-0016 IMP-002 + CR-07). Verificar con `ng build` (tipos) y revisión de que ningún otro archivo usa literales de métodos del hub (`grep`)
-- [ ] 2.4 VMs de design D-02 y del handoff §2 en `features/*/models/*.vm.ts` y el tipo `Loadable<T>` en `shared/state/loadable.ts`. Verificar con `ng build`
-- [ ] 2.5 `src/styles/_tokens.scss` (MASTER.md, claro y `[data-theme="dark"]`), `_typography.scss`, fuentes Manrope, JetBrains Mono y Material Symbols Rounded, clases de tono `is-*`. Verificar con `npm run lint` y comparación visual con el mockup en 1440 px
+- [x] 2.1 `core/models/enums.ts` con los tipos literales espejo de data-model §5 (más `OdometerReadingOutcome`, `OdometerReadingIgnoredReason`, `ServiceOrderAction`, `ServiceOrderBlockedReason`, `Profile`) y `core/models/enum-labels.ts` con el mapa único en español. Verificar con prueba que cada valor de cada tipo tiene etiqueta (tabla exhaustiva tipada con `Record<T, string>`)
+- [x] 2.2 `core/api/api-routes.ts` con todas las rutas del registro de `foundation-platform` (D-09) y de CR-01 a CR-09 como funciones puras. Verificar con prueba unitaria de 5 rutas representativas (con y sin parámetros de consulta)
+- [x] 2.3 `core/realtime/hub-methods.ts` y `core/realtime/realtime-events.ts` (nombres y payloads del hub, ADR-0016 IMP-002 + CR-07). Verificar con `ng build` (tipos) y revisión de que ningún otro archivo usa literales de métodos del hub (`grep`)
+- [x] 2.4 VMs de design D-02 y del handoff §2 en `features/*/models/*.vm.ts` y el tipo `Loadable<T>` en `shared/state/loadable.ts`. Verificar con `ng build`
+- [x] 2.5 `src/styles/_tokens.scss` (MASTER.md, claro y `[data-theme="dark"]`), `_typography.scss`, fuentes Manrope, JetBrains Mono y Material Symbols Rounded, clases de tono `is-*`. Verificar con `npm run lint` y comparación visual con el mockup en 1440 px
 
 ## 3. Core
 

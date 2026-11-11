@@ -18,7 +18,10 @@
     "shorthand-property-no-redundant-values": null,
     "declaration-block-no-redundant-longhand-properties": null,
     "no-descending-specificity": null,
-    "property-no-vendor-prefix": null
+    "property-no-vendor-prefix": null,
+    "custom-property-empty-line-before": null,
+    "color-hex-length": null,
+    "property-no-deprecated": null
   },
   "overrides": [
     {
