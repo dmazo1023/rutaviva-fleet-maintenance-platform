@@ -9,3 +9,15 @@ src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Time/
 tests/RutaViva.Testing.Common/
 tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Infrastructure/
 tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Testing/
+src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/
+src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/
+tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/
+tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Messaging/
+src/Platform/EventBus/RutaViva.EventBus.Application/
+tests/Platform/RutaViva.EventBus.Application.UnitTests/
+src/BuildingBlocks/RutaViva.BuildingBlocks.Api/
+tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Api/
+tests/RutaViva.Architecture.Tests/
+tests/RutaViva.IntegrationContracts.Tests/
+src/Platform/RutaViva.ServiceDefaults/
+tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/ServiceDefaults/

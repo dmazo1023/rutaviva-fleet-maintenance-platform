@@ -10,7 +10,9 @@
   <Folder Name="/src/Contracts/">
     <Project Path="src/Contracts/RutaViva.IntegrationContracts/RutaViva.IntegrationContracts.csproj" />
   </Folder>
-  <Folder Name="/src/Platform/" />
+  <Folder Name="/src/Platform/">
+    <Project Path="src/Platform/RutaViva.ServiceDefaults/RutaViva.ServiceDefaults.csproj" />
+  </Folder>
   <Folder Name="/src/Platform/EventBus/">
     <Project Path="src/Platform/EventBus/RutaViva.EventBus.Application/RutaViva.EventBus.Application.csproj" />
     <Project Path="src/Platform/EventBus/RutaViva.EventBus.Hub/RutaViva.EventBus.Hub.csproj" />

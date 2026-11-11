@@ -1,44 +1,44 @@
 {
   "agents": [
     {
-      "id": "1.A",
-      "tasks": 1,
-      "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/"],
-      "read": ["openspec/changes/foundation-platform/design.md#L96-L117", "openspec/changes/foundation-platform/specs/architecture-governance/spec.md"],
-      "writeLines": 380,
-      "skills": 1
-    },
-    {
-      "id": "1.B",
-      "tasks": 2,
-      "files": ["src/Contracts/RutaViva.IntegrationContracts/"],
-      "read": ["openspec/changes/foundation-platform/design.md#L182-L191", "openspec/changes/foundation-platform/design.md#L207-L333"],
-      "writeLines": 780,
-      "skills": 0
-    },
-    {
-      "id": "1.C",
+      "id": "2.F",
       "tasks": 3,
-      "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Application/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/"],
-      "read": ["openspec/changes/foundation-platform/design.md#L96-L153", "openspec/changes/foundation-platform/design.md#L309-L333"],
-      "writeLines": 720,
+      "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/", "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Messaging/"],
+      "read": ["openspec/changes/foundation-platform/design.md#L118-L174", "tests/RutaViva.Testing.Common/SqlServerTestDatabase.cs"],
+      "writeLines": 650,
       "skills": 1
     },
     {
-      "id": "1.D",
+      "id": "2.H",
       "tasks": 1,
-      "files": ["deploy/local/sql/"],
-      "read": ["openspec/changes/foundation-platform/design.md#L203-L206", "docs/architecture/data-model.md#L381-L388", "docs/adr/adr-0013-data-sqlserver-schema-per-service.md#L20-L35"],
-      "writeLines": 160,
+      "files": ["src/Platform/EventBus/RutaViva.EventBus.Application/", "tests/Platform/RutaViva.EventBus.Application.UnitTests/"],
+      "read": ["openspec/changes/foundation-platform/design.md#L175-L181", "openspec/changes/foundation-platform/design.md#L224-L227", "openspec/changes/foundation-platform/specs/event-bus/spec.md"],
+      "writeLines": 450,
+      "skills": 1
+    },
+    {
+      "id": "2.I",
+      "tasks": 1,
+      "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Api/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Api/"],
+      "read": ["openspec/changes/foundation-platform/design.md#L192-L202", "openspec/changes/foundation-platform/specs/api-conventions/spec.md"],
+      "writeLines": 420,
+      "skills": 1
+    },
+    {
+      "id": "2.J",
+      "tasks": 2,
+      "files": ["tests/RutaViva.Architecture.Tests/", "tests/RutaViva.IntegrationContracts.Tests/"],
+      "read": ["openspec/changes/foundation-platform/specs/architecture-governance/spec.md", "docs/adr/adr-0026-proc-naming-conventions.md#L29-L45", "openspec/changes/foundation-platform/design.md#L32-L95"],
+      "writeLines": 500,
       "skills": 0
     },
     {
-      "id": "1.E",
+      "id": "2.P",
       "tasks": 1,
-      "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Time/", "tests/RutaViva.Testing.Common/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Infrastructure/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Testing/"],
-      "read": ["docs/adr/adr-0027-proc-integration-tests-local-sqlserver.md#L30-L45", "openspec/changes/foundation-platform/design.md#L118-L130"],
-      "writeLines": 300,
-      "skills": 1
+      "files": ["src/Platform/RutaViva.ServiceDefaults/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/ServiceDefaults/"],
+      "read": ["openspec/changes/foundation-platform/specs/api-conventions/spec.md#L50-L60"],
+      "writeLines": 250,
+      "skills": 0
     }
   ]
 }

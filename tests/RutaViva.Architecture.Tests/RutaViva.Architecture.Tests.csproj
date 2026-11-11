@@ -11,4 +11,7 @@
     <ProjectReference Include="..\..\src\Platform\EventBus\RutaViva.EventBus.Infrastructure\RutaViva.EventBus.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Platform\EventBus\RutaViva.EventBus.Hub\RutaViva.EventBus.Hub.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Platform\RutaViva.ServiceDefaults\RutaViva.ServiceDefaults.csproj" />
+  </ItemGroup>
 </Project>
