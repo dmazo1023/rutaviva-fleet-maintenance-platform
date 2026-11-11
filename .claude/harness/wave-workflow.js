@@ -60,15 +60,16 @@ const VERDICT_SCHEMA = {
   required: ['results'],
 }
 
-const VERIFY_ONLY = args.verifyOnly === true
-const MAX_RETRIES = VERIFY_ONLY ? 0 : (args.maxRetries ?? 2)
+const input = typeof args === 'string' ? JSON.parse(args) : args
+const VERIFY_ONLY = input.verifyOnly === true
+const MAX_RETRIES = VERIFY_ONLY ? 0 : (input.maxRetries ?? 2)
 const INFRASTRUCTURE_CHECKS = ['0-baseline', '1-ownership']
 const NOTES_LIMIT = 600
 const DECISION_LIMIT = 200
 const MAX_DECISIONS = 3
 const SIGNATURE_LINES_LIMIT = 15
-const agents = args.agents
-const handoff = args.handoff ?? { waves: {} }
+const agents = input.agents
+const handoff = input.handoff ?? { waves: {} }
 const PRESERVE_RULE = 'Conserva todo el contenido previo de los archivos que modificas (comentarios existentes, encabezados generados como el esquema de ResX, espacios y finales de línea) y cambia solo las líneas que exige la tarea. Las reglas de estilo aplican al código nuevo; la compuerta solo revisa líneas agregadas.'
 const PROTOCOL = [
   'Protocolo de comunicación:',
@@ -95,7 +96,7 @@ function normalize(path) {
 }
 
 function canonicalFile(file) {
-  const root = normalize(args.repoRoot ?? '').replace(/\/$/, '').toLowerCase()
+  const root = normalize(input.repoRoot ?? '').replace(/\/$/, '').toLowerCase()
   let value = normalize(file).replace(/^\.\//, '')
   if (root && value.toLowerCase().startsWith(`${root}/`)) value = value.slice(root.length + 1)
   const owned = agents.flatMap(a => a.files).find(o => value === o || value.endsWith(`/${o}`) || o.endsWith(`/${value}`))
@@ -130,8 +131,8 @@ function consumedSignatures(a) {
 }
 
 const COMMON_BLOCK = [
-  `Change OpenSpec "${args.change}", ola ${args.wave}.`,
-  `Reglas: ${args.rules}`,
+  `Change OpenSpec "${input.change}", ola ${input.wave}.`,
+  `Reglas: ${input.rules}`,
   PRESERVE_RULE,
   PROTOCOL,
   'No compiles ni ejecutes tests: la compuerta lo hace. No hagas commits ni crees ramas.',
@@ -208,15 +209,15 @@ function absorb(agentId, taskIds, result) {
 
 async function runGate(attempt) {
   return agent(
-    `Desde la raíz del repositorio ${args.repoRoot}, ejecuta exactamente este comando con la herramienta Bash (timeout 600000 ms) y reporta el resultado sin modificar archivos:\n${args.gateCommand}\n` +
+    `Desde la raíz del repositorio ${input.repoRoot}, ejecuta exactamente este comando con la herramienta Bash (timeout 600000 ms) y reporta el resultado sin modificar archivos:\n${input.gateCommand}\n` +
     'passed=true solo si el código de salida es 0. En failedCheck pon el nombre del chequeo que falló (por ejemplo 4-build). En summary copia como máximo 30 líneas del error, con las rutas de archivo tal como aparecen. Si falla un test y el error no trae la ruta de su archivo, busca con Grep el nombre del método del test y agrega al summary la ruta relativa del archivo que lo contiene, para que se reactive solo al agente dueño.',
     { label: `gate:${attempt}`, phase: 'Gate', schema: GATE_SCHEMA, model: 'haiku', effort: 'low' })
 }
 
 async function verifyWave(taskIds) {
-  if (!args.verifyByAgent) return verifyGroup(taskIds, agents, `wave-${args.wave}`)
+  if (!input.verifyByAgent) return verifyGroup(taskIds, agents, `wave-${input.wave}`)
   const groups = agents.filter(a => a.tasks.some(t => taskIds.includes(t.id)))
-  const verdicts = await parallel(groups.map(a => () => verifyGroup(taskIds, [a], `wave-${args.wave}:${a.id}`)))
+  const verdicts = await parallel(groups.map(a => () => verifyGroup(taskIds, [a], `wave-${input.wave}:${a.id}`)))
   return { results: verdicts.filter(Boolean).flatMap(v => v.results ?? []) }
 }
 
@@ -225,14 +226,14 @@ async function verifyGroup(taskIds, group, label) {
   const files = group.flatMap(a => a.files)
   const decisions = waveDecisions.length ? `\nDecisiones declaradas por los agentes (comprueba que no contradigan design.md):\n${waveDecisions.map(d => `- ${d}`).join('\n')}\n` : ''
   return agent(
-    `Verifica las tareas de la ola ${args.wave} del change "${args.change}" contra su criterio.\n` +
+    `Verifica las tareas de la ola ${input.wave} del change "${input.change}" contra su criterio.\n` +
     `${taskList(tasks)}\n\nRevisa solo el diff (git diff y archivos nuevos sin versionar) de estos archivos:\n${files.join('\n')}\n` +
     'Los archivos ignorados por git (por ejemplo local.settings.json) léelos directamente. La compuerta ya confirmó que compila y que los tests pasan con la línea base; evalúa lo que el script no comprueba (criterio funcional, cobertura de los casos pedidos en los tests, constantes, reglas de diseño). Las partes de un criterio que exigen BD de test, credenciales o arrancar un servicio en local no las evalúes: aprueba si el código está listo y dilo en reason.\n' +
     decisions +
-    `\nReglas a comprobar además del criterio: ${args.rules}\n${PRESERVE_RULE} Rechaza la tarea si el diff borra contenido previo que la tarea no pedía cambiar.\n` +
+    `\nReglas a comprobar además del criterio: ${input.rules}\n${PRESERVE_RULE} Rechaza la tarea si el diff borra contenido previo que la tarea no pedía cambiar.\n` +
     'Lee por rangos y solo lo necesario para cada criterio. Invoca la skill satrack-sonarqube-quality-gates si necesitas criterios de calidad. No modifiques archivos. ' +
     'Marca passed=false ante la duda y explica el motivo concreto (archivo y qué falta) en reason. Devuelve un resultado por cada tarea listada.',
-    { label: `verify:${label}`, phase: 'Verify', schema: VERDICT_SCHEMA, model: args.verifierModel ?? 'sonnet', effort: 'medium' })
+    { label: `verify:${label}`, phase: 'Verify', schema: VERDICT_SCHEMA, model: input.verifierModel ?? 'sonnet', effort: 'medium' })
 }
 
 function fixPrompt(owner, items, split) {
@@ -360,7 +361,7 @@ allTaskIds.filter(open).forEach(id => escalated.set(id, {
 
 if (escalated.size) log(`Tareas escaladas al usuario: ${[...escalated.keys()].join(', ')}`)
 return {
-  wave: args.wave,
+  wave: input.wave,
   verified: [...verified],
   escalated: [...escalated.values()].map(e => ({ ...e, attempts: attempts.get(e.taskId), contextExhausted: exhausted.has(e.taskId) })),
   unaccounted: allTaskIds.filter(id => !verified.has(id) && !escalated.has(id)),
