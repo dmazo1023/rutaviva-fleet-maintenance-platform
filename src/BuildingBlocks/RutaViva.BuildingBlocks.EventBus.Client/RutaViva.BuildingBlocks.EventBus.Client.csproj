@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
+    <PackageReference Include="Polly.Core" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <ProjectReference Include="..\RutaViva.BuildingBlocks.Application\RutaViva.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\RutaViva.BuildingBlocks.Infrastructure\RutaViva.BuildingBlocks.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Contracts\RutaViva.IntegrationContracts\RutaViva.IntegrationContracts.csproj" />
   </ItemGroup>
 </Project>

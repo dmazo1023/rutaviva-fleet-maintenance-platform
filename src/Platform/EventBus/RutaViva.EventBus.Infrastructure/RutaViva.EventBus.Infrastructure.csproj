@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <ProjectReference Include="..\RutaViva.EventBus.Application\RutaViva.EventBus.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\RutaViva.BuildingBlocks.Infrastructure\RutaViva.BuildingBlocks.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

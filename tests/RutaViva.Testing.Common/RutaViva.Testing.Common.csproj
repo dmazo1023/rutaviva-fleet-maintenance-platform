@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="xunit.v3.extensibility.core" />
+    <PackageReference Include="Microsoft.Data.SqlClient" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\RutaViva.BuildingBlocks.Application\RutaViva.BuildingBlocks.Application.csproj" />
+  </ItemGroup>
+</Project>

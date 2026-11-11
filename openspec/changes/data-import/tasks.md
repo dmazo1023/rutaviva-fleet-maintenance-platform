@@ -3,7 +3,7 @@
 ## 1. Proyectos y contratos compartidos
 
 - [ ] 1.1 Crear los 4 proyectos de DataImport y los 3 de pruebas, con referencias permitidas (Domain → BuildingBlocks.Domain; Application → Domain, BuildingBlocks.Application, RutaViva.IntegrationContracts; Infrastructure → Application, BuildingBlocks.Infrastructure, CsvHelper, Microsoft.Extensions.Http.Resilience; Api → Infrastructure, BuildingBlocks.Api) y agregarlos a `RutaViva.slnx`. Verificar con `dotnet build RutaViva.slnx` y `dotnet test tests/RutaViva.Architecture.Tests` en verde incluyendo los ensamblados de DataImport
-- [ ] 1.2 Agregar a `src/Contracts/RutaViva.IntegrationContracts/Bulk/` los payloads `BulkRequest<TRow>`, `WorkshopBulkRow`, `CustomerBulkRow`, `ApproverBulkRow`, `VehicleBulkRow`, `RoutineBulkRow` (campos de design D-07) y los códigos de referencia de design D-06 como constantes en `BulkReferenceErrorCodes`; registrar ambos en `openspec/changes/foundation-platform/design.md` § Contrato del lote masivo. Verificar con un *snapshot* Verify por payload en `tests/RutaViva.IntegrationContracts.Tests`
+- [ ] 1.2 Agregar a `src/Contracts/RutaViva.IntegrationContracts/Bulk/` los payloads `BulkRequest<TRow>`, `WorkshopBulkRow`, `CustomerBulkRow`, `ApproverBulkRow`, `VehicleBulkRow`, `RoutineBulkRow` (campos de design D-07) y los códigos de referencia de design D-06 como constantes en `BulkReferenceErrorCodes`; registrar ambos en `openspec/changes/foundation-platform/design.md` § Contrato del lote masivo. Verificar con un *snapshot* `ContractSnapshot` (ADR-0027) por payload en `tests/RutaViva.IntegrationContracts.Tests`
 
 ## 2. Dominio
 

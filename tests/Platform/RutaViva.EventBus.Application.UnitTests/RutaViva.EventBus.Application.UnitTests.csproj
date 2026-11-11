@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="NSubstitute" />
+    <ProjectReference Include="..\..\..\src\Platform\EventBus\RutaViva.EventBus.Application\RutaViva.EventBus.Application.csproj" />
+    <ProjectReference Include="..\..\RutaViva.Testing.Common\RutaViva.Testing.Common.csproj" />
+  </ItemGroup>
+</Project>

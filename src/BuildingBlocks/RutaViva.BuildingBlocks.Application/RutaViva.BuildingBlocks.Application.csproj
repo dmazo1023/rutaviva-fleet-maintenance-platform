@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Scrutor" />
     <ProjectReference Include="..\RutaViva.BuildingBlocks.Domain\RutaViva.BuildingBlocks.Domain.csproj" />
     <ProjectReference Include="..\..\Contracts\RutaViva.IntegrationContracts\RutaViva.IntegrationContracts.csproj" />
   </ItemGroup>

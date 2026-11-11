@@ -1,0 +1,3 @@
+.claude/harness/
+tests/RutaViva.Smoke.Tests/
+RutaViva.slnx

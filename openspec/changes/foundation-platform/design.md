@@ -141,6 +141,7 @@ public interface IEventCheckpointStore
 }
 ```
 
+- `IIntegrationEvent` (marcador) y `EventMetadata` viven en `RutaViva.IntegrationContracts.Abstractions`, no en BuildingBlocks: los contratos no dependen de nada, y BuildingBlocks.Application referencia a los contratos (nunca al revés).
 - `IIntegrationEventPublisher.Enqueue` escribe en el Outbox de la unidad de trabajo actual y se confirma con su `SaveChangesAsync`. Es la única vía para publicar un evento de integración **sin** evento de dominio, reservada a hechos que no cambian un agregado (caso único: `OdometerReadingRecorded` de una lectura ignorada, ADR-0014 y ADR-0025). Todo lo demás sale por el *mapper* de D-04.
 - `IEventCheckpointStore` tiene dos implementaciones: `EfEventCheckpointStore<TContext>` (en la transacción del efecto) e `InMemoryEventCheckpointStore` para suscriptores sin base de datos (Notifications, con `StartPosition.Latest`).
 - Carga masiva (patrón **Template Method**): `BulkRegistrationHandler<TRow, TCommand>` resuelve el command de cada fila (`ResolveCommandAsync`, abstracto), calcula su clave natural (`NaturalKey`, abstracto), devuelve `Skipped` si ya existe, `Invalid` con `Bulk.DuplicateInBatch` si se repite en el lote y, si no, ejecuta el mismo `ICommandHandler` del alta individual. `IBulkExecutionScope` y `DryRunUnitOfWork` (patrón **Null Object**) hacen que `dryRun=true` ejecute las reglas sin guardar, sin condiciones `if (dryRun)` repartidas. Lo usan los 5 endpoints masivos.

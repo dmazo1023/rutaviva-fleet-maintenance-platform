@@ -36,7 +36,7 @@ Adoptaremos la **pirámide de pruebas** con un propósito explícito por nivel:
 | `{Service}.Domain.UnitTests` | Unitaria **sin mocks**, con TDD | RN-1 a RN-6, VOs, máquina de estados, alertas y casos borde | xUnit v3, AwesomeAssertions |
 | `{Service}.Application.UnitTests` | Unitaria con dobles | Handlers, traducción a eventos de integración y validators | xUnit v3, NSubstitute |
 | `{Service}.Api.IntegrationTests` | Integración | Repositorios EF contra SQL Server real, índices únicos filtrados, Outbox y checkpoints con un EventBus real en proceso, evento duplicado = 1 efecto, suscriptor detenido que se pone al día | Testcontainers (MsSql), `WebApplicationFactory` (servicio y EventBus) |
-| `RutaViva.IntegrationContracts.Tests` | Contrato | Cada contrato de `RutaViva.IntegrationContracts` serializa y deserializa con el envelope CloudEvents, y los cambios incompatibles fallan con un *snapshot* | xUnit + Verify (*snapshots* JSON) |
+| `RutaViva.IntegrationContracts.Tests` | Contrato | Cada contrato de `RutaViva.IntegrationContracts` serializa y deserializa con el envelope CloudEvents, y los cambios incompatibles fallan con un *snapshot* | xUnit + *snapshots* JSON propios (ADR-0027) |
 | `RutaViva.Acceptance.Tests` | Aceptación (BDD) | Un `.feature` por regla RN-n contra los servicios core | Reqnroll + Gherkin |
 | `RutaViva.Architecture.Tests` | Fitness function | Regla de dependencia por servicio, ningún servicio referencia a otro, Application sin `Microsoft.AspNetCore` (incluido el cliente de SignalR) | NetArchTest.Rules |
 

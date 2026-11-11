@@ -16,7 +16,7 @@ Corresponde al corte **S0** del análisis (§10).
 - Servicio **`RutaViva.EventBus.Hub`**: hub interno `/internal/hubs/events`, log `eventbus.Events` con único escritor, `eventbus.DeadLetters` (ADR-0024).
 - `RutaViva.ServiceDefaults` (OpenTelemetry, health checks, service discovery) y `RutaViva.AppHost` de Aspire (ADR-0018) **(Recortable)**.
 - Script de base: BD `RutaViva`, schemas y un usuario por servicio con `GRANT` propio y `DENY` al resto, generado en ciclo (data-model D-20); actualización del script de referencia a ADR-0024 (schema `eventbus`, `EventCheckpoints` en lugar de `InboxMessages`).
-- Proyectos de pruebas transversales: `RutaViva.Architecture.Tests` (NetArchTest) y `RutaViva.IntegrationContracts.Tests` (Verify).
+- Proyectos de pruebas transversales: `RutaViva.Architecture.Tests` (NetArchTest) y `RutaViva.IntegrationContracts.Tests` (*snapshots* JSON propios, ADR-0027).
 
 ## Capabilities
 
@@ -35,7 +35,7 @@ Corresponde al corte **S0** del análisis (§10).
 
 - Código nuevo: `src/BuildingBlocks/*`, `src/Contracts/RutaViva.IntegrationContracts`, `src/Platform/EventBus/RutaViva.EventBus.Hub`, `src/Platform/RutaViva.ServiceDefaults`, `src/Platform/RutaViva.AppHost`, `tests/RutaViva.Architecture.Tests`, `tests/RutaViva.IntegrationContracts.Tests`, `deploy/local/sql/`.
 - Documentación: `docs/architecture/database/rutaviva-reference-schema.sql` se alinea con ADR-0024.
-- Dependencias NuGet: EF Core 10 (SqlServer), `Microsoft.AspNetCore.SignalR.Client`, FluentValidation, OpenTelemetry, Aspire, xUnit v3, AwesomeAssertions, NSubstitute, Microsoft.Data.SqlClient (BD de prueba desechable, ADR-0027), NetArchTest.Rules, Verify.Xunit.
+- Dependencias NuGet: EF Core 10 (SqlServer), `Microsoft.AspNetCore.SignalR.Client`, FluentValidation, OpenTelemetry, Aspire, xUnit v3, AwesomeAssertions, NSubstitute, Microsoft.Data.SqlClient (BD de prueba desechable, ADR-0027), NetArchTest.Rules.
 - Todos los changes posteriores (`maintenance-core`, `service-orders-core`, `supporting-contexts`, `edge-gateway-notifications`, `data-import`, `reporting`, `fleet-maintenance-ui`) dependen de este.
 
 ## Fuera de alcance

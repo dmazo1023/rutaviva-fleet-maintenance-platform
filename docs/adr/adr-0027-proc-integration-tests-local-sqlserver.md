@@ -70,6 +70,7 @@ Las pruebas de integración usarán **el SQL Server local con una base de datos 
 |---|---|
 | IMP-001 | `SqlServerTestDatabase` usa `Microsoft.Data.SqlClient`; no hay contraseñas en el código porque usa autenticación de Windows |
 | IMP-002 | La prueba de humo de la Ola 0 crea, migra y borra una base con este fixture antes de lanzar agentes |
+| IMP-003 | **Snapshots de contratos sin Verify.** Verify 33.x exige declarar una licencia de patrocinio (SponsorCheck SC021) para compilar. Las pruebas de contrato usan un helper propio `ContractSnapshot` en `RutaViva.IntegrationContracts.Tests`: serializa con las opciones JSON de la solución y compara con `Snapshots/{Evento}.approved.json` versionado; si el archivo no existe, lo crea y la prueba falla para que se revise. Mismo comportamiento que Verify para este uso, sin dependencia de licencia |
 
 ## Referencias
 

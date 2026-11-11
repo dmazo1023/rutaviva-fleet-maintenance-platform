@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <ProjectReference Include="..\..\..\src\Platform\EventBus\RutaViva.EventBus.Hub\RutaViva.EventBus.Hub.csproj" />
+    <ProjectReference Include="..\..\..\src\Platform\EventBus\RutaViva.EventBus.Infrastructure\RutaViva.EventBus.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\Platform\EventBus\RutaViva.EventBus.Application\RutaViva.EventBus.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Contracts\RutaViva.IntegrationContracts\RutaViva.IntegrationContracts.csproj" />
+    <ProjectReference Include="..\..\RutaViva.Testing.Common\RutaViva.Testing.Common.csproj" />
+  </ItemGroup>
+</Project>

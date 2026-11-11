@@ -11,7 +11,7 @@ context: |
   Stack: .NET 10 / C# 14, ASP.NET Core Minimal API, EF Core 10 sobre SQL Server localhost (una BD RutaViva, un schema y un
   usuario por servicio), EventBus propio (SignalR como aviso + SQL Server como log, ADR-0024), YARP, .NET Aspire,
   Angular 22 (standalone, signals, zoneless), xUnit v3, AwesomeAssertions, NSubstitute, SQL Server local con BD de prueba desechable (ADR-0027), NetArchTest,
-  Verify, Reqnroll y Playwright.
+  snapshots JSON propios (ADR-0027), Reqnroll y Playwright.
   Arquitectura: microservicios por bounded context (ADR-0010) con Clean Architecture interna (Domain, Application,
   Infrastructure, Api), DDD táctico, CQRS sin MediatR, Result<T> en lugar de excepciones de negocio, Transactional Outbox,
   checkpoints por suscriptor y réplicas locales *Reference alimentadas por eventos. Ningún tipo de dominio se comparte
