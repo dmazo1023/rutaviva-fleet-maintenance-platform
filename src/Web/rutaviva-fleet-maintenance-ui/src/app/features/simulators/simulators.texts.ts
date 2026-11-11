@@ -1,0 +1,22 @@
+export const SIMULATORS_TEXTS = {
+  title: 'Simulador de eventos',
+  restrictedMessage: 'El simulador solo está disponible para el perfil Operador.',
+  odometerCardTitle: 'Lectura de odómetro',
+  odometerCardSub: 'Simula una lectura reportada por telemetría para evaluar rutinas por kilometraje.',
+  plateLabel: 'Placa',
+  platePlaceholder: 'RVA101',
+  kmLabel: 'Kilómetros',
+  kmPlaceholder: '50200',
+  readAtLabel: 'Fecha y hora',
+  sendReadingAction: 'Enviar lectura',
+  timeCardTitle: 'Corte de tiempo',
+  timeCardSub: 'Ejecuta la evaluación de planes y rutinas a una fecha de corte.',
+  asOfDateLabel: 'Fecha de corte',
+  runTimeAction: 'Ejecutar corte de tiempo',
+  resultTitle: 'Resultado',
+  evaluatedPlansLabel: 'Planes evaluados',
+  dueSoonLabel: 'Rutinas por vencer',
+  overdueLabel: 'Rutinas vencidas',
+  requestedOrdersLabel: 'Órdenes solicitadas',
+} as const;
+

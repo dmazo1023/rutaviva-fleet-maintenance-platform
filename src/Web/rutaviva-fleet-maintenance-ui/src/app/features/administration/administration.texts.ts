@@ -1,0 +1,22 @@
+export const ADMINISTRATION_TEXTS = {
+  title: 'Parámetros',
+  readOnlyBanner: 'Modo de solo lectura: solo el perfil Operador puede modificar parámetros.',
+  routineTypesTitle: 'Tipos de rutina',
+  routineTypesSub: 'Valores por defecto para nuevos planes y rutinas sin ajuste propio.',
+  colType: 'Tipo',
+  colIntervalKm: 'Cada (km)',
+  colIntervalMonths: 'O cada (meses)',
+  colThreshold: 'Aviso (% final)',
+  colAction: 'Acción',
+  saveAction: 'Guardar',
+  savedToast: 'Parámetros actualizados',
+  policyTitle: 'Política de autoaprobación',
+  policySub: 'Las cotizaciones con total menor o igual a este tope se aprueban automáticamente.',
+  policyCurrentLabel: 'Tope vigente (COP)',
+  policyNewLabel: 'Nuevo tope (COP)',
+  policySaveAction: 'Actualizar tope',
+  policySavedToast: 'Política de autoaprobación actualizada',
+  policyHistorySummaryPrefix: 'Historial de cambios (',
+  policyHistorySummarySuffix: ')',
+} as const;
+

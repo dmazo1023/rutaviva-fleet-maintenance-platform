@@ -1,0 +1,148 @@
+<div class="parameters-page">
+  <header class="parameters-page__header">
+    <h1 id="h1" tabindex="-1" class="parameters-page__title">{{ texts.title }}</h1>
+  </header>
+
+  @if (!isOperator()) {
+    <div class="parameters-page__readonly" role="status">
+      <span class="ms" aria-hidden="true">lock</span>
+      <span>{{ texts.readOnlyBanner }}</span>
+    </div>
+  }
+
+  <section class="parameters-card">
+    <div class="parameters-card__head">
+      <h2 class="parameters-card__title">{{ texts.routineTypesTitle }}</h2>
+      <p class="parameters-card__sub">{{ texts.routineTypesSub }}</p>
+    </div>
+
+    <div class="parameters-table-wrap">
+      <table class="parameters-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ texts.colType }}</th>
+            <th scope="col">{{ texts.colIntervalKm }}</th>
+            <th scope="col">{{ texts.colIntervalMonths }}</th>
+            <th scope="col">{{ texts.colThreshold }}</th>
+            @if (isOperator()) {
+              <th scope="col">{{ texts.colAction }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of routineTypes(); track item.id) {
+            <tr class="parameters-table__row">
+              <td>
+                <div class="parameters-table__type-cell">
+                  <span class="ms" aria-hidden="true">{{ item.icon }}</span>
+                  <div>
+                    <strong class="parameters-table__name">{{ item.name }}</strong>
+                    <code class="parameters-table__code">{{ item.code }}</code>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <input
+                  type="number"
+                  class="input parameters-table__input"
+                  [value]="getDraft(item.id).km"
+                  [disabled]="!isOperator()"
+                  [attr.aria-label]="item.name + ' km'"
+                  (input)="onDraftFieldChange(item.id, 'km', $event)"
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  class="input parameters-table__input"
+                  [value]="getDraft(item.id).months"
+                  [disabled]="!isOperator()"
+                  [attr.aria-label]="item.name + ' meses'"
+                  (input)="onDraftFieldChange(item.id, 'months', $event)"
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  class="input parameters-table__input"
+                  [value]="getDraft(item.id).percent"
+                  [disabled]="!isOperator()"
+                  [attr.aria-label]="item.name + ' %'"
+                  (input)="onDraftFieldChange(item.id, 'percent', $event)"
+                />
+              </td>
+              @if (isOperator()) {
+                <td>
+                  <button
+                    type="button"
+                    class="btn btn--primary parameters-table__save-btn"
+                    (click)="onSaveRoutineType(item)"
+                  >
+                    {{ texts.saveAction }}
+                  </button>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  @if (policy(); as pol) {
+    <section class="parameters-card">
+      <div class="parameters-card__head">
+        <h2 class="parameters-card__title">{{ texts.policyTitle }}</h2>
+        <p class="parameters-card__sub">{{ texts.policySub }}</p>
+      </div>
+
+      <div class="parameters-policy">
+        <div class="parameters-policy__current">
+          <span class="parameters-policy__label">{{ texts.policyCurrentLabel }}</span>
+          <strong class="parameters-policy__amount">{{ formatCop(pol.currentAmount) }}</strong>
+        </div>
+
+        @if (isOperator()) {
+          <div class="parameters-policy__form">
+            <label class="parameters-policy__field">
+              <span>{{ texts.policyNewLabel }}</span>
+              <input
+                type="number"
+                class="input parameters-policy__input"
+                [value]="policyInput()"
+                (input)="onPolicyInputChange($event)"
+              />
+            </label>
+            <button
+              type="button"
+              class="btn btn--primary parameters-policy__save-btn"
+              (click)="onSavePolicy()"
+            >
+              {{ texts.policySaveAction }}
+            </button>
+          </div>
+        }
+      </div>
+
+      <details class="parameters-history">
+        <summary class="parameters-history__summary">
+          {{ texts.policyHistorySummaryPrefix }}{{ pol.history.length
+          }}{{ texts.policyHistorySummarySuffix }}
+        </summary>
+        <ul class="parameters-history__list">
+          @for (entry of pol.history; track entry.id) {
+            <li class="parameters-history__item">
+              <span class="parameters-history__amount">
+                {{ formatCop(entry.autoApprovalMaxAmount) }}
+              </span>
+              <span class="parameters-history__meta">
+                {{ entry.createdBy }} · {{ entry.effectiveFrom }}
+              </span>
+            </li>
+          }
+        </ul>
+      </details>
+    </section>
+  }
+</div>
+
