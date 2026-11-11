@@ -1,0 +1,24 @@
+<div [class]="toneClass()">
+  <span class="ms" aria-hidden="true">{{ iconName() }}</span>
+  <div
+    class="trk-bar"
+    role="meter"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [attr.aria-valuenow]="roundedValueNow()"
+    [attr.aria-label]="meterAriaLabel()"
+  >
+    <span
+      class="trk-zone"
+      [style.left.%]="zoneLeftPercent()"
+      [style.width.%]="zoneWidthPercent()"
+    ></span>
+    <span class="trk-fill" [style.transform]="scaleXTransform()"></span>
+    <span class="trk-end"></span>
+    <span class="trk-dot" [style.left.%]="clampedPercent()"></span>
+  </div>
+  <span class="trk-rem" [class.is-neg]="isNegativeRemaining()">
+    {{ formattedRemaining() }}
+  </span>
+</div>
+

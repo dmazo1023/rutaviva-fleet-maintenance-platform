@@ -1,0 +1,17 @@
+<span
+  class="pill"
+  [class]="presentation().tone"
+  [class.pill--s]="small()"
+>
+  <span class="ms ms--fill" aria-hidden="true">{{ presentation().icon }}</span>
+  <span>{{ presentation().label }}</span>
+  @if (triggerIcons().length > 0) {
+    <span class="trig" aria-hidden="true">
+      @for (ico of triggerIcons(); track ico) {
+        <span class="ms ms--s">{{ ico }}</span>
+      }
+    </span>
+    <span class="sr-only"> {{ triggerAccessibleText() }}</span>
+  }
+</span>
+

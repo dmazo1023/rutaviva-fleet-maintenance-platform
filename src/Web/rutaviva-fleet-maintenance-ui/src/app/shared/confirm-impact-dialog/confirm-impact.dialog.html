@@ -1,0 +1,47 @@
+<dialog
+  #dialogEl
+  tabindex="-1"
+  aria-labelledby="confirm-dlg-title"
+  (cancel)="onCancel()"
+  (keydown)="onKeydown($event)"
+>
+  <div class="m-head">
+    <span class="rt-ico" [class]="tone()">
+      <span class="ms" aria-hidden="true">{{ icon() }}</span>
+    </span>
+    <h2 id="confirm-dlg-title">{{ title() }}</h2>
+    <button
+      class="icon-btn"
+      type="button"
+      [attr.aria-label]="texts.closeAriaLabel"
+      (click)="onCancel()"
+    >
+      <span class="ms" aria-hidden="true">close</span>
+    </button>
+  </div>
+  <div class="m-body">
+    <ul class="impact">
+      @for (item of items(); track item.text) {
+        <li>
+          <span class="ms" aria-hidden="true">{{ item.icon }}</span>
+          <span>{{ item.text }}</span>
+        </li>
+      }
+    </ul>
+  </div>
+  <div class="m-foot">
+    <button class="btn btn--ghost" type="button" (click)="onCancel()">
+      {{ cancelLabel() }}
+    </button>
+    <button
+      #confirmBtn
+      class="btn btn--danger"
+      type="button"
+      [disabled]="busy()"
+      [attr.aria-busy]="busy() ? 'true' : null"
+      (click)="onConfirm()"
+    >
+      {{ confirmLabel() }}
+    </button>
+  </div>
+</dialog>

@@ -1,0 +1,14 @@
+@if (link(); as targetRoute) {
+  <a
+    class="plate"
+    [class.plate--lg]="size() === 'lg'"
+    [routerLink]="targetRoute"
+  >
+    {{ plate() }}
+  </a>
+} @else {
+  <span class="plate" [class.plate--lg]="size() === 'lg'">
+    {{ plate() }}
+  </span>
+}
+

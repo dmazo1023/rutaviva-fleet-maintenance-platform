@@ -1,0 +1,27 @@
+<section class="panel state" [class]="tone()">
+  <span class="ill">
+    <span class="ms" aria-hidden="true">{{ icon() }}</span>
+  </span>
+  <h2>{{ title() }}</h2>
+  @if (message(); as msg) {
+    <p>{{ msg }}</p>
+  }
+  @if (actionLabel(); as label) {
+    @if (actionRoute(); as route) {
+      <a class="btn btn--primary" [routerLink]="route">
+        @if (actionIcon(); as ico) {
+          <span class="ms" aria-hidden="true">{{ ico }}</span>
+        }
+        <span>{{ label }}</span>
+      </a>
+    } @else {
+      <button class="btn btn--ghost" type="button" (click)="onAction()">
+        @if (actionIcon(); as ico) {
+          <span class="ms" aria-hidden="true">{{ ico }}</span>
+        }
+        <span>{{ label }}</span>
+      </button>
+    }
+  }
+</section>
+

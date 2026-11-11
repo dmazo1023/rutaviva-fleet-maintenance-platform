@@ -1,0 +1,17 @@
+.mini {
+  position: relative;
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--c-track);
+  overflow: hidden;
+}
+
+.mini span {
+  position: absolute;
+  inset: 0;
+  background: var(--bar);
+  transform-origin: left;
+  transition: transform var(--dur-slow) var(--ease);
+}
+
