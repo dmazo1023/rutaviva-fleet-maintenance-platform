@@ -202,7 +202,7 @@ Todas las rutas públicas siguen `/api/v1/{service-segment}/...` y el Gateway en
 
 ### D-10 Script de base de datos
 
-`01-schemas-and-users.sql` genera, para la lista de 8 schemas (`customers`, `workshops`, `fleet`, `maintenance`, `serviceorders`, `imports`, `reporting`, `eventbus`), el schema, el login/usuario `rutaviva_{schema}_app` con contraseña por variable `sqlcmd`, el `GRANT` sobre su schema y el `DENY` sobre los demás, en un único ciclo (D-20). Las tablas las crean las migraciones de EF Core de cada servicio con un usuario administrativo.
+`01-schemas-and-users.sql` genera, para la lista de 8 schemas (`customers`, `workshops`, `fleet`, `maintenance`, `serviceorders`, `imports`, `reporting`, `eventbus`), el schema, el login/usuario `rutaviva_{schema}_app` con contraseña por variable `sqlcmd`, el `GRANT` sobre su schema y el `DENY` sobre los demás, en un único ciclo (D-20). Las tablas las crean las migraciones de EF Core de cada servicio con un usuario administrativo. En local los servicios se conectan con autenticación de Windows (`ConnectionStrings:RutaViva`) y los usuarios por servicio se verifican con `EXECUTE AS USER` (ADR-0028).
 
 ## Registro de contratos
 

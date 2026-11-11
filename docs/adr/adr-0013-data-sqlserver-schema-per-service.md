@@ -17,6 +17,8 @@ superseded_by: ""
 
 > **Enmienda 2026-11-10:** las pruebas de integración usan el SQL Server local con una BD desechable por fixture en lugar de Testcontainers (ADR-0027).
 
+> **Enmienda 2026-11-11:** en local los servicios se conectan con autenticación de Windows; los usuarios por servicio quedan como control verificado con `EXECUTE AS USER` (ADR-0028).
+
 ## Contexto
 
 Este ADR reemplaza al ADR-0005, que proponía persistencia en memoria.
