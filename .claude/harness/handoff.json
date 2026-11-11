@@ -127,9 +127,39 @@
       ]
     },
     "5": {
-      "runId": "wf_8d432328-14b",
-      "exports": {},
-      "decisions": []
+      "runId": "wf_d3be5cd9-5e7",
+      "exports": {
+        "src/Services/Maintenance/RutaViva.Maintenance.Application/Plans/Queries/GetMaintenancePlanHandler.cs": "public sealed class GetMaintenancePlanHandler(IMaintenancePlanQueries) : IQueryHandler<GetMaintenancePlanQuery, MaintenancePlanDetailDto>",
+        "src/Services/Maintenance/RutaViva.Maintenance.Application/Alerts/Queries/SearchAlertsQueryValidator.cs": "public sealed class SearchAlertsQueryValidator : AbstractValidator<SearchAlertsQuery>",
+        "src/Services/Maintenance/RutaViva.Maintenance.Application/Telemetry/Queries/GetOdometerReadingsQueryValidator.cs": "public sealed class GetOdometerReadingsQueryValidator : AbstractValidator<GetOdometerReadingsQuery>",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/MaintenancePlanQueries.cs": "public sealed class MaintenancePlanQueries(MaintenanceDbContext) : IMaintenancePlanQueries",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/AlertQueries.cs": "public sealed class AlertQueries(MaintenanceDbContext) : IAlertQueries",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/OdometerReadingQueries.cs": "public sealed class OdometerReadingQueries(MaintenanceDbContext) : IOdometerReadingQueries",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/RoutineTypeQueries.cs": "public sealed class RoutineTypeQueries(MaintenanceDbContext) : IRoutineTypeQueries",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Repositories/*.cs": "ns RutaViva.Maintenance.Infrastructure.Persistence.Repositories. public sealed: MaintenancePlanRepository(MaintenanceDbContext) : IMaintenancePlanRepository; RoutineTypeRepository(MaintenanceDbContext) : IRoutineTypeRepository; AlertRepository(MaintenanceDbContext) : IAlertRepository; OdometerReadingLog(MaintenanceDbContext) : IOdometerReadingLog; MaintenanceUnitOfWork(MaintenanceDbContext) : IUnitOfWork; UnitOfWorkScopeFactory(IServiceScopeFactory) : IUnitOfWorkScopeFactory. internal sealed UnitOfWorkScope : IUnitOfWorkScope (resolves IUnitOfWork, IMaintenancePlanRepository, IRoutineTypeRepository, IAlertRepository from the new scope).",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/DependencyInjection/MaintenanceInfrastructureServiceCollectionExtensions.cs": "public static class MaintenanceInfrastructureServiceCollectionExtensions { public static IServiceCollection AddMaintenance(this IServiceCollection services, IConfiguration configuration); }",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Scheduling/NextRunCalculator.cs": "public static class NextRunCalculator { public static DateTimeOffset Calculate(DateTimeOffset utcNow, TimeOnly runAt, TimeZoneInfo timeZone); }",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Scheduling/TimeEvaluationScheduleOptions.cs": "public sealed class TimeEvaluationScheduleOptions { const SectionName=\"Maintenance:TimeEvaluation\"; static DefaultRunAt (00:05); TimeOnly RunAt {get;init;}; string TimeZoneId {get;init;}; static FromConfiguration(IConfiguration); }",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Scheduling/DailyTimeEvaluationScheduler.cs": "public sealed class DailyTimeEvaluationScheduler(IServiceScopeFactory, IClock, TimeProvider, TimeEvaluationScheduleOptions, ILogger<DailyTimeEvaluationScheduler>) : BackgroundService",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Endpoints/*Endpoints.cs": "public sealed class {Telemetry|TimeEvaluation|Plan|Routine|RoutineType|Alert}Endpoints : IEndpointModule { void MapEndpoints(IEndpointRouteBuilder app) }",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Contracts/*": "records: TelemetryOdometerReadingRequest(string? Plate,long OdometerKm,DateTimeOffset ReadAt); TelemetryOdometerReadingResponse(Outcome,Reason?); TimeEvaluationRequest(DateOnly? AsOfDate); ReevaluationRequest(DateOnly? AsOfDate,Guid? VehicleId); UpdateRoutineParametersRequest(IntervalKm?,IntervalMonths?,DueSoonThresholdPercent?,UpdatedBy?); ChangeRoutineStateRequest(State?,UpdatedBy?); UpdateRoutineTypeParametersRequest(...,DueSoonThresholdPercent,UpdatedBy?); AcknowledgeAlertRequest(AcknowledgedBy?)",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Serialization/MaintenanceIdJsonConverterFactory.cs": "public sealed class MaintenanceIdJsonConverterFactory : JsonConverterFactory (VehicleId, RoutineId, RoutineTypeId, AlertId, CustomerId as plain GUID strings)",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Api/MaintenanceApiFactory.cs": "public sealed class MaintenanceApiFactory : WebApplicationFactory<Program> { static Task<MaintenanceApiFactory> CreateAsync(SqlServerTestDatabase, CancellationToken) }"
+      },
+      "decisions": [
+        "Handlers are named GetMaintenancePlanHandler, GetMaintenancePlanSummariesHandler, GetOdometerReadingsHandler, SearchAlertsHandler, GetRoutineTypesHandler; queries stay in their feature folder.",
+        "Infra query classes are public sealed and take MaintenanceDbContext; the host must register them as scoped for the IXxxQueries ports (no AddQueryHandlers scan covers them).",
+        "Plan summaries and details count only active routines; InactiveCount is separate. Pistas km/time come from the domain evaluators in the Infrastructure projector.",
+        "DI must register scoped IMaintenancePlanRepository, IRoutineTypeRepository, IAlertRepository, IOdometerReadingLog and IUnitOfWork->MaintenanceUnitOfWork (after AddRutaVivaPersistence), plus singleton …",
+        "GetActivePlanIdsPageAsync uses FromSqlRaw 'WHERE [VehicleId] > {0}' (Guid.Empty when after is null) so the keyset order matches SQL Server uniqueidentifier ordering.",
+        "GetCatalogAsync uses a tracked ToListAsync on RoutineTypes, so already-tracked entities with unsaved changes win over database values.",
+        "AddMaintenance reads ConnectionStrings:RutaViva eagerly and throws InvalidOperationException if missing; EventBus:HubUrl is read lazily from configuration.",
+        "Domain-event handlers and integration-event mappers are registered as Scoped via a Scrutor scan of the Application assembly; IUnitOfWorkScopeFactory is Singleton.",
+        "AddMaintenance registers TimeProvider.System and SystemClock through TryAdd, so a host can override them.",
+        "Strong IDs serialize as plain GUID strings via MaintenanceIdJsonConverterFactory, registered in Program.cs with ConfigureHttpJsonOptions; without it DTOs would emit {value:...}.",
+        "UpdatedBy/AcknowledgedBy come from the request body (no auth yet). PUT/PATCH commands answer 204 via ToNoContentResult; failures use ToHttpResult.",
+        "Request field is dueSoonThresholdPercent (spec name) for routine and routine-type PUT; no PATCH plan status route because the registry has none."
+      ]
     }
   }
 }

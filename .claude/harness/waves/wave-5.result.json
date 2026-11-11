@@ -1,100 +1,198 @@
 {
   "wave": "5",
   "verified": [
-    "10.1",
-    "10.2",
-    "10.5"
+    "6.9",
+    "7.3",
+    "7.2",
+    "7.4",
+    "8.1",
+    "8.2"
   ],
-  "escalated": [
-    {
-      "taskId": "10.3",
-      "reason": "La funcionalidad está completa: ArchitectureAssemblies descubre los ensamblados desde src/**/*.csproj excluyendo bin/obj, y todos están referenciados en el csproj (sin blockers). Existen las reglas de capas internas, de Domain y de pureza de hosts, más la prueba de descubrimiento con EventBus.Hub, EventBus.Client y ServiceDefaults. Se rechaza por reglas de estilo: hay literales de texto inline en las pruebas nuevas, y deben ser constantes privadas. Son los mensajes de razón en HostPurityTests.cs (línea 26, junto con \", \" en string.Join) e InnerLayerDependencyTests.cs (líneas 24 y 35), y el literal \"{name}.{PersistenceSegment}\" en la interpolación de HostPurityTests.cs (línea 34).",
-      "attempts": 0,
-      "contextExhausted": false
-    },
-    {
-      "taskId": "10.6",
-      "reason": "La funcionalidad está completa: ValidationQueryHandlerDecorator y LoggingQueryHandlerDecorator, con la lógica común extraída a RequestValidation (los comandos la reutilizan). AddQueryHandlers usa Scrutor y TryDecorate, y ValidatorRegistration.AddOnce evita duplicar validadores. Las pruebas cubren los tres casos pedidos. Se rechaza por reglas de estilo: LoggingQueryHandlerDecoratorTests.cs usa literales inline en new(\"Sample.Failed\", \"Sample failure.\", ...) en las líneas 38 y 51, y deben ser constantes privadas.",
-      "attempts": 0,
-      "contextExhausted": false
-    },
-    {
-      "taskId": "10.4",
-      "reason": "La funcionalidad está completa: validadores FluentValidation para PublishEventCommand, GetEventsQuery y ReportFailureCommand con límites de IntegrationEventLimits, TryParse en lugar del regex, y EnvelopeValidator eliminado. Los handlers no validan, el Hub registra con AddCommandHandlers/AddQueryHandlers, los mensajes de EventBusErrors son private const y StoredEvent/DeadLetter.Create usan Guard con BoundedText sin cambiar las longitudes de columna (60/150/60/60/2000 coinciden con los límites). Las pruebas cubren stream de 61, subject de 61 y type no parseable. Se rechaza por reglas de estilo: hay literales inline \" \" en GetEventsQueryValidatorTests.cs (línea 53) y ReportFailureCommandValidatorTests.cs (líneas 27 y 53), y deben ser constantes. Observación no bloqueante: se eliminó el truncado del error a 2000 caracteres, por lo que un error más largo ahora se rechaza en el Hub.",
-      "attempts": 0,
-      "contextExhausted": false
-    }
-  ],
+  "escalated": [],
   "unaccounted": [],
   "handoff": {
-    "exports": {},
-    "decisions": []
+    "exports": {
+      "src/Services/Maintenance/RutaViva.Maintenance.Application/Plans/Queries/GetMaintenancePlanHandler.cs": "public sealed class GetMaintenancePlanHandler(IMaintenancePlanQueries) : IQueryHandler<GetMaintenancePlanQuery, MaintenancePlanDetailDto>",
+      "src/Services/Maintenance/RutaViva.Maintenance.Application/Alerts/Queries/SearchAlertsQueryValidator.cs": "public sealed class SearchAlertsQueryValidator : AbstractValidator<SearchAlertsQuery>",
+      "src/Services/Maintenance/RutaViva.Maintenance.Application/Telemetry/Queries/GetOdometerReadingsQueryValidator.cs": "public sealed class GetOdometerReadingsQueryValidator : AbstractValidator<GetOdometerReadingsQuery>",
+      "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/MaintenancePlanQueries.cs": "public sealed class MaintenancePlanQueries(MaintenanceDbContext) : IMaintenancePlanQueries",
+      "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/AlertQueries.cs": "public sealed class AlertQueries(MaintenanceDbContext) : IAlertQueries",
+      "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/OdometerReadingQueries.cs": "public sealed class OdometerReadingQueries(MaintenanceDbContext) : IOdometerReadingQueries",
+      "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/RoutineTypeQueries.cs": "public sealed class RoutineTypeQueries(MaintenanceDbContext) : IRoutineTypeQueries",
+      "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Repositories/*.cs": "ns RutaViva.Maintenance.Infrastructure.Persistence.Repositories. public sealed: MaintenancePlanRepository(MaintenanceDbContext) : IMaintenancePlanRepository; RoutineTypeRepository(MaintenanceDbContext) : IRoutineTypeRepository; AlertRepository(MaintenanceDbContext) : IAlertRepository; OdometerReadingLog(MaintenanceDbContext) : IOdometerReadingLog; MaintenanceUnitOfWork(MaintenanceDbContext) : IUnitOfWork; UnitOfWorkScopeFactory(IServiceScopeFactory) : IUnitOfWorkScopeFactory. internal sealed UnitOfWorkScope : IUnitOfWorkScope (resolves IUnitOfWork, IMaintenancePlanRepository, IRoutineTypeRepository, IAlertRepository from the new scope).",
+      "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/DependencyInjection/MaintenanceInfrastructureServiceCollectionExtensions.cs": "public static class MaintenanceInfrastructureServiceCollectionExtensions { public static IServiceCollection AddMaintenance(this IServiceCollection services, IConfiguration configuration); }",
+      "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Scheduling/NextRunCalculator.cs": "public static class NextRunCalculator { public static DateTimeOffset Calculate(DateTimeOffset utcNow, TimeOnly runAt, TimeZoneInfo timeZone); }",
+      "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Scheduling/TimeEvaluationScheduleOptions.cs": "public sealed class TimeEvaluationScheduleOptions { const SectionName=\"Maintenance:TimeEvaluation\"; static DefaultRunAt (00:05); TimeOnly RunAt {get;init;}; string TimeZoneId {get;init;}; static FromConfiguration(IConfiguration); }",
+      "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Scheduling/DailyTimeEvaluationScheduler.cs": "public sealed class DailyTimeEvaluationScheduler(IServiceScopeFactory, IClock, TimeProvider, TimeEvaluationScheduleOptions, ILogger<DailyTimeEvaluationScheduler>) : BackgroundService",
+      "src/Services/Maintenance/RutaViva.Maintenance.Api/Endpoints/*Endpoints.cs": "public sealed class {Telemetry|TimeEvaluation|Plan|Routine|RoutineType|Alert}Endpoints : IEndpointModule { void MapEndpoints(IEndpointRouteBuilder app) }",
+      "src/Services/Maintenance/RutaViva.Maintenance.Api/Contracts/*": "records: TelemetryOdometerReadingRequest(string? Plate,long OdometerKm,DateTimeOffset ReadAt); TelemetryOdometerReadingResponse(Outcome,Reason?); TimeEvaluationRequest(DateOnly? AsOfDate); ReevaluationRequest(DateOnly? AsOfDate,Guid? VehicleId); UpdateRoutineParametersRequest(IntervalKm?,IntervalMonths?,DueSoonThresholdPercent?,UpdatedBy?); ChangeRoutineStateRequest(State?,UpdatedBy?); UpdateRoutineTypeParametersRequest(...,DueSoonThresholdPercent,UpdatedBy?); AcknowledgeAlertRequest(AcknowledgedBy?)",
+      "src/Services/Maintenance/RutaViva.Maintenance.Api/Serialization/MaintenanceIdJsonConverterFactory.cs": "public sealed class MaintenanceIdJsonConverterFactory : JsonConverterFactory (VehicleId, RoutineId, RoutineTypeId, AlertId, CustomerId as plain GUID strings)",
+      "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Api/MaintenanceApiFactory.cs": "public sealed class MaintenanceApiFactory : WebApplicationFactory<Program> { static Task<MaintenanceApiFactory> CreateAsync(SqlServerTestDatabase, CancellationToken) }"
+    },
+    "decisions": [
+      "Handlers are named GetMaintenancePlanHandler, GetMaintenancePlanSummariesHandler, GetOdometerReadingsHandler, SearchAlertsHandler, GetRoutineTypesHandler; queries stay in their feature folder.",
+      "Infra query classes are public sealed and take MaintenanceDbContext; the host must register them as scoped for the IXxxQueries ports (no AddQueryHandlers scan covers them).",
+      "Plan summaries and details count only active routines; InactiveCount is separate. Pistas km/time come from the domain evaluators in the Infrastructure projector.",
+      "DI must register scoped IMaintenancePlanRepository, IRoutineTypeRepository, IAlertRepository, IOdometerReadingLog and IUnitOfWork->MaintenanceUnitOfWork (after AddRutaVivaPersistence), plus singleton …",
+      "GetActivePlanIdsPageAsync uses FromSqlRaw 'WHERE [VehicleId] > {0}' (Guid.Empty when after is null) so the keyset order matches SQL Server uniqueidentifier ordering.",
+      "GetCatalogAsync uses a tracked ToListAsync on RoutineTypes, so already-tracked entities with unsaved changes win over database values.",
+      "AddMaintenance reads ConnectionStrings:RutaViva eagerly and throws InvalidOperationException if missing; EventBus:HubUrl is read lazily from configuration.",
+      "Domain-event handlers and integration-event mappers are registered as Scoped via a Scrutor scan of the Application assembly; IUnitOfWorkScopeFactory is Singleton.",
+      "AddMaintenance registers TimeProvider.System and SystemClock through TryAdd, so a host can override them.",
+      "Strong IDs serialize as plain GUID strings via MaintenanceIdJsonConverterFactory, registered in Program.cs with ConfigureHttpJsonOptions; without it DTOs would emit {value:...}.",
+      "UpdatedBy/AcknowledgedBy come from the request body (no auth yet). PUT/PATCH commands answer 204 via ToNoContentResult; failures use ToHttpResult.",
+      "Request field is dueSoonThresholdPercent (spec name) for routine and routine-type PUT; no PATCH plan status route because the registry has none."
+    ]
   },
   "implemented": [
     {
-      "agent": "P",
+      "agent": "J",
       "status": "complete",
-      "notes": "",
-      "files": []
+      "notes": "Resumed: handlers, validators, Infra queries and unit tests were already on disk from the earlier run; I reviewed them against the contracts. I added the missing integration tests under Persistence/Queries/ (TAN201 108%/-800, RVA104 counts, paged alerts with total, odometer, routine types). Nothing compiled or run. DI registration of the IXxxQueries ports is not in my folders.",
+      "files": [
+        "src/Services/Maintenance/RutaViva.Maintenance.Application/Plans/Queries/GetMaintenancePlanHandler.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Application/Plans/Queries/GetMaintenancePlanSummariesHandler.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Application/Telemetry/Queries/GetOdometerReadingsHandler.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Application/Telemetry/Queries/GetOdometerReadingsQueryValidator.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Application/Alerts/Queries/SearchAlertsHandler.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Application/Alerts/Queries/SearchAlertsQueryValidator.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Application/RoutineTypes/Queries/GetRoutineTypesHandler.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/AlertQueries.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/MaintenancePlanQueries.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/OdometerReadingQueries.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/PlanProjector.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/PlanReadRow.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/PlanStatistics.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/RoutineDetailProjector.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/RoutineReadRow.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/RoutineTypeQueries.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/Queries/GetMaintenancePlanHandlerTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/Queries/GetMaintenancePlanSummariesHandlerTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/Queries/GetOdometerReadingsHandlerTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/Queries/GetRoutineTypesHandlerTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/Queries/QueryTestData.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/Queries/SearchAlertsHandlerTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/Queries/RoutineSeed.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/Queries/QueryPlanSeeder.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/Queries/MaintenancePlanQueriesTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/Queries/AlertQueriesTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/Queries/OdometerReadingQueriesTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/Queries/RoutineTypeQueriesTests.cs"
+      ]
     },
     {
-      "agent": "S",
+      "agent": "R",
       "status": "complete",
-      "notes": "",
-      "files": []
+      "notes": "Nothing compiled or run, per instructions. Tests need SQL Server (RUTAVIVA_TEST_SQL). Risk to check at the gate: Contains on a List of LicensePlate (value converter) in GetByPlatesAsync, and the FromSqlRaw composition in GetActivePlanIdsPageAsync. UnitOfWorkScope is an internal sealed helper in its own file, inside my authorized folder.",
+      "files": [
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Repositories/MaintenancePlanRepository.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Repositories/RoutineTypeRepository.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Repositories/AlertRepository.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Repositories/OdometerReadingLog.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Repositories/MaintenanceUnitOfWork.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Repositories/UnitOfWorkScope.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Repositories/UnitOfWorkScopeFactory.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/Repositories/PlanSeeding.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/Repositories/AlertRepositoryTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/Repositories/MaintenanceUnitOfWorkTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/Repositories/MaintenancePlanRepositoryTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/Repositories/UnitOfWorkScopeFactoryTests.cs"
+      ]
     },
     {
-      "agent": "A",
+      "agent": "K",
       "status": "complete",
-      "notes": "",
-      "files": []
+      "notes": "The Scheduling files already existed from an earlier run; I reviewed them and left them unchanged. I wrote AddMaintenance and two test files. The DI test does not touch SQL Server, so it has no Integration trait. Nothing was compiled or run.",
+      "files": [
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Scheduling/TimeEvaluationScheduleOptions.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Scheduling/NextRunCalculator.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Scheduling/DailyTimeEvaluationScheduler.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/DependencyInjection/MaintenanceInfrastructureServiceCollectionExtensions.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Scheduling/NextRunCalculatorTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Scheduling/MaintenanceRegistrationTests.cs"
+      ]
     },
     {
-      "agent": "E",
+      "agent": "W",
       "status": "complete",
-      "notes": "",
-      "files": []
-    },
-    {
-      "agent": "D",
-      "status": "complete",
-      "notes": "",
-      "files": []
+      "notes": "Nothing was compiled or run. Program.cs and the appsettings files already met the spec; I only added the converter registration to Program.cs. Tests assume AddMaintenance registers IClock, the command/query handlers and the validation decorators, and that the factory's RemoveAll<IHostedService> removes the relay and subscriber. The unknown-plate bulk test asserts only outcome Invalid, not the error code.",
+      "files": [
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Program.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Contracts/TelemetryOdometerReadingRequest.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Contracts/TelemetryOdometerReadingResponse.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Contracts/TimeEvaluationRequest.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Contracts/ReevaluationRequest.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Contracts/UpdateRoutineParametersRequest.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Contracts/ChangeRoutineStateRequest.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Contracts/UpdateRoutineTypeParametersRequest.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Contracts/AcknowledgeAlertRequest.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Serialization/MaintenanceIdJsonConverterFactory.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Serialization/MaintenanceIdJsonConverter.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Endpoints/OptionalIdentifiers.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Endpoints/NoContentResultExtensions.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Endpoints/TelemetryEndpoints.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Endpoints/TimeEvaluationEndpoints.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Endpoints/PlanEndpoints.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Endpoints/RoutineEndpoints.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Endpoints/RoutineTypeEndpoints.cs",
+        "src/Services/Maintenance/RutaViva.Maintenance.Api/Endpoints/AlertEndpoints.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Api/MaintenanceApiFactory.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Api/TelemetryEndpointsTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Api/TimeEvaluationEndpointsTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Api/PlanEndpointsTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Api/RoutineEndpointsTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Api/RoutineTypeEndpointsTests.cs",
+        "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Api/AlertEndpointsTests.cs"
+      ]
     }
   ],
   "history": [
     {
       "round": 0,
       "gate": {
+        "passed": false,
+        "failedCheck": "4-build"
+      }
+    },
+    {
+      "round": 1,
+      "gate": {
+        "passed": false,
+        "failedCheck": "5-tests"
+      }
+    },
+    {
+      "round": 2,
+      "gate": {
         "passed": true,
         "failedCheck": null
       }
     },
     {
-      "round": 0,
+      "round": 2,
       "verdict": [
         {
-          "taskId": "10.1",
+          "taskId": "6.9",
           "passed": true
         },
         {
-          "taskId": "10.2",
+          "taskId": "7.3",
           "passed": true
         },
         {
-          "taskId": "10.3",
-          "passed": false
+          "taskId": "7.2",
+          "passed": true
         },
         {
-          "taskId": "10.6",
-          "passed": false
+          "taskId": "7.4",
+          "passed": true
         },
         {
-          "taskId": "10.4",
-          "passed": false
+          "taskId": "8.1",
+          "passed": true
         },
         {
-          "taskId": "10.5",
+          "taskId": "8.2",
           "passed": true
         }
       ]
