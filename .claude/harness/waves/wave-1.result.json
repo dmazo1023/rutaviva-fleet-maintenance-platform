@@ -2,120 +2,36 @@
   "wave": "1",
   "verified": [
     "2.1",
+    "3.1",
     "2.2",
+    "4.1",
     "2.3",
-    "10.2",
-    "10.1"
+    "6.1"
   ],
   "escalated": [],
   "unaccounted": [],
   "handoff": {
-    "exports": {
-      "Common/MaintenanceErrors.cs": "static class MaintenanceErrors: static readonly Error MaintenancePlanNotFound, RoutineTypeNotFound, RoutineNotFound, AlertNotFound, RoutineAlreadyExists, RoutineLastServiceKmAboveOdometer, RoutineIncompleteLastService, BulkDuplicateInBatch, AlertInvalidTransition, AlertAcknowledgedByRequired, UpdatedByRequired, RoutineTypeNameRequired, IdentifierEmpty, LicensePlateInvalid, RoutineTypeCodeInvalid, OdometerKilometersNegative, OdometerReadingKilometersNegative, MaintenanceIntervalEmpty/KilometersNotPositive/MonthsNotPositive/MonthsTooLarge, DueSoonThresholdOutOfRange, MaintenanceCycleNumberInvalid/StartKmNegative, ServiceRecordKilometersNegative, EvaluationContextKilometersNegative",
-      "Common/VehicleId.cs (same shape: RoutineId, RoutineTypeId, AlertId, CustomerId)": "readonly record struct VehicleId { VehicleId(Guid value) /*throws on empty*/; Guid Value; static VehicleId New(); static Result<VehicleId> Create(Guid) }",
-      "Common/MaintenanceTimeZone.cs": "static class: const string BogotaId; static readonly TimeZoneInfo Bogota; static DateOnly ToLocalDate(DateTimeOffset)",
-      "Plans/ValueObjects/*.cs": "LicensePlate.Create(string?) Value; Odometer.Create(long,DateTimeOffset) Kilometers ReadAt IsAdvancedBy(OdometerReading) Advance(OdometerReading); OdometerReading.Create(long,DateTimeOffset); MaintenanceInterval.Create(int?,int?) Kilometers Months HasDistance HasTime; DueSoonThreshold.Create(decimal) Percent Of(decimal); RoutineOverrides.Create(int? km,int? months,decimal? pct) IntervalKm IntervalMonths DueSoonPercent None",
-      "Plans/ValueObjects/EffectiveRoutineParameters.cs": "static Result<EffectiveRoutineParameters> Resolve(MaintenanceInterval typeInterval, DueSoonThreshold typeThreshold, RoutineOverrides overrides); Interval; DueSoonThreshold; IntervalKilometersSource; IntervalMonthsSource; DueSoonSource (ParameterSource)",
-      "Plans/ValueObjects/MaintenanceCycle.cs": "Number StartKm(long) StartDate; static Result<MaintenanceCycle> Create(int,long,DateOnly); static Result<MaintenanceCycle> Start(long,DateOnly); MaintenanceCycle Next(ServiceRecord)",
-      "Plans/ValueObjects/NextDue.cs, ServiceRecord.cs, EvaluationContext.cs": "NextDue.Calculate(MaintenanceCycle, MaintenanceInterval) -> long? Kilometers, DateOnly? Date; ServiceRecord.Create(long,DateOnly) Kilometers Date; EvaluationContext.Create(long odometerKm, DateOnly effectiveDate) OdometerKm EffectiveDate",
-      "RoutineTypes/ValueObjects/RoutineTypeCode.cs": "namespace ...Domain.RoutineTypes.ValueObjects; RoutineTypeCode.Create(string?) Value (trim + upper, ^[A-Z][A-Z0-9_]{0,29}$)",
-      "Enums (Plans/Alerts/RoutineTypes)": "RoutineTypeStatus{Active,Inactive} MaintenancePlanStatus{Active,Suspended} RoutineState{Active,Inactive} RoutineDueStatus{UpToDate,DueSoon,Overdue} DueDimension{Distance,Time} OdometerReadingOutcome{Accepted,Ignored} OdometerReadingIgnoredReason{NotGreaterThanCurrent,UnknownVehicle} ParameterSource{RoutineType,Override} AlertType{DueSoon,Overdue} AlertTrigger{Distance,Time,DistanceAndTime} AlertStatus{Active,Acknowledged,Resolved} AlertResolutionReason{RoutineRestarted,EscalatedToOverdue,ParametersChanged,RoutineDeactivated}",
-      "Plans/Events/RoutineStatusSnapshot.cs": "sealed record RoutineStatusSnapshot(RoutineId RoutineId, VehicleId VehicleId, LicensePlate Plate, CustomerId CustomerId, RoutineTypeCode RoutineTypeCode, string RoutineName, RoutineState State, RoutineDueStatus DueStatus, int CycleNumber, long CycleStartKm, DateOnly CycleStartDate, int? IntervalKm, int? IntervalMonths, decimal EffectiveDueSoonPercent, NextDue NextDue, long OdometerKm, decimal ConsumedPercent)",
-      "Plans/Events/*.cs": "RoutineRegistered(Snapshot, OccurredAt); RoutineBecameDueSoon(Snapshot, AlertTrigger Trigger, bool IsFirstNoticeInCycle, OccurredAt); RoutineBecameOverdue(Snapshot, AlertTrigger Trigger, OccurredAt); RoutineDueStatusReverted(Snapshot, OccurredAt); RoutineRestarted(Snapshot, Guid ServiceOrderId, ServiceRecord Service, OccurredAt); RoutineStateChanged(Snapshot, OccurredAt); RoutineParametersChanged(Snapshot, OccurredAt); MaintenancePlanStatusChanged(VehicleId, LicensePlate Plate, CustomerId, MaintenancePlanStatus Status, OccurredAt)",
-      "Alerts/Events/AlertRaised.cs": "sealed record AlertRaised(AlertId AlertId, VehicleId VehicleId, LicensePlate Plate, CustomerId CustomerId, RoutineId RoutineId, string RoutineName, int CycleNumber, AlertType Type, AlertTrigger Trigger, AlertStatus Status, DateTimeOffset RaisedAt, DateTimeOffset OccurredAt)",
-      "Alerts/Events/AlertStatusChanged.cs": "sealed record AlertStatusChanged(AlertId AlertId, VehicleId VehicleId, LicensePlate Plate, CustomerId CustomerId, RoutineId RoutineId, AlertType Type, AlertTrigger Trigger, AlertStatus Status, DateTimeOffset? AcknowledgedAt, string? AcknowledgedBy, DateTimeOffset? ResolvedAt, AlertResolutionReason? ResolutionReason, DateTimeOffset OccurredAt)",
-      "RoutineTypes/Events/RoutineTypeParametersChanged.cs": "sealed record RoutineTypeParametersChanged(RoutineTypeId RoutineTypeId, DateTimeOffset OccurredAt)"
-    },
-    "decisions": [
-      "MaintenanceErrors es plana: MaintenanceErrors.RoutineAlreadyExists, .MaintenancePlanNotFound, etc. (nombre = codigo sin punto). Tambien UpdatedByRequired, RoutineTypeNameRequired, AlertAcknowledgedByR…",
-      "ValueObject del repo es abstract record sin GetEqualityComponents: los VOs son sealed record con ctor privado y propiedades get-only. Km como long; intervalos y overrides como int?.",
-      "EffectiveRoutineParameters.Resolve recibe (MaintenanceInterval, DueSoonThreshold, RoutineOverrides), no RoutineTypeParameters; expone Interval/DueSoonThreshold y 3 fuentes. Meses de intervalo max 1200…",
-      "AlertRaised y AlertStatusChanged llevan campos planos (ids, placa, ruta, ciclo) en vez de AlertOrigin, para no depender de ese VO; Alert debe volcarlos al emitir.",
-      "Se asumen enums de Plans y Alerts en sus namespaces raiz, ids en Common, LicensePlate/NextDue/ServiceRecord en Plans.ValueObjects y RoutineTypeCode en RoutineTypes.ValueObjects.",
-      "RoutineStatusSnapshot usa NextDue (VO) en vez de NextDueKm/NextDueDate; EffectiveDueSoonPercent es decimal. El mapper convierte al contrato."
-    ]
+    "exports": {},
+    "decisions": []
   },
   "implemented": [
     {
-      "agent": "M",
+      "agent": "C",
       "status": "complete",
-      "notes": "No compile ni ejecuté pruebas (lo hace la compuerta). Ids: ctor publico lanza ArgumentException con Guid vacio; Create devuelve Result con Identifier.Empty. Se agregaron Odometer.Advance, DueSoonThreshold.Of y MaintenanceCycle.Start como apoyo. Pruebas de ids y MaintenanceTimeZone viven en ValueObjects/StrongIdTests.cs por restriccion de carpetas. No se creo nada en Events/.",
-      "files": [
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineTypeStatus.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/MaintenancePlanStatus.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/RoutineState.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/RoutineDueStatus.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/DueDimension.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/OdometerReadingOutcome.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/OdometerReadingIgnoredReason.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ParameterSource.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/AlertType.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/AlertTrigger.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/AlertStatus.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/AlertResolutionReason.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/VehicleId.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/RoutineId.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/RoutineTypeId.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/AlertId.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/CustomerId.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/MaintenanceTimeZone.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Common/MaintenanceErrors.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/LicensePlate.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/Odometer.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/OdometerReading.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/MaintenanceInterval.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/DueSoonThreshold.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/RoutineOverrides.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/EffectiveRoutineParameters.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/MaintenanceCycle.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/NextDue.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/ServiceRecord.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ValueObjects/EvaluationContext.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/ValueObjects/RoutineTypeCode.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/LicensePlateTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/OdometerTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/MaintenanceIntervalTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/DueSoonThresholdTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/RoutineOverridesTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/EffectiveRoutineParametersTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/MaintenanceCycleTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/NextDueTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/EvaluationContextTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/RoutineTypeCodeTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/MaintenanceErrorsTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/ValueObjects/StrongIdTests.cs"
-      ]
+      "notes": "",
+      "files": []
     },
     {
-      "agent": "V",
+      "agent": "W",
       "status": "complete",
-      "notes": "Se creo un archivo por evento mas RoutineStatusSnapshot. Todos son sealed record con IDomainEvent y OccurredAt como ultimo parametro. Sin compilar. Si RoutineTypeCode o los enums quedan en otro namespace, ajustar los usings de RoutineStatusSnapshot.cs.",
-      "files": [
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineStatusSnapshot.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineRegistered.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineBecameDueSoon.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineBecameOverdue.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineDueStatusReverted.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineRestarted.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineStateChanged.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/RoutineParametersChanged.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Events/MaintenancePlanStatusChanged.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/Events/AlertRaised.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/Events/AlertStatusChanged.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/Events/RoutineTypeParametersChanged.cs"
-      ]
+      "notes": "",
+      "files": []
     },
     {
-      "agent": "S",
+      "agent": "F",
       "status": "complete",
-      "notes": "The repo is not a git repository, so I deleted samples/kafka/ with rm instead of git rm. Section 3 of the README now cites ADR-0014 and ADR-0017. Searching samples/ for 'kafka' finds nothing. The README's other sections are unchanged.",
-      "files": [
-        "samples/http/odometer-readings.http",
-        "samples/http/time-evaluations.http",
-        "samples/README.md",
-        "samples/kafka/maintenance-time-evaluation-requested.v1.jsonl",
-        "samples/kafka/telemetry-odometer-readings.v1.jsonl"
-      ]
+      "notes": "",
+      "files": []
     }
   ],
   "history": [
@@ -134,7 +50,15 @@
           "passed": true
         },
         {
+          "taskId": "3.1",
+          "passed": true
+        },
+        {
           "taskId": "2.2",
+          "passed": true
+        },
+        {
+          "taskId": "4.1",
           "passed": true
         },
         {
@@ -142,27 +66,7 @@
           "passed": true
         },
         {
-          "taskId": "10.1",
-          "passed": false
-        },
-        {
-          "taskId": "10.2",
-          "passed": true
-        }
-      ]
-    },
-    {
-      "round": 1,
-      "gate": {
-        "passed": true,
-        "failedCheck": null
-      }
-    },
-    {
-      "round": 1,
-      "verdict": [
-        {
-          "taskId": "10.1",
+          "taskId": "6.1",
           "passed": true
         }
       ]

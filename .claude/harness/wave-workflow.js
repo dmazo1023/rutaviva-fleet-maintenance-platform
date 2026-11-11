@@ -210,6 +210,7 @@ function absorb(agentId, taskIds, result) {
 async function runGate(attempt) {
   return agent(
     `Desde la raíz del repositorio ${input.repoRoot}, ejecuta exactamente este comando con la herramienta Bash (timeout 600000 ms) y reporta el resultado sin modificar archivos:\n${input.gateCommand}\n` +
+    'No uses run_in_background ni Monitor. Si la herramienta mueve el comando al segundo plano, espera su notificación de fin y lee la salida completa antes de responder. Nunca respondas con un resultado incompleto: el veredicto exige el código de salida final.\n' +
     'passed=true solo si el código de salida es 0. En failedCheck pon el nombre del chequeo que falló (por ejemplo 4-build). En summary copia como máximo 30 líneas del error, con las rutas de archivo tal como aparecen. Si falla un test y el error no trae la ruta de su archivo, busca con Grep el nombre del método del test y agrega al summary la ruta relativa del archivo que lo contiene, para que se reactive solo al agente dueño.',
     { label: `gate:${attempt}`, phase: 'Gate', schema: GATE_SCHEMA, model: 'haiku', effort: 'low' })
 }

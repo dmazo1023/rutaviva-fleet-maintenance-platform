@@ -1,0 +1,10 @@
+using RutaViva.BuildingBlocks.Domain.Events;
+using RutaViva.Customers.Domain.Common;
+
+namespace RutaViva.Customers.Domain.Events;
+
+public sealed record ApproverStatusChanged(
+    ApproverId ApproverId,
+    CustomerId CustomerId,
+    ApproverStatus Status,
+    DateTimeOffset OccurredAt) : IDomainEvent;

@@ -1,12 +1,10 @@
 {
   "agents": [
-    { "id": "M5.J", "tasks": 2, "files": ["src/Services/Maintenance/RutaViva.Maintenance.Application/Plans/Queries/", "src/Services/Maintenance/RutaViva.Maintenance.Application/Telemetry/Queries/", "src/Services/Maintenance/RutaViva.Maintenance.Application/Alerts/Queries/", "src/Services/Maintenance/RutaViva.Maintenance.Application/RoutineTypes/Queries/", "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Queries/", "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/Queries/", "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/Queries/"],
-      "read": ["openspec/changes/maintenance-core/design.md#L111-L130", "openspec/changes/maintenance-core/design.md#L215-L234", {"label": "puertos de consulta, DTOs y configuraciones EF", "lines": 300}], "writeLines": 750, "skills": 1 },
-    { "id": "M5.R", "tasks": 1, "files": ["src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/Repositories/", "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/Repositories/"],
-      "read": ["openspec/changes/maintenance-core/design.md#L182-L214", {"label": "puertos, DbContext, EfUnitOfWork", "lines": 250}], "writeLines": 500, "skills": 1 },
-    { "id": "M5.K", "tasks": 1, "files": ["src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Scheduling/", "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/DependencyInjection/", "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Scheduling/"],
-      "read": ["openspec/changes/maintenance-core/design.md#L242-L245", {"label": "extensiones de BuildingBlocks (persistence, relay, subscriber, handlers)", "lines": 250}, {"label": "lista de handlers y mappers de Application", "lines": 120}], "writeLines": 450, "skills": 1 },
-    { "id": "M5.W", "tasks": 2, "files": ["src/Services/Maintenance/RutaViva.Maintenance.Api/", "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Api/"],
-      "read": ["openspec/changes/maintenance-core/specs/odometer-ingestion/spec.md", "openspec/changes/maintenance-core/specs/time-evaluation/spec.md", "openspec/changes/maintenance-core/specs/routine-administration/spec.md", {"label": "commands/queries, BuildingBlocks.Api, contratos de endpoints del registro", "lines": 300}], "writeLines": 700, "skills": 1 }
+    { "id": "S1.C", "tasks": 2, "files": ["src/Services/Customers/RutaViva.Customers.Domain/", "tests/Services/Customers/RutaViva.Customers.Domain.UnitTests/"],
+      "read": ["openspec/changes/supporting-contexts/design.md#L19-L36", "openspec/changes/supporting-contexts/specs/customer-management/spec.md", {"label": "BuildingBlocks.Domain + ejemplos de VOs de Maintenance", "lines": 220}], "writeLines": 650, "skills": 1 },
+    { "id": "S1.W", "tasks": 2, "files": ["src/Services/Workshops/RutaViva.Workshops.Domain/", "tests/Services/Workshops/RutaViva.Workshops.Domain.UnitTests/"],
+      "read": ["openspec/changes/supporting-contexts/design.md#L19-L36", "openspec/changes/supporting-contexts/specs/workshop-management/spec.md", {"label": "BuildingBlocks.Domain + ejemplos", "lines": 220}], "writeLines": 450, "skills": 1 },
+    { "id": "S1.F", "tasks": 2, "files": ["src/Services/Fleet/RutaViva.Fleet.Domain/", "tests/Services/Fleet/RutaViva.Fleet.Domain.UnitTests/"],
+      "read": ["openspec/changes/supporting-contexts/design.md#L19-L48", "openspec/changes/supporting-contexts/specs/fleet-vehicle-registry/spec.md", {"label": "BuildingBlocks.Domain + ejemplos", "lines": 220}], "writeLines": 700, "skills": 1 }
   ]
 }
