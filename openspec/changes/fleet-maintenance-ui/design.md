@@ -1,6 +1,6 @@
 ## Context
 
-Motivación en `proposal.md`. El diseño visual está aprobado y congelado (`mockups/crm-flota.mockup.html` v3, `mockups/crm-flota.handoff.md`, `mockups/design-system/MASTER.md`). Este documento define cómo se estructura la SPA para que el código refleje los mismos bounded contexts del backend y no duplique reglas de negocio.
+Motivación en `proposal.md`. El diseño visual está aprobado y congelado (`docs/ux/crm-flota.mockup.html` v3, `docs/ux/crm-flota.handoff.md`, `docs/ux/design-system/MASTER.md`). Este documento define cómo se estructura la SPA para que el código refleje los mismos bounded contexts del backend y no duplique reglas de negocio.
 
 Insumos que se consumen sin redefinir:
 - Endpoints: `openspec/changes/foundation-platform/design.md#endpoints-públicos` (rutas normalizadas D-09; las rutas del handoff §2 quedan reemplazadas, p. ej. `/api/v1/alerts` → `/api/v1/maintenance/alerts`).

@@ -5,7 +5,7 @@ context: |
   Entrega: jueves 2026-11-12 antes de las 05:00 (último commit y enlace al repositorio público).
   Fuentes de verdad (leer por sección, nunca completas): docs/architecture/analisis-del-reto.md,
   docs/architecture/data-model.md, docs/adr/README.md (solo ADRs en estado Proposed; los Superseded no aplican),
-  mockups/crm-flota.handoff.md, mockups/design-system/MASTER.md y samples/README.md.
+  docs/ux/crm-flota.handoff.md, docs/ux/design-system/MASTER.md y samples/README.md.
   Regla de precedencia ante contradicciones: prevalece el ADR vigente más reciente sobre el análisis, el modelo de datos,
   el handoff y las muestras.
   Stack: .NET 10 / C# 14, ASP.NET Core Minimal API, EF Core 10 sobre SQL Server localhost (una BD RutaViva, un schema y un

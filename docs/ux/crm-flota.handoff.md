@@ -2,11 +2,11 @@
 
 | Campo | Valor |
 |---|---|
-| Mockup aprobado | `mockups/crm-flota.mockup.html` · **aprobado v3** · 2026-11-10 |
-| Sistema de diseño | Externo RutaViva con toques Doggie (`mockups/design-system/MASTER.md`) |
-| Stack | Angular 22 standalone, signals, zoneless ([ADR-0008](../docs/adr/adr-0008-tech-angular-22-frontend.md)) |
+| Mockup aprobado | `docs/ux/crm-flota.mockup.html` · **aprobado v3** · 2026-11-10 |
+| Sistema de diseño | Externo RutaViva con toques Doggie (`docs/ux/design-system/MASTER.md`) |
+| Stack | Angular 22 standalone, signals, zoneless ([ADR-0008](../adr/adr-0008-tech-angular-22-frontend.md)) |
 | Micro fronts | **1 SPA** (`src/Web/rutaviva-fleet-maintenance-ui`), con features por bounded context. ADR-0008 ALT-001 descarta los micro fronts |
-| Historial | `mockups/crm-flota.changelog.md` (v1 → aprobado v3) |
+| Historial | `docs/ux/crm-flota.changelog.md` (v1 → aprobado v3) |
 
 ## 1. Resumen de diseño
 

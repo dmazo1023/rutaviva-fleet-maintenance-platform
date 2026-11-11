@@ -1,6 +1,6 @@
 ## Why
 
-El reto exige una interfaz de usuario con su backend. Los servicios de RutaViva exponen reglas ricas (RN-1 a RN-6, 9 estados de la orden, alertas, parámetros editables y carga inicial), pero sin el CRM el jefe de flota, el aprobador y el taller no pueden operarlas ni ver su efecto en tiempo real. El mockup aprobado v3 (`mockups/crm-flota.handoff.md`) fija el diseño; este change lo convierte en una SPA mantenible que **no duplica reglas de negocio**: las acciones de la orden llegan del backend (`availableActions`, ADR-0003 IMP-005) y los cambios llegan por SignalR (ADR-0016).
+El reto exige una interfaz de usuario con su backend. Los servicios de RutaViva exponen reglas ricas (RN-1 a RN-6, 9 estados de la orden, alertas, parámetros editables y carga inicial), pero sin el CRM el jefe de flota, el aprobador y el taller no pueden operarlas ni ver su efecto en tiempo real. El mockup aprobado v3 (`docs/ux/crm-flota.handoff.md`) fija el diseño; este change lo convierte en una SPA mantenible que **no duplica reglas de negocio**: las acciones de la orden llegan del backend (`availableActions`, ADR-0003 IMP-005) y los cambios llegan por SignalR (ADR-0016).
 
 Corresponde al corte **S5** del análisis (§10).
 
@@ -11,7 +11,7 @@ Corresponde al corte **S5** del análisis (§10).
 - Shell: rail de navegación con contadores, barra superior con indicador «En vivo» y botón «Actualizar» (ADR-0019, `POST /api/v1/maintenance/reevaluations`), salida de avisos.
 - `shared/`: componentes presentacionales del handoff §3, incluida la **firma** `routine-track`.
 - *Features*: `fleet` (lista, detalle, desactivar vehículo), `maintenance` (rutinas, ajustar parámetros con vista previa, activar/desactivar, lecturas de odómetro de ADR-0025, alertas), `service-orders` (bandeja priorizada, detalle, líneas, acciones desde `availableActions`, diálogos de datos y de confirmación con impacto), `administration` (matriz de tipos de rutina y política de aprobación automática), `data-import`, `reports` y `simulators` (lectura de odómetro y revisión por fecha contra los endpoints reales de Maintenance, ADR-0014 y ADR-0017).
-- Tokens de diseño en `src/styles/_tokens.scss` a partir de `mockups/design-system/MASTER.md`, tema claro y oscuro.
+- Tokens de diseño en `src/styles/_tokens.scss` a partir de `docs/ux/design-system/MASTER.md`, tema claro y oscuro.
 - Pruebas unitarias con el *runner* por defecto de Angular 22 (Vitest) y E2E con Playwright (ADR-0008 IMP-003) **(Recortable)**.
 
 ## Capabilities

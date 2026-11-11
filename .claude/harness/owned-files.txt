@@ -30,3 +30,6 @@ docs/architecture/data-model.md
 docs/architecture/database/rutaviva-reference-schema.sql
 dotnet-tools.json
 .editorconfig
+docs/ux/
+mockups/
+.gitignore

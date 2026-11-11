@@ -20,7 +20,7 @@ superseded_by: ""
 
 ## Contexto
 
-- El mockup aprobado (v3) tiene la pestaña **«Lecturas»** en el detalle del vehículo. Muestra las lecturas recibidas y tacha las ignoradas por RN-6 con su motivo (`mockups/crm-flota.handoff.md`, §5, bloque B2).
+- El mockup aprobado (v3) tiene la pestaña **«Lecturas»** en el detalle del vehículo. Muestra las lecturas recibidas y tacha las ignoradas por RN-6 con su motivo (`docs/ux/crm-flota.handoff.md`, §5, bloque B2).
 - El ADR-0014 IMP-003 descartó guardar el historial por YAGNI, y el handoff dejó la contradicción como pregunta abierta.
 - El equipo decidió conservar la pestaña: hace visible en la demo que la monotonía (RN-6) funciona, sin depender de leer logs.
 - Guardar las lecturas dentro de `MaintenancePlan` haría crecer el agregado sin límite y obligaría a cargar todo el historial en cada lectura nueva.
@@ -87,7 +87,7 @@ Registraremos cada lectura de un vehículo conocido en **`maintenance.OdometerRe
 | ID | Referencia |
 |---|---|
 | REF-001 | adr-0014-data-odometer-ingestion-acl: decisión que se enmienda (IMP-003) |
-| REF-002 | `mockups/crm-flota.handoff.md` §5 y §10 |
+| REF-002 | `docs/ux/crm-flota.handoff.md` §5 y §10 |
 | REF-003 | Vernon, V. (2013). *Implementing Domain-Driven Design*, cap. 10: Design small aggregates |
 
 ---
