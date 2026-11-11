@@ -1,10 +1,8 @@
 {
   "agents": [
-    { "id": "3.K", "tasks": 2, "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/DomainEvents/", "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/DomainEvents/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/"],
-      "read": ["openspec/changes/foundation-platform/design.md#L154-L174", "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/RutaVivaModelBuilderExtensions.cs", {"label": "pruebas de persistencia existentes", "lines": 150}], "writeLines": 550, "skills": 1 },
-    { "id": "3.L", "tasks": 2, "files": ["src/Platform/EventBus/RutaViva.EventBus.Infrastructure/", "src/Platform/EventBus/RutaViva.EventBus.Hub/", "tests/Platform/RutaViva.EventBus.Hub.IntegrationTests/"],
-      "read": ["openspec/changes/foundation-platform/design.md#L175-L181", "openspec/changes/foundation-platform/specs/event-bus/spec.md"], "writeLines": 750, "skills": 1 },
-    { "id": "3.Q", "tasks": 1, "files": ["docs/architecture/data-model.md", "docs/architecture/database/rutaviva-reference-schema.sql"],
-      "read": ["docs/architecture/data-model.md", "docs/architecture/database/rutaviva-reference-schema.sql", "openspec/changes/foundation-platform/design.md#L164-L174", "openspec/changes/foundation-platform/design.md#L334-L347", "docs/adr/adr-0025-data-odometer-reading-log.md#L30-L50"], "writeLines": 300, "skills": 0 }
+    { "id": "4.N", "tasks": 1, "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Publishing/"],
+      "read": ["openspec/changes/foundation-platform/design.md#L182-L190", "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/OutboxMessage.cs", "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Connection/EventBusConnectionFactory.cs", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/EventBusTestServer.cs", {"label": "pruebas de Outbox existentes", "lines": 120}], "writeLines": 450, "skills": 1 },
+    { "id": "4.O", "tasks": 2, "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/"],
+      "read": ["openspec/changes/foundation-platform/design.md#L182-L190", "openspec/changes/foundation-platform/specs/reliable-messaging/spec.md", "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Connection/EventBusConnectionFactory.cs", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/EventBusTestServer.cs", "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/EfEventCheckpointStore.cs"], "writeLines": 800, "skills": 1 }
   ]
 }

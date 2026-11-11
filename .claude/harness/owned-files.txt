@@ -33,3 +33,6 @@ dotnet-tools.json
 docs/ux/
 mockups/
 .gitignore
+src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/
+tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/
+Directory.Packages.props
