@@ -170,7 +170,7 @@ Un evento de dominio no se publica tal cual: el *mapper* lo traduce a un contrat
 | `eventbus.Events` | `Offset bigint identity PK`, `MessageId uniqueidentifier UK`, `Stream`, `Type`, `Subject`, `OccurredAt`, `StoredAt`, `Payload nvarchar(max)` |
 | `eventbus.DeadLetters` | `Id bigint identity PK`, `SubscriberName`, `Offset`, `Error nvarchar(2000)`, `ReportedAt` |
 
-Configuraciones EF compartidas: `OutboxMessageConfiguration`, `EventCheckpointConfiguration` y la extensión `modelBuilder.ApplyRutaVivaConventions()` (enums por nombre `varchar(20)`, `datetimeoffset(0)`, `decimal(18,2)`, `rowversion` en raíces mediante la interfaz marcadora `IHasRowVersion`).
+Configuraciones EF compartidas: `OutboxMessageConfiguration`, `EventCheckpointConfiguration` y la extensión `modelBuilder.ApplyRutaVivaConventions()` (enums por nombre `varchar(20)`, `datetimeoffset(0)`, `decimal(18,2)`, `rowversion` como **propiedad sombra** `RowVersion` en toda entidad que hereda de `AggregateRoot<>`, de modo que el dominio no conoce la persistencia).
 
 ### D-06 Servicio EventBus
 

@@ -24,6 +24,7 @@
 - [x] 4.2 `EfUnitOfWork<TContext>` con traducción de `DbUpdateConcurrencyException` a `Concurrency.Conflict` y estrategia de ejecución. Verificar con prueba de integración (BD desechable `SqlServerTestDatabase`, ADR-0027) de dos guardados concurrentes que devuelve `ErrorType.Conflict`
 - [ ] 4.3 `DomainEventsToOutboxInterceptor` (design D-04): handlers internos, mappers a integración, Outbox y tope de 5 vueltas. Verificar con pruebas de integración: evento con efecto interno confirmado juntos; transacción fallida sin filas en Outbox; ciclo infinito devuelve error
 - [x] 4.4 `OutboxIntegrationEventPublisher : IIntegrationEventPublisher` (escribe en el Outbox de la unidad de trabajo actual) y `EfEventCheckpointStore<TContext>`. Verificar con prueba de integración: un `Enqueue` sin `SaveChangesAsync` no deja filas y con `SaveChangesAsync` deja una
+- [ ] 4.5 Concurrencia sin acoplar el dominio a la persistencia: `ApplyRutaVivaConventions` agrega la propiedad sombra `RowVersion` (`rowversion`) a toda entidad del modelo que hereda de `AggregateRoot<>` y se elimina `IHasRowVersion` (design D-05). Verificar con la prueba de convenciones (columna `rowversion` en una raíz de agregado de prueba sin propiedad `RowVersion` en su clase) y con la prueba de concurrencia de `EfUnitOfWork` usando esa raíz
 
 ## 5. Servicio EventBus
 

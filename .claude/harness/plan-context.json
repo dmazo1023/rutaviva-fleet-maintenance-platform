@@ -1,44 +1,10 @@
 {
   "agents": [
-    {
-      "id": "2.F",
-      "tasks": 3,
-      "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/", "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Messaging/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Messaging/"],
-      "read": ["openspec/changes/foundation-platform/design.md#L118-L174", "tests/RutaViva.Testing.Fixtures/SqlServerTestDatabase.cs"],
-      "writeLines": 650,
-      "skills": 1
-    },
-    {
-      "id": "2.H",
-      "tasks": 1,
-      "files": ["src/Platform/EventBus/RutaViva.EventBus.Application/", "tests/Platform/RutaViva.EventBus.Application.UnitTests/"],
-      "read": ["openspec/changes/foundation-platform/design.md#L175-L181", "openspec/changes/foundation-platform/design.md#L224-L227", "openspec/changes/foundation-platform/specs/event-bus/spec.md"],
-      "writeLines": 450,
-      "skills": 1
-    },
-    {
-      "id": "2.I",
-      "tasks": 1,
-      "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Api/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Api/"],
-      "read": ["openspec/changes/foundation-platform/design.md#L192-L202", "openspec/changes/foundation-platform/specs/api-conventions/spec.md"],
-      "writeLines": 420,
-      "skills": 1
-    },
-    {
-      "id": "2.J",
-      "tasks": 2,
-      "files": ["tests/RutaViva.Architecture.Tests/", "tests/RutaViva.IntegrationContracts.Tests/"],
-      "read": ["openspec/changes/foundation-platform/specs/architecture-governance/spec.md", "docs/adr/adr-0026-proc-naming-conventions.md#L29-L45", "openspec/changes/foundation-platform/design.md#L32-L95"],
-      "writeLines": 500,
-      "skills": 0
-    },
-    {
-      "id": "2.P",
-      "tasks": 1,
-      "files": ["src/Platform/RutaViva.ServiceDefaults/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/ServiceDefaults/"],
-      "read": ["openspec/changes/foundation-platform/specs/api-conventions/spec.md#L50-L60"],
-      "writeLines": 250,
-      "skills": 0
-    }
+    { "id": "3.K", "tasks": 2, "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/DomainEvents/", "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/DomainEvents/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Persistence/"],
+      "read": ["openspec/changes/foundation-platform/design.md#L154-L174", "src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Persistence/RutaVivaModelBuilderExtensions.cs", {"label": "pruebas de persistencia existentes", "lines": 150}], "writeLines": 550, "skills": 1 },
+    { "id": "3.L", "tasks": 2, "files": ["src/Platform/EventBus/RutaViva.EventBus.Infrastructure/", "src/Platform/EventBus/RutaViva.EventBus.Hub/", "tests/Platform/RutaViva.EventBus.Hub.IntegrationTests/"],
+      "read": ["openspec/changes/foundation-platform/design.md#L175-L181", "openspec/changes/foundation-platform/specs/event-bus/spec.md"], "writeLines": 750, "skills": 1 },
+    { "id": "3.Q", "tasks": 1, "files": ["docs/architecture/data-model.md", "docs/architecture/database/rutaviva-reference-schema.sql"],
+      "read": ["docs/architecture/data-model.md", "docs/architecture/database/rutaviva-reference-schema.sql", "openspec/changes/foundation-platform/design.md#L164-L174", "openspec/changes/foundation-platform/design.md#L334-L347", "docs/adr/adr-0025-data-odometer-reading-log.md#L30-L50"], "writeLines": 300, "skills": 0 }
   ]
 }

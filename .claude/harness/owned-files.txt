@@ -21,3 +21,10 @@ tests/RutaViva.Architecture.Tests/
 tests/RutaViva.IntegrationContracts.Tests/
 src/Platform/RutaViva.ServiceDefaults/
 tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/ServiceDefaults/
+src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/DomainEvents/
+tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/DomainEvents/
+src/Platform/EventBus/RutaViva.EventBus.Infrastructure/
+src/Platform/EventBus/RutaViva.EventBus.Hub/
+tests/Platform/RutaViva.EventBus.Hub.IntegrationTests/
+docs/architecture/data-model.md
+docs/architecture/database/rutaviva-reference-schema.sql
