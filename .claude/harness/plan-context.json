@@ -1,65 +1,106 @@
 {
  "agents": [
   {
-   "id": "M3.P",
+   "id": "M4.P",
    "tasks": 2,
    "files": [
-    "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/MaintenancePlan.cs",
-    "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/MaintenanceRoutine.cs",
-    "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Plans/"
+    "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/",
+    "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Plans/",
+    "src/Services/Maintenance/RutaViva.Maintenance.Application/RoutineTypes/",
+    "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/RoutineTypes/"
    ],
    "read": [
     "openspec/changes/maintenance-core/design.md#L60-L85",
-    "openspec/changes/maintenance-core/design.md#L131-L181",
-    "openspec/changes/maintenance-core/specs/maintenance-plan-evaluation/spec.md",
-    "samples/README.md#L1-L60",
+    "openspec/changes/maintenance-core/specs/routine-administration/spec.md",
     {
-     "label": "VOs, evaluación y eventos (firmas)",
-     "lines": 203
-    }
+     "label": "MaintenancePlan y MaintenanceRoutine actuales",
+     "lines": 344
+    },
+    "openspec/changes/maintenance-core/specs/routine-type-catalog/spec.md"
    ],
    "writeLines": 700,
    "skills": 1
   },
   {
-   "id": "M3.C",
-   "tasks": 1,
+   "id": "M4.T",
+   "tasks": 2,
    "files": [
-    "src/Services/Maintenance/RutaViva.Maintenance.Application/"
+    "src/Services/Maintenance/RutaViva.Maintenance.Application/Telemetry/",
+    "src/Services/Maintenance/RutaViva.Maintenance.Application/Evaluations/",
+    "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/Telemetry/",
+    "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/Evaluations/"
    ],
    "read": [
     "openspec/changes/maintenance-core/design.md#L182-L234",
+    "openspec/changes/maintenance-core/specs/odometer-ingestion/spec.md",
+    "openspec/changes/maintenance-core/specs/time-evaluation/spec.md",
     {
-     "label": "abstracciones de BuildingBlocks.Application",
-     "lines": 120
-    },
-    {
-     "label": "firmas de dominio",
-     "lines": 150
+     "label": "firmas",
+     "lines": 200
     }
    ],
-   "writeLines": 700,
+   "writeLines": 650,
    "skills": 1
   },
   {
-   "id": "M3.O",
-   "tasks": 1,
+   "id": "M4.U",
+   "tasks": 2,
    "files": [
-    "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/",
-    "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/"
+    "src/Services/Maintenance/RutaViva.Maintenance.Application/Routines/",
+    "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineParameterCatalog.cs",
+    "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/Routines/"
    ],
    "read": [
-    "openspec/changes/maintenance-core/design.md#L142-L181",
+    "openspec/changes/maintenance-core/design.md#L215-L234",
+    "openspec/changes/maintenance-core/specs/routine-administration/spec.md",
     {
-     "label": "contratos V1 de maintenance",
-     "lines": 220
-    },
-    {
-     "label": "eventos de dominio",
-     "lines": 150
+     "label": "firmas + Bulk de BuildingBlocks",
+     "lines": 250
     }
    ],
    "writeLines": 600,
+   "skills": 1
+  },
+  {
+   "id": "M4.V",
+   "tasks": 2,
+   "files": [
+    "src/Services/Maintenance/RutaViva.Maintenance.Application/Alerts/",
+    "src/Services/Maintenance/RutaViva.Maintenance.Application/Plans/",
+    "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Inbound/",
+    "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/Alerts/",
+    "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Inbound/",
+    "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/Plans/"
+   ],
+   "read": [
+    "openspec/changes/maintenance-core/specs/maintenance-alerts/spec.md",
+    {
+     "label": "firmas + contratos V1 inbound",
+     "lines": 280
+    }
+   ],
+   "writeLines": 750,
+   "skills": 1
+  },
+  {
+   "id": "M4.I",
+   "tasks": 1,
+   "files": [
+    "src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/Persistence/",
+    "tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/Persistence/"
+   ],
+   "read": [
+    "openspec/changes/maintenance-core/design.md#L235-L245",
+    {
+     "label": "data-model maintenance",
+     "lines": 120
+    },
+    {
+     "label": "dominio + puertos + BuildingBlocks persistence",
+     "lines": 300
+    }
+   ],
+   "writeLines": 550,
    "skills": 1
   }
  ]
