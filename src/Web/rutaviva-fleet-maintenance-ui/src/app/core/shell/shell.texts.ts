@@ -1,0 +1,27 @@
+export const SHELL_TEXTS = {
+  skipToContent: 'Saltar al contenido',
+  brandHomeAria: 'RutaViva, inicio',
+  navAriaLabel: 'Principal',
+  wordmarkPrefix: 'ruta',
+  wordmarkHighlight: 'viva',
+  liveOnline: 'En vivo',
+  liveReconnecting: 'Reconectando…',
+  refreshAria: 'Reevaluar con los parámetros vigentes',
+  refreshTooltip: 'Actualizar',
+  refreshBusyText: 'Actualizando…',
+  refreshDoneToast: 'Flota reevaluada',
+  customerAria: 'Cliente',
+  allCustomers: 'Todos los clientes',
+  profileAria: 'Perfil',
+  actorAria: 'Actor activo',
+  sections: {
+    fleet: 'Flota',
+    alerts: 'Alertas',
+    orders: 'Órdenes',
+    parameters: 'Parámetros',
+    import: 'Carga',
+    reports: 'Reportes',
+    simulators: 'Simulador',
+  },
+} as const;
+

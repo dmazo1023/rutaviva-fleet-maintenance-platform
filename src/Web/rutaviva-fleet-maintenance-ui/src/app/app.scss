@@ -1,0 +1,26 @@
+.app-shell {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  background: var(--bg-canvas);
+
+  @media (width <= 760px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.app-workspace {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: var(--space-5) clamp(var(--space-4), 3cqi, var(--space-8));
+  outline: none;
+}
+

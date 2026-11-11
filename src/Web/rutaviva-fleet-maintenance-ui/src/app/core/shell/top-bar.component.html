@@ -1,0 +1,87 @@
+<header class="topbar">
+  <span class="wordmark" aria-hidden="true">
+    {{ texts.wordmarkPrefix }}<span>{{ texts.wordmarkHighlight }}</span>
+  </span>
+  <span class="grow"></span>
+
+  <span class="live" [class.is-off]="!isLiveConnected()" role="status">
+    <i aria-hidden="true"></i>
+    <b>{{ liveLabel() }}</b>
+  </span>
+
+  <button
+    class="btn btn--ghost btn--s refresh-btn"
+    [class.is-spinning]="isRefreshing()"
+    type="button"
+    [disabled]="isRefreshing()"
+    [attr.aria-busy]="isRefreshing() ? 'true' : null"
+    [attr.aria-label]="texts.refreshAria"
+    [attr.data-tip]="texts.refreshTooltip"
+    (click)="onRefreshClick()"
+  >
+    <span class="ms ms--s" aria-hidden="true">refresh</span>
+    <span class="refresh-text">{{ refreshButtonLabel() }}</span>
+  </button>
+
+  <div class="select select--icon select--cust">
+    <span class="ms ms--s" aria-hidden="true">apartment</span>
+    <select
+      [attr.aria-label]="texts.customerAria"
+      [value]="sessionStore.customerId()"
+      (change)="onCustomerChange($event)"
+    >
+      <option value="">{{ texts.allCustomers }}</option>
+      @for (customer of sessionStore.customers(); track customer.id) {
+        <option [value]="customer.id">{{ customer.name }}</option>
+      }
+    </select>
+    <span class="ms ms--s" aria-hidden="true">expand_more</span>
+  </div>
+
+  <div class="select select--icon select--prof">
+    <span class="ms ms--s" aria-hidden="true">badge</span>
+    <select
+      [attr.aria-label]="texts.profileAria"
+      [value]="sessionStore.profile()"
+      (change)="onProfileChange($event)"
+    >
+      @for (opt of profileOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+    <span class="ms ms--s" aria-hidden="true">expand_more</span>
+  </div>
+
+  @if (sessionStore.profile() === 'Approver' && sessionStore.availableApprovers().length > 0) {
+    <div class="select select--icon select--actor">
+      <span class="ms ms--s" aria-hidden="true">person</span>
+      <select
+        [attr.aria-label]="texts.actorAria"
+        [value]="sessionStore.actorId() ?? ''"
+        (change)="onActorChange($event)"
+      >
+        @for (approver of sessionStore.availableApprovers(); track approver.id) {
+          <option [value]="approver.id">{{ approver.fullName }}</option>
+        }
+      </select>
+      <span class="ms ms--s" aria-hidden="true">expand_more</span>
+    </div>
+  }
+
+  @if (sessionStore.profile() === 'Workshop' && sessionStore.workshops().length > 0) {
+    <div class="select select--icon select--actor">
+      <span class="ms ms--s" aria-hidden="true">build</span>
+      <select
+        [attr.aria-label]="texts.actorAria"
+        [value]="sessionStore.actorId() ?? ''"
+        (change)="onActorChange($event)"
+      >
+        @for (workshop of sessionStore.workshops(); track workshop.id) {
+          <option [value]="workshop.id">{{ workshop.name }}</option>
+        }
+      </select>
+      <span class="ms ms--s" aria-hidden="true">expand_more</span>
+    </div>
+  }
+</header>
+

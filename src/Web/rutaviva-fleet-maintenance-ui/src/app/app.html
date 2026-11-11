@@ -1,2 +1,11 @@
-<h1>{{ title() }}</h1>
-<router-outlet />
+<app-skip-link />
+<div class="app-shell">
+  <app-shell-rail />
+  <div class="app-workspace">
+    <app-top-bar />
+    <main id="main" tabindex="-1" class="app-main">
+      <router-outlet />
+    </main>
+  </div>
+</div>
+<app-toast-outlet />
