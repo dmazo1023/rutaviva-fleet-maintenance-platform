@@ -1,0 +1,117 @@
+{
+  "wave": "4",
+  "verified": [
+    "6.1",
+    "6.2",
+    "6.3"
+  ],
+  "escalated": [],
+  "unaccounted": [],
+  "handoff": {
+    "exports": {
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/EventBusPublisher.cs": "public sealed class EventBusPublisher : IIntegrationEventTransport, IAsyncDisposable { EventBusPublisher(IEventBusConnectionFactory connectionFactory); Task<long> SendAsync(string stream, IntegrationEventEnvelope envelope, CancellationToken cancellationToken); ValueTask DisposeAsync(); }",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/OutboxBatchProcessor.cs": "public sealed class OutboxBatchProcessor<TContext>(TContext context, IIntegrationEventTransport transport, IClock clock, ILogger<OutboxBatchProcessor<TContext>> logger) where TContext : DbContext { const int BatchSize = 50; Task ProcessAsync(CancellationToken cancellationToken); }",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/OutboxRelayService.cs": "public sealed class OutboxRelayService<TContext>(IServiceScopeFactory scopeFactory, ILogger<OutboxRelayService<TContext>> logger) : BackgroundService where TContext : DbContext { const int PollIntervalMilliseconds = 500; }",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/OutboxRelayServiceCollectionExtensions.cs": "public static class OutboxRelayServiceCollectionExtensions { static IServiceCollection AddOutboxRelay<TContext>(this IServiceCollection services, Action<EventBusClientOptions> configure) where TContext : DbContext; }",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/StartPosition.cs": "public enum StartPosition { Checkpoint = 1, Latest = 2 }",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/EventBusSubscriberServiceCollectionExtensions.cs": "public static EventBusSubscriberBuilder AddEventBusSubscriber(this IServiceCollection services, string subscriberName, StartPosition startFrom, Action<EventBusClientOptions> configure)",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/EventBusSubscriberBuilder.cs": "public sealed class EventBusSubscriberBuilder { Handle<TEvent, THandler>(string stream) where TEvent : IIntegrationEvent where THandler : class, IIntegrationEventHandler<TEvent>; HandleFamily<TMarker, THandler>(string stream) where TMarker : IIntegrationEvent where THandler : class, IIntegrationEventHandler<TMarker> }",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/InMemoryEventCheckpointStore.cs": "public sealed class InMemoryEventCheckpointStore : IEventCheckpointStore { GetLastOffsetAsync(string, CancellationToken); SaveAsync(string, long, CancellationToken) }",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/IntegrationEventDispatcher.cs": "internal sealed class IntegrationEventDispatcher { Task<Result> DispatchAsync(HubConnection connection, EventRecord record, CancellationToken ct) }",
+      "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/EventBusSubscriberHost.cs": "internal sealed class EventBusSubscriberHost : BackgroundService"
+    },
+    "decisions": [
+      "AddOutboxRelay requires the host to register IClock and the TContext DbContext; the batch processor is scoped and resolved per cycle by OutboxRelayService.",
+      "Transport is registered with TryAddSingleton so several AddOutboxRelay<TContext> calls in one host share a single EventBusPublisher.",
+      "A failure while deserializing a payload is treated as a delivery failure (RegisterFailure) and stops the batch, preserving order.",
+      "HandleFamily<TMarker,...> requires TMarker : IIntegrationEvent (needed for IIntegrationEventHandler<TMarker>); IRoutineSnapshotEvent/IServiceOrderSnapshotEvent do not extend it, so they must to be usa…",
+      "Registry key is the EventName; the dispatcher extracts it from envelope.Type (rutaviva.{svc}.{Name}.v1 -> Name, or the raw type if not in that format).",
+      "Host/dispatcher are internal; the service must register its own scoped IEventCheckpointStore and IUnitOfWork for Checkpoint (Latest gets in-memory and null defaults via TryAdd)."
+    ]
+  },
+  "implemented": [
+    {
+      "agent": "N",
+      "status": "complete",
+      "notes": "Not compiled or run. OutboxBatchProcessor catches every non-cancellation exception per message, registers the failure, and stops the batch; one SaveChanges per batch. Tests drive OutboxBatchProcessor directly (3 failing cycles, then success; OccurredAt order; hub idempotency). Note that RutaViva conventions store DateTimeOffset with precision 0 (seconds).",
+      "files": [
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/EventBusPublisher.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/OutboxBatchProcessor.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/OutboxRelayService.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/OutboxRelayServiceCollectionExtensions.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Publishing/OutboxRelayTestDbContext.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Publishing/FailingThenDelegatingTransport.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Publishing/OutboxBatchProcessorTests.cs"
+      ]
+    },
+    {
+      "agent": "O",
+      "status": "complete",
+      "notes": "Not compiled. Ola-3 gate caveat: IRoutineSnapshotEvent and IServiceOrderSnapshotEvent (IntegrationContracts, not mine) do not extend IIntegrationEvent, so HandleFamily<IRoutineSnapshotEvent,H> will not compile in later waves until they do; my family test uses a test-local marker. HandleFamily scans the IntegrationContracts assembly plus the marker's assembly. EventName is read by reflection in EventNames because IntegrationEventTypeInfo is internal. Retry test injects ImmediateTimeProvider via DI TimeProvider.",
+      "files": [
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/StartPosition.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/IEventDispatchStrategy.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/SkippedEventStrategy.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/HandlerDispatchStrategy.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/SubscriberErrors.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/SubscriberOptions.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/NullUnitOfWork.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/InMemoryEventCheckpointStore.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/EventNames.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/EventFamilyScanner.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/EventHandlerRegistry.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/SubscriberRetryPipeline.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/IntegrationEventDispatcher.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/EventBusSubscriberHost.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/EventBusSubscriberBuilder.cs",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/EventBusSubscriberServiceCollectionExtensions.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/ProcessedEffect.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/SubscribingTestDbContext.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/IFamilyEvent.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/FamilyFirstV1.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/FamilySecondV1.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/IgnoredHappenedV1.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/FailingHappenedV1.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/RecordEffectHandler.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/FamilyEffectHandler.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/AttemptCounter.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/FailingEffectHandler.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/ImmediateTimeProvider.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/Eventually.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/CapturingConnectionFactory.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/SubscribingTestNames.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/DeadLetterQuery.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/TestEventPublisher.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/SubscriberTestHost.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/EventBusSubscriberTests.cs",
+        "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/Subscribing/EventBusSubscriberRetryTests.cs"
+      ]
+    }
+  ],
+  "history": [
+    {
+      "round": 0,
+      "gate": {
+        "passed": true,
+        "failedCheck": null
+      }
+    },
+    {
+      "round": 0,
+      "verdict": [
+        {
+          "taskId": "6.1",
+          "passed": true
+        },
+        {
+          "taskId": "6.2",
+          "passed": true
+        },
+        {
+          "taskId": "6.3",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

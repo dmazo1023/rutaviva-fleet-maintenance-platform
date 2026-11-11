@@ -34,9 +34,9 @@
 
 ## 6. Cliente del EventBus
 
-- [ ] 6.1 `EventBusPublisher` y `OutboxRelayService` (500 ms, lote 50, `Attempts`/`LastError`). Verificar con prueba de integración: con el EventBus caído 3 ciclos el mensaje queda pendiente con 3 intentos y luego se publica una sola vez
-- [ ] 6.2 `EventBusSubscriberHost`, `IntegrationEventDispatcher`, *builder* `AddEventBusSubscriber(...).Handle<TEvent, THandler>(stream)` `HandleFamily<TMarker, THandler>(stream)`, `StartPosition`, `InMemoryEventCheckpointStore` y omisión de eventos sin handler (design D-07). Verificar con pruebas de integración: evento entregado 5 veces = 1 efecto; suscriptor detenido se pone al día con 3 eventos; aviso perdido se recupera en ≤ 5 s; evento sin handler avanza el checkpoint sin *dead letter*
-- [ ] 6.3 Reintentos 1/2/4 s con Polly v8 y `ReportFailure` con avance del checkpoint. Verificar con prueba de integración: handler que siempre falla genera 1 *dead letter* y el siguiente evento se procesa
+- [x] 6.1 `EventBusPublisher` y `OutboxRelayService` (500 ms, lote 50, `Attempts`/`LastError`). Verificar con prueba de integración: con el EventBus caído 3 ciclos el mensaje queda pendiente con 3 intentos y luego se publica una sola vez
+- [x] 6.2 `EventBusSubscriberHost`, `IntegrationEventDispatcher`, *builder* `AddEventBusSubscriber(...).Handle<TEvent, THandler>(stream)` `HandleFamily<TMarker, THandler>(stream)`, `StartPosition`, `InMemoryEventCheckpointStore` y omisión de eventos sin handler (design D-07). Verificar con pruebas de integración: evento entregado 5 veces = 1 efecto; suscriptor detenido se pone al día con 3 eventos; aviso perdido se recupera en ≤ 5 s; evento sin handler avanza el checkpoint sin *dead letter*
+- [x] 6.3 Reintentos 1/2/4 s con Polly v8 y `ReportFailure` con avance del checkpoint. Verificar con prueba de integración: handler que siempre falla genera 1 *dead letter* y el siguiente evento se procesa
 
 ## 7. API común y gobierno de arquitectura
 

@@ -66,6 +66,29 @@
       "runId": "wf_e6852c12-50d",
       "exports": {},
       "decisions": []
+    },
+    "4": {
+      "runId": "wf_639d3a28-5db",
+      "exports": {
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/EventBusPublisher.cs": "public sealed class EventBusPublisher : IIntegrationEventTransport, IAsyncDisposable { EventBusPublisher(IEventBusConnectionFactory connectionFactory); Task<long> SendAsync(string stream, IntegrationEventEnvelope envelope, CancellationToken cancellationToken); ValueTask DisposeAsync(); }",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/OutboxBatchProcessor.cs": "public sealed class OutboxBatchProcessor<TContext>(TContext context, IIntegrationEventTransport transport, IClock clock, ILogger<OutboxBatchProcessor<TContext>> logger) where TContext : DbContext { const int BatchSize = 50; Task ProcessAsync(CancellationToken cancellationToken); }",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/OutboxRelayService.cs": "public sealed class OutboxRelayService<TContext>(IServiceScopeFactory scopeFactory, ILogger<OutboxRelayService<TContext>> logger) : BackgroundService where TContext : DbContext { const int PollIntervalMilliseconds = 500; }",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Publishing/OutboxRelayServiceCollectionExtensions.cs": "public static class OutboxRelayServiceCollectionExtensions { static IServiceCollection AddOutboxRelay<TContext>(this IServiceCollection services, Action<EventBusClientOptions> configure) where TContext : DbContext; }",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/StartPosition.cs": "public enum StartPosition { Checkpoint = 1, Latest = 2 }",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/EventBusSubscriberServiceCollectionExtensions.cs": "public static EventBusSubscriberBuilder AddEventBusSubscriber(this IServiceCollection services, string subscriberName, StartPosition startFrom, Action<EventBusClientOptions> configure)",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/EventBusSubscriberBuilder.cs": "public sealed class EventBusSubscriberBuilder { Handle<TEvent, THandler>(string stream) where TEvent : IIntegrationEvent where THandler : class, IIntegrationEventHandler<TEvent>; HandleFamily<TMarker, THandler>(string stream) where TMarker : IIntegrationEvent where THandler : class, IIntegrationEventHandler<TMarker> }",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/InMemoryEventCheckpointStore.cs": "public sealed class InMemoryEventCheckpointStore : IEventCheckpointStore { GetLastOffsetAsync(string, CancellationToken); SaveAsync(string, long, CancellationToken) }",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/IntegrationEventDispatcher.cs": "internal sealed class IntegrationEventDispatcher { Task<Result> DispatchAsync(HubConnection connection, EventRecord record, CancellationToken ct) }",
+        "src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/Subscribing/EventBusSubscriberHost.cs": "internal sealed class EventBusSubscriberHost : BackgroundService"
+      },
+      "decisions": [
+        "AddOutboxRelay requires the host to register IClock and the TContext DbContext; the batch processor is scoped and resolved per cycle by OutboxRelayService.",
+        "Transport is registered with TryAddSingleton so several AddOutboxRelay<TContext> calls in one host share a single EventBusPublisher.",
+        "A failure while deserializing a payload is treated as a delivery failure (RegisterFailure) and stops the batch, preserving order.",
+        "HandleFamily<TMarker,...> requires TMarker : IIntegrationEvent (needed for IIntegrationEventHandler<TMarker>); IRoutineSnapshotEvent/IServiceOrderSnapshotEvent do not extend it, so they must to be usa…",
+        "Registry key is the EventName; the dispatcher extracts it from envelope.Type (rutaviva.{svc}.{Name}.v1 -> Name, or the raw type if not in that format).",
+        "Host/dispatcher are internal; the service must register its own scoped IEventCheckpointStore and IUnitOfWork for Checkpoint (Latest gets in-memory and null defaults via TryAdd)."
+      ]
     }
   }
 }

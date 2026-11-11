@@ -36,3 +36,4 @@ mockups/
 src/BuildingBlocks/RutaViva.BuildingBlocks.EventBus.Client/
 tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/EventBus/
 Directory.Packages.props
+src/Contracts/RutaViva.IntegrationContracts/Abstractions/
