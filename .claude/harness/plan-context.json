@@ -1,0 +1,44 @@
+{
+  "agents": [
+    {
+      "id": "1.A",
+      "tasks": 1,
+      "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/"],
+      "read": ["openspec/changes/foundation-platform/design.md#L96-L117", "openspec/changes/foundation-platform/specs/architecture-governance/spec.md"],
+      "writeLines": 380,
+      "skills": 1
+    },
+    {
+      "id": "1.B",
+      "tasks": 2,
+      "files": ["src/Contracts/RutaViva.IntegrationContracts/"],
+      "read": ["openspec/changes/foundation-platform/design.md#L182-L191", "openspec/changes/foundation-platform/design.md#L207-L333"],
+      "writeLines": 780,
+      "skills": 0
+    },
+    {
+      "id": "1.C",
+      "tasks": 3,
+      "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Application/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/"],
+      "read": ["openspec/changes/foundation-platform/design.md#L96-L153", "openspec/changes/foundation-platform/design.md#L309-L333"],
+      "writeLines": 720,
+      "skills": 1
+    },
+    {
+      "id": "1.D",
+      "tasks": 1,
+      "files": ["deploy/local/sql/"],
+      "read": ["openspec/changes/foundation-platform/design.md#L203-L206", "docs/architecture/data-model.md#L381-L388", "docs/adr/adr-0013-data-sqlserver-schema-per-service.md#L20-L35"],
+      "writeLines": 160,
+      "skills": 0
+    },
+    {
+      "id": "1.E",
+      "tasks": 1,
+      "files": ["src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Time/", "tests/RutaViva.Testing.Common/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Infrastructure/", "tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Testing/"],
+      "read": ["docs/adr/adr-0027-proc-integration-tests-local-sqlserver.md#L30-L45", "openspec/changes/foundation-platform/design.md#L118-L130"],
+      "writeLines": 300,
+      "skills": 1
+    }
+  ]
+}

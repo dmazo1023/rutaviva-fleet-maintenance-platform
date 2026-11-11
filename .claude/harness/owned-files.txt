@@ -1,3 +1,11 @@
 .claude/harness/
-tests/RutaViva.Smoke.Tests/
-RutaViva.slnx
+src/BuildingBlocks/RutaViva.BuildingBlocks.Domain/
+tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/
+src/Contracts/RutaViva.IntegrationContracts/
+src/BuildingBlocks/RutaViva.BuildingBlocks.Application/
+tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Application/
+deploy/local/sql/
+src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/Time/
+tests/RutaViva.Testing.Common/
+tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Infrastructure/
+tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/Testing/

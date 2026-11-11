@@ -3,6 +3,9 @@
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="Scrutor" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <ProjectReference Include="..\RutaViva.BuildingBlocks.Domain\RutaViva.BuildingBlocks.Domain.csproj" />
     <ProjectReference Include="..\..\Contracts\RutaViva.IntegrationContracts\RutaViva.IntegrationContracts.csproj" />
   </ItemGroup>

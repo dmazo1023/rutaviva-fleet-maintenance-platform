@@ -1,3 +1,5 @@
+> Plan de ejecución en paralelo: [parallel-execution.md](parallel-execution.md)
+
 ## 1. Solución y reglas de compilación
 
 - [x] 1.1 Crear `RutaViva.slnx`, `Directory.Build.props` (net10.0, Nullable, TreatWarningsAsErrors, LangVersion 14), `Directory.Packages.props` con las versiones centrales, `.editorconfig` (`csharp_style_var_*=false:error`, IDE0008 error (IDE0007 en none) y EnforceCodeStyleInBuild) y `global.json`. Verificar con `dotnet build RutaViva.slnx` en verde y con un archivo temporal que use `var` haciendo fallar el build (luego se borra)
@@ -6,7 +8,7 @@
 ## 2. Contratos (primero, los consumen todos los demás)
 
 - [ ] 2.1 `RutaViva.BuildingBlocks.Domain`: `Entity<TId>`, `AggregateRoot<TId>`, `ValueObject`, `IDomainEvent`, `Error`, `ErrorType`, `Result`, `Result<T>` y `Guard` (design D-02). Verificar con pruebas en `tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/Domain/` (igualdad de VOs, `Raise`/`ClearDomainEvents`, conversiones implícitas de `Result<T>`)
-- [ ] 2.2 `RutaViva.BuildingBlocks.Application`: `ICommand<T>`, `IQuery<T>`, `ICommandHandler`, `IQueryHandler`, `IUnitOfWork`, `IClock`, `IDomainEventHandler<T>`, `IIntegrationEventMapper<T>`, `IIntegrationEventHandler<T>`, `IIntegrationEventPublisher`, `IEventCheckpointStore`, `EventMetadata` (design D-03). Verificar con `dotnet build` y con la prueba de arquitectura 7.2 (sin dependencias de AspNetCore ni EF)
+- [ ] 2.2 `RutaViva.BuildingBlocks.Application`: `ICommand<T>`, `IQuery<T>`, `ICommandHandler`, `IQueryHandler`, `IUnitOfWork`, `IClock`, `IDomainEventHandler<T>`, `IIntegrationEventMapper<T>`, `IIntegrationEventHandler<T>`, `IIntegrationEventPublisher`, `IEventCheckpointStore` (design D-03; `IIntegrationEvent` y `EventMetadata` viven en los contratos). Verificar con `dotnet build` y con la prueba de arquitectura 7.2 (sin dependencias de AspNetCore ni EF)
 - [ ] 2.3 `RutaViva.IntegrationContracts`: `Abstractions/` (`IIntegrationEvent`, `EventMetadata`), `Streams`, `IntegrationEventEnvelope`, `EventBusHubMethods`, `EventRecord`, `Bulk/` (`BulkRequest<TRow>`, `BulkRowResult`, `BulkRowOutcome`, `BulkRowError`, las 5 filas `*BulkRow` y `BulkErrorCodes`, design § Contrato del lote masivo), y todos los eventos `V1` de customers, workshops y fleet con sus campos (design § Eventos de integración). Verificar con `dotnet build` y con la prueba de contrato 7.3 para esos eventos
 - [ ] 2.4 `RutaViva.IntegrationContracts`: eventos `V1` de maintenance.routine (`RoutineSnapshot` incluido), maintenance.alert y serviceorders.service-order (`ServiceOrderSnapshot` incluido), con las interfaces marcadoras `IRoutineSnapshotEvent` e `IServiceOrderSnapshotEvent` (design D-07). Verificar con la prueba de contrato 7.3 para esos eventos
 
