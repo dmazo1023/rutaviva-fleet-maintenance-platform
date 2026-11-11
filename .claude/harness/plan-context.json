@@ -1,10 +1,12 @@
 {
   "agents": [
-    { "id": "S1.C", "tasks": 2, "files": ["src/Services/Customers/RutaViva.Customers.Domain/", "tests/Services/Customers/RutaViva.Customers.Domain.UnitTests/"],
-      "read": ["openspec/changes/supporting-contexts/design.md#L19-L36", "openspec/changes/supporting-contexts/specs/customer-management/spec.md", {"label": "BuildingBlocks.Domain + ejemplos de VOs de Maintenance", "lines": 220}], "writeLines": 650, "skills": 1 },
-    { "id": "S1.W", "tasks": 2, "files": ["src/Services/Workshops/RutaViva.Workshops.Domain/", "tests/Services/Workshops/RutaViva.Workshops.Domain.UnitTests/"],
-      "read": ["openspec/changes/supporting-contexts/design.md#L19-L36", "openspec/changes/supporting-contexts/specs/workshop-management/spec.md", {"label": "BuildingBlocks.Domain + ejemplos", "lines": 220}], "writeLines": 450, "skills": 1 },
-    { "id": "S1.F", "tasks": 2, "files": ["src/Services/Fleet/RutaViva.Fleet.Domain/", "tests/Services/Fleet/RutaViva.Fleet.Domain.UnitTests/"],
-      "read": ["openspec/changes/supporting-contexts/design.md#L19-L48", "openspec/changes/supporting-contexts/specs/fleet-vehicle-registry/spec.md", {"label": "BuildingBlocks.Domain + ejemplos", "lines": 220}], "writeLines": 700, "skills": 1 }
+    { "id": "S2.CA", "tasks": 1, "files": ["src/Services/Customers/RutaViva.Customers.Application/", "tests/Services/Customers/RutaViva.Customers.Application.UnitTests/"],
+      "read": ["openspec/changes/supporting-contexts/design.md#L49-L72", {"label": "dominio Customers", "lines": 473}, {"label": "patrones Application de Maintenance", "lines": 100}], "writeLines": 550, "skills": 1 },
+    { "id": "S2.WA", "tasks": 1, "files": ["src/Services/Workshops/RutaViva.Workshops.Application/", "tests/Services/Workshops/RutaViva.Workshops.Application.UnitTests/"],
+      "read": ["openspec/changes/supporting-contexts/design.md#L49-L72", {"label": "dominio Workshops", "lines": 382}, {"label": "patrones", "lines": 100}], "writeLines": 450, "skills": 1 },
+    { "id": "S2.F5", "tasks": 1, "files": ["src/Services/Fleet/RutaViva.Fleet.Application/References/", "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Inbound/", "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/References/"],
+      "read": ["openspec/changes/supporting-contexts/design.md#L37-L48", {"label": "réplicas de Fleet.Domain", "lines": 200}, {"label": "contratos V1 customers/workshops", "lines": 90}], "writeLines": 450, "skills": 1 },
+    { "id": "S2.F6", "tasks": 1, "files": ["src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/", "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Outbound/", "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/Vehicles/"],
+      "read": ["openspec/changes/supporting-contexts/design.md#L49-L81", {"label": "dominio Fleet", "lines": 681}, {"label": "contratos V1 fleet", "lines": 60}], "writeLines": 550, "skills": 1 }
   ]
 }

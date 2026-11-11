@@ -1,76 +1,193 @@
 {
   "wave": "2",
   "verified": [
-    "3.1",
     "3.2",
-    "3.3",
-    "4.4"
+    "4.2",
+    "5.1",
+    "6.2"
   ],
   "escalated": [],
   "unaccounted": [],
   "handoff": {
     "exports": {
-      "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/*.cs": "ns RutaViva.Maintenance.Domain.Plans.Evaluation: interface IDueDimensionEvaluator{DueDimension Dimension; DimensionAssessment? Assess(MaintenanceCycle,EffectiveRoutineParameters,EvaluationContext)}; sealed DistanceDueEvaluator, TimeDueEvaluator (parameterless ctor); record DimensionAssessment(DueDimension Dimension,RoutineDueStatus Status,decimal ConsumedPercent,long Remaining,decimal DueSoonWindowPercent); record RoutineAssessment(RoutineDueStatus Status,AlertTrigger Trigger,decimal ConsumedPercent,NextDue? NextDue); static DueStatusPolicy.Combine(IReadOnlyList<DimensionAssessment>,NextDue? nextDue=null)->RoutineAssessment; enum RoutineTransitionType{None=1,BecameDueSoon,BecameOverdue,RevertedToUpToDate}; record RoutineTransition(RoutineTransitionType Type,RoutineDueStatus Status,AlertTrigger Trigger){bool HasChanged}; static RoutineTransitionPolicy.Decide(RoutineDueStatus current,RoutineAssessment assessment)->RoutineTransition",
-      "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineType.cs": "ns RutaViva.Maintenance.Domain.RoutineTypes; sealed class RoutineType : AggregateRoot<RoutineTypeId> { Code, Name, DefaultInterval, DueSoonThreshold, Status, UpdatedBy, UpdatedAt; static Result<RoutineType> Create(RoutineTypeId id, RoutineTypeCode code, string name, MaintenanceInterval defaultInterval, DueSoonThreshold dueSoonThreshold, string updatedBy, DateTimeOffset at); Result UpdateParameters(MaintenanceInterval, DueSoonThreshold, string updatedBy, DateTimeOffset at); RoutineTypeParameters ToParameters() }",
-      "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineTypeParameters.cs": "sealed record RoutineTypeParameters(RoutineTypeCode Code, string Name, MaintenanceInterval Interval, DueSoonThreshold Threshold)",
-      "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineParameterCatalog.cs": "sealed class RoutineParameterCatalog { ctor(IEnumerable<KeyValuePair<RoutineTypeId, RoutineTypeParameters>>); int Count; static From(IEnumerable<RoutineType>); Result<RoutineTypeParameters> Find(RoutineTypeId); Find(RoutineTypeCode); FindByCode(RoutineTypeCode) }",
-      "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/Alert.cs": "sealed class Alert : AggregateRoot<AlertId> { VehicleId VehicleId; LicensePlate Plate; CustomerId CustomerId; RoutineId RoutineId; string RoutineName; int CycleNumber; AlertType Type; AlertTrigger Trigger; AlertStatus Status; DateTimeOffset RaisedAt; DateTimeOffset? AcknowledgedAt; string? AcknowledgedBy; DateTimeOffset? ResolvedAt; AlertResolutionReason? ResolutionReason; static Alert Raise(AlertOrigin origin, AlertType type, AlertTrigger trigger, DateTimeOffset raisedAt); Result Acknowledge(string acknowledgedBy, DateTimeOffset at); Result Resolve(AlertResolutionReason reason, DateTimeOffset at) } (all setters private; private parameterless ctor for EF)",
-      "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/AlertOrigin.cs": "sealed record AlertOrigin(VehicleId VehicleId, LicensePlate Plate, CustomerId CustomerId, RoutineId RoutineId, string RoutineName, int CycleNumber) in RutaViva.Maintenance.Domain.Alerts"
+      "src/Services/Customers/RutaViva.Customers.Application/Abstractions/*.cs": "ICustomerRepository { Task<Customer?> GetByIdAsync(CustomerId, ct); Task<Customer?> GetByTaxIdAsync(TaxId, ct); void Add(Customer) }; ICustomerUniquenessChecker { Task<bool> IsTaxIdTakenAsync(TaxId, ct) }; ICustomerQueries { Task<IReadOnlyList<CustomerSummaryDto>> ListAsync(CustomerStatus?, ct); Task<CustomerDetailDto?> GetDetailAsync(CustomerId, ct) }",
+      "Customers/ (namespace RutaViva.Customers.Application.Customers)": "RegisterCustomerCommand(string Name, string TaxId, string Email, string? Phone):ICommand<Guid>; ChangeCustomerStatusCommand(CustomerId, CustomerStatus TargetStatus):ICommand<CustomerId>; ListCustomersQuery(CustomerStatus? Status); GetCustomerDetailQuery(CustomerId); CustomerSummaryDto(Guid Id,string Name,string TaxId,string Email,CustomerStatus Status); CustomerDetailDto(Guid Id,Name,TaxId,Email,string? Phone,Status,IReadOnlyList<ApproverDto> Approvers); ApproverDto(Guid Id,string FullName,string Email,ApproverStatus Status); handlers: RegisterCustomerHandler, ChangeCustomerStatusHandler, Queries.ListCustomersHandler, Queries.GetCustomerDetailHandler",
+      "Approvers/ (namespace RutaViva.Customers.Application.Approvers)": "AddApproverCommand(CustomerId CustomerId, string FullName, string Email):ICommand<Guid>; ChangeApproverStatusCommand(CustomerId, ApproverId, ApproverStatus TargetStatus):ICommand<ApproverId>; AddApproverHandler; ChangeApproverStatusHandler",
+      "IntegrationEvents/Outbound/ (namespace ...Application.IntegrationEvents.Outbound)": "CustomerRegisteredMapper, CustomerStatusChangedMapper, ApproverRegisteredMapper, ApproverStatusChangedMapper : IIntegrationEventMapper<domain event>",
+      "src/Services/Workshops/RutaViva.Workshops.Application/Abstractions/*.cs": "IWorkshopRepository { Task<Workshop?> GetByIdAsync(WorkshopId, ct); Task<Workshop?> GetByTaxIdAsync(TaxId, ct); void Add(Workshop) }; IWorkshopUniquenessChecker { Task<bool> IsTaxIdTakenAsync(TaxId, ct) }; IWorkshopQueries { Task<IReadOnlyList<WorkshopSummaryDto>> ListAsync(WorkshopStatus?, string? city, ct); Task<WorkshopDetailDto?> GetDetailAsync(WorkshopId, ct) }",
+      "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/*.cs": "namespace RutaViva.Workshops.Application.Workshops; RegisterWorkshopCommand(string? Name, string? TaxId, string? Email, string? Phone, string? Address, string? City) : ICommand<Guid>; ChangeWorkshopStatusCommand(WorkshopId WorkshopId, WorkshopStatus TargetStatus) : ICommand<WorkshopId>; ListWorkshopsQuery(WorkshopStatus? Status, string? City); GetWorkshopDetailQuery(WorkshopId WorkshopId); WorkshopSummaryDto(Guid Id, string Name, string TaxId, string City, WorkshopStatus Status); WorkshopDetailDto(Guid Id, string Name, string TaxId, string Email, string? Phone, string Address, string City, WorkshopStatus Status, DateTimeOffset CreatedAt)",
+      "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/**/*.cs (handlers, validators)": "RegisterWorkshopHandler(IWorkshopRepository, IWorkshopUniquenessChecker, IUnitOfWork); ChangeWorkshopStatusHandler(IWorkshopRepository, IUnitOfWork); Queries.ListWorkshopsHandler(IWorkshopQueries); Queries.GetWorkshopDetailHandler(IWorkshopQueries); RegisterWorkshopCommandValidator; ChangeWorkshopStatusCommandValidator; ListWorkshopsQueryValidator",
+      "src/Services/Workshops/RutaViva.Workshops.Application/IntegrationEvents/Outbound/*.cs": "namespace RutaViva.Workshops.Application.IntegrationEvents.Outbound; WorkshopRegisteredMapper : IIntegrationEventMapper<WorkshopRegistered>; WorkshopStatusChangedMapper : IIntegrationEventMapper<WorkshopStatusChanged>",
+      "src/Services/Fleet/RutaViva.Fleet.Application/References/IFleetReferenceWriter.cs": "interface IFleetReferenceWriter { Task UpsertCustomerAsync(CustomerReference reference, CancellationToken ct); Task UpsertWorkshopAsync(WorkshopReference reference, CancellationToken ct); Task UpsertApproverAsync(ApproverReference reference, CancellationToken ct); }",
+      "src/Services/Fleet/RutaViva.Fleet.Application/References/IFleetReferenceReader.cs": "interface IFleetReferenceReader with the 6 Find*Async methods exactly as in the handoff",
+      "src/Services/Fleet/RutaViva.Fleet.Application/References/ReferenceErrors.cs": "static class ReferenceErrors { static readonly Error InvalidStatus }",
+      "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Inbound/CustomerRegisteredHandler.cs": "CustomerRegisteredHandler(IFleetReferenceWriter, IUnitOfWork) : IIntegrationEventHandler<CustomerRegisteredV1>; same shape for WorkshopRegisteredHandler and ApproverRegisteredHandler",
+      "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Inbound/CustomerStatusChangedHandler.cs": "CustomerStatusChangedHandler(IFleetReferenceReader, IFleetReferenceWriter, IUnitOfWork, ILogger<CustomerStatusChangedHandler>); same shape for Workshop and Approver StatusChanged handlers",
+      "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/RegisterVehicleCommand.cs": "ns RutaViva.Fleet.Application.Vehicles: sealed record RegisterVehicleCommand(string Plate, string? Vin, string Brand, string Model, int ModelYear, long InitialOdometerKm, CustomerId CustomerId, WorkshopId WorkshopId, ApproverId? ResponsibleApproverId) : ICommand<Guid>; RegisterVehicleHandler : ICommandHandler<RegisterVehicleCommand, Guid>(IVehicleRepository, IVehicleUniquenessChecker, IFleetReferenceReader, IUnitOfWork, IClock); RegisterVehicleCommandValidator(IClock)",
+      "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/AssignResponsibleCommand.cs": "sealed record AssignResponsibleCommand(VehicleId VehicleId, ApproverId? ResponsibleApproverId) : ICommand<VehicleId>; AssignResponsibleHandler(IVehicleRepository, IFleetReferenceReader, IUnitOfWork, IClock); AssignResponsibleCommandValidator()",
+      "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/ChangeVehicleStatusCommand.cs": "sealed record ChangeVehicleStatusCommand(VehicleId VehicleId, VehicleStatus Target) : ICommand<VehicleId>; ChangeVehicleStatusHandler(IVehicleRepository, IUnitOfWork, IClock); ChangeVehicleStatusCommandValidator()",
+      "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/IVehicleRepository.cs": "interface IVehicleRepository { Task<Vehicle?> GetByIdAsync(VehicleId id, CancellationToken ct); void Add(Vehicle vehicle); }",
+      "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/IVehicleUniquenessChecker.cs": "interface IVehicleUniquenessChecker { Task<bool> IsPlateTakenAsync(Plate plate, CancellationToken ct); Task<bool> IsVinTakenAsync(Vin vin, CancellationToken ct); }",
+      "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/VehicleApplicationErrors.cs": "static class VehicleApplicationErrors { static readonly Error NotFound (Vehicle.NotFound, NotFound type); static readonly Error InvalidStatus (Vehicle.InvalidStatus, Validation) }",
+      "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Outbound/VehicleRegisteredMapper.cs": "ns RutaViva.Fleet.Application.IntegrationEvents.Outbound: sealed classes VehicleRegisteredMapper, VehicleStatusChangedMapper, VehicleResponsibleAssignedMapper : IIntegrationEventMapper<domain event>, parameterless ctor"
     },
     "decisions": [
-      "RoutineTransitionPolicy.Decide(current, RoutineAssessment) replaces design's (current, assessed, bool dueSoonNotified): the trigger needs the assessment and dueSoonNotified is the aggregate's alert de…",
-      "DueStatusPolicy.Combine takes optional NextDue? (default null) because NextDue needs cycle+interval; caller does NextDue.Calculate(cycle, interval) and passes it; RoutineAssessment.NextDue is nullable…",
-      "New enum RoutineTransitionType (None=1) added in Evaluation/. On None, RoutineTransition.Status = current status (Overdue stays Overdue). DueSoonWindowPercent = threshold percent.",
-      "Catalog exposes Find(RoutineTypeId), Find(RoutineTypeCode) and FindByCode, covering both the task and design.md D-02 (map by id). Missing key returns MaintenanceErrors.RoutineTypeNotFound.",
-      "RoutineTypeParameters has exactly Code, Name, Interval, Threshold (no Id); the catalog gets ids via KeyValuePair entries or RoutineParameterCatalog.From(IEnumerable<RoutineType>).",
-      "UpdateParameters with identical values returns Success without raising an event or touching UpdatedBy/UpdatedAt; Create always sets Status=Active.",
-      "AlertOrigin (named in design.md D-02 but absent from the task contracts) was created by me in Alerts/AlertOrigin.cs as a plain sealed record; the plan/application agent must construct it for Alert.Rai…",
-      "Alert.Resolve returns Result (as the task requires; design.md says void). It always succeeds in practice: resolving an already Resolved alert returns Success with no change and no event.",
-      "Acknowledge validates acknowledgedBy first (AlertAcknowledgedByRequired), then the transition table (AlertInvalidTransition for Acknowledged or Resolved)."
+      "Commands use typed ids (CustomerId, ApproverId); registrations return Guid, status changes return CustomerId/ApproverId. Callers (API, bulk) build ids via CustomerId.Create(guid).",
+      "DTOs expose Guid ids, string fields and domain status enums, so the infrastructure query projections stay simple and serialize cleanly.",
+      "Validators and handlers are discovered by assembly scanning; CustomerRuleBuilderExtensions is internal. Handlers are named *Handler, not *CommandHandler.",
+      "ChangeWorkshopStatus/GetWorkshopDetail take typed WorkshopId (like Maintenance VehicleId); the API must build it with WorkshopId.Create(guid). Register returns Guid; status change returns WorkshopId.",
+      "DTOs expose Guid ids (not WorkshopId) so System.Text.Json serializes them plainly; Status is the WorkshopStatus enum.",
+      "Application namespace for commands/queries/DTOs/handlers is RutaViva.Workshops.Application.Workshops (handlers of queries in .Queries); no DI registration file was created (not in my list).",
+      "IFleetReferenceWriter has UpsertCustomerAsync/UpsertWorkshopAsync/UpsertApproverAsync(reference, ct); Infrastructure must add-or-update by Id (works for new and tracked/untracked entities).",
+      "Unknown replicated status string yields ReferenceErrors.InvalidStatus (Application, Validation) because the Fleet domain catalog has no such error; Registered handlers fail without upsert.",
+      "StatusChanged for an unknown entity logs ReferenceUpdateIgnored (Warning) and returns success without upsert or SaveChanges.",
+      "Commands use strong ids (CustomerId, WorkshopId, ApproverId?, VehicleId) like Maintenance; API/bulk must build them from Guid via Create. RegisterVehicleHandler returns Guid.",
+      "VehicleErrors has no vehicle-not-found: added VehicleApplicationErrors.NotFound (Vehicle.NotFound, ErrorType.NotFound) and InvalidStatus in Fleet.Application.Vehicles; API maps it to 404.",
+      "RegisterVehicleCommandValidator takes IClock (year range depends on current year); a blank Vin is treated as no VIN. Ports sit directly in the Vehicles namespace."
     ]
   },
   "implemented": [
     {
-      "agent": "E",
+      "agent": "CA",
       "status": "complete",
-      "notes": "Not compiled (the gate does that). DueStatusClassifier is an internal helper shared by both evaluators. Time window = floor(totalDays x %/100); km window is not rounded. Combine with an empty list returns UpToDate with trigger Distance, a case that cannot occur because MaintenanceInterval needs at least one dimension. Consumed percent is not rounded.",
+      "notes": "No compile or tests run, as instructed. The repository's GetByIdAsync must load the Approvers collection (the aggregate needs it for AddApprover and the approver status changes). Registered handlers need ICustomerRepository, ICustomerUniquenessChecker, ICustomerQueries, IUnitOfWork and IClock to be implemented in Infrastructure.",
       "files": [
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/IDueDimensionEvaluator.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/DimensionAssessment.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/DueStatusClassifier.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/DistanceDueEvaluator.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/TimeDueEvaluator.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/RoutineAssessment.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/DueStatusPolicy.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/RoutineTransitionType.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/RoutineTransition.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/Evaluation/RoutineTransitionPolicy.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Evaluation/DistanceDueEvaluatorTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Evaluation/TimeDueEvaluatorTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Evaluation/DueStatusPolicyTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Evaluation/RoutineTransitionPolicyTests.cs"
+        "src/Services/Customers/RutaViva.Customers.Application/Abstractions/ICustomerRepository.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Abstractions/ICustomerUniquenessChecker.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Abstractions/ICustomerQueries.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/ApproverDto.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/CustomerSummaryDto.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/CustomerDetailDto.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/RegisterCustomerCommand.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/CustomerRuleBuilderExtensions.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/RegisterCustomerCommandValidator.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/RegisterCustomerHandler.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/ChangeCustomerStatusCommand.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/ChangeCustomerStatusCommandValidator.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/ChangeCustomerStatusHandler.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/ListCustomersQuery.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/GetCustomerDetailQuery.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/Queries/ListCustomersQueryValidator.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/Queries/ListCustomersHandler.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Customers/Queries/GetCustomerDetailHandler.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Approvers/AddApproverCommand.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Approvers/AddApproverCommandValidator.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Approvers/AddApproverHandler.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Approvers/ChangeApproverStatusCommand.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Approvers/ChangeApproverStatusCommandValidator.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/Approvers/ChangeApproverStatusHandler.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/IntegrationEvents/Outbound/CustomerRegisteredMapper.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/IntegrationEvents/Outbound/CustomerStatusChangedMapper.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/IntegrationEvents/Outbound/ApproverRegisteredMapper.cs",
+        "src/Services/Customers/RutaViva.Customers.Application/IntegrationEvents/Outbound/ApproverStatusChangedMapper.cs",
+        "tests/Services/Customers/RutaViva.Customers.Application.UnitTests/CustomerTestFactory.cs",
+        "tests/Services/Customers/RutaViva.Customers.Application.UnitTests/Customers/RegisterCustomerHandlerTests.cs",
+        "tests/Services/Customers/RutaViva.Customers.Application.UnitTests/Customers/RegisterCustomerCommandValidatorTests.cs",
+        "tests/Services/Customers/RutaViva.Customers.Application.UnitTests/Customers/ChangeCustomerStatusHandlerTests.cs",
+        "tests/Services/Customers/RutaViva.Customers.Application.UnitTests/Customers/ChangeCustomerStatusCommandValidatorTests.cs",
+        "tests/Services/Customers/RutaViva.Customers.Application.UnitTests/Customers/CustomerQueryHandlerTests.cs",
+        "tests/Services/Customers/RutaViva.Customers.Application.UnitTests/Approvers/AddApproverHandlerTests.cs",
+        "tests/Services/Customers/RutaViva.Customers.Application.UnitTests/Approvers/AddApproverCommandValidatorTests.cs",
+        "tests/Services/Customers/RutaViva.Customers.Application.UnitTests/Approvers/ChangeApproverStatusHandlerTests.cs",
+        "tests/Services/Customers/RutaViva.Customers.Application.UnitTests/IntegrationEvents/Outbound/CustomerMappersTests.cs"
       ]
     },
     {
-      "agent": "R",
+      "agent": "WA",
       "status": "complete",
-      "notes": "RoutineType.Create adds an id parameter and updatedBy/at (audit) beyond design D-02. Name and updatedBy are trimmed and validated with MaintenanceErrors.RoutineTypeNameRequired and UpdatedByRequired. Private parameterless constructor for EF; setters are private. Not compiled, per instructions.",
+      "notes": "Not compiled (gate does it). A bash heredoc batch failed on parsing, so I wrote the files in smaller batches and via Write. Uniqueness is checked in the handler through IWorkshopUniquenessChecker.IsTaxIdTakenAsync; Infrastructure should also map the unique-index violation to TaxIdAlreadyRegistered for races.",
       "files": [
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineType.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineTypeParameters.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/RoutineTypes/RoutineParameterCatalog.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/RoutineTypes/RoutineTypeTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/RoutineTypes/RoutineParameterCatalogTests.cs"
+        "src/Services/Workshops/RutaViva.Workshops.Application/Abstractions/IWorkshopRepository.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Abstractions/IWorkshopUniquenessChecker.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Abstractions/IWorkshopQueries.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/WorkshopSummaryDto.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/WorkshopDetailDto.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/RegisterWorkshopCommand.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/RegisterWorkshopCommandValidator.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/RegisterWorkshopHandler.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/ChangeWorkshopStatusCommand.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/ChangeWorkshopStatusCommandValidator.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/ChangeWorkshopStatusHandler.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/ListWorkshopsQuery.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/ListWorkshopsQueryValidator.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/GetWorkshopDetailQuery.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/Queries/ListWorkshopsHandler.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/Workshops/Queries/GetWorkshopDetailHandler.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/IntegrationEvents/Outbound/WorkshopRegisteredMapper.cs",
+        "src/Services/Workshops/RutaViva.Workshops.Application/IntegrationEvents/Outbound/WorkshopStatusChangedMapper.cs",
+        "tests/Services/Workshops/RutaViva.Workshops.Application.UnitTests/WorkshopTestFactory.cs",
+        "tests/Services/Workshops/RutaViva.Workshops.Application.UnitTests/Workshops/RegisterWorkshopHandlerTests.cs",
+        "tests/Services/Workshops/RutaViva.Workshops.Application.UnitTests/Workshops/RegisterWorkshopCommandValidatorTests.cs",
+        "tests/Services/Workshops/RutaViva.Workshops.Application.UnitTests/Workshops/ChangeWorkshopStatusHandlerTests.cs",
+        "tests/Services/Workshops/RutaViva.Workshops.Application.UnitTests/Workshops/ChangeWorkshopStatusCommandValidatorTests.cs",
+        "tests/Services/Workshops/RutaViva.Workshops.Application.UnitTests/Workshops/ListWorkshopsQueryValidatorTests.cs",
+        "tests/Services/Workshops/RutaViva.Workshops.Application.UnitTests/Queries/ListWorkshopsHandlerTests.cs",
+        "tests/Services/Workshops/RutaViva.Workshops.Application.UnitTests/Queries/GetWorkshopDetailHandlerTests.cs",
+        "tests/Services/Workshops/RutaViva.Workshops.Application.UnitTests/IntegrationEvents/WorkshopRegisteredMapperTests.cs",
+        "tests/Services/Workshops/RutaViva.Workshops.Application.UnitTests/IntegrationEvents/WorkshopStatusChangedMapperTests.cs"
       ]
     },
     {
-      "agent": "L",
+      "agent": "F5",
       "status": "complete",
-      "notes": "Not compiled, per instructions. Transitions use a FrozenSet of (From, To) pairs. AlertRaised.OccurredAt equals raisedAt; AlertStatusChanged.OccurredAt equals the at argument. The Alert id is generated with AlertId.New() inside Raise. I did not need any new error constants.",
+      "notes": "Not compiled (gate does). 6 inbound handlers need DI registration (IIntegrationEventHandler<T>) in the Fleet composition and the Infrastructure implementation of IFleetReferenceReader/Writer in the next wave. Handlers use ILogger from Microsoft.Extensions.Logging.Abstractions, which flows in via BuildingBlocks.Application. Internal helpers ReferenceStatusParser and ReferenceUpdateLogging are not public.",
       "files": [
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/Alert.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Alerts/AlertOrigin.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Alerts/AlertTests.cs"
+        "src/Services/Fleet/RutaViva.Fleet.Application/References/IFleetReferenceReader.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/References/IFleetReferenceWriter.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/References/ReferenceErrors.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/References/ReferenceStatusParser.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Inbound/ReferenceUpdateLogging.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Inbound/CustomerRegisteredHandler.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Inbound/CustomerStatusChangedHandler.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Inbound/WorkshopRegisteredHandler.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Inbound/WorkshopStatusChangedHandler.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Inbound/ApproverRegisteredHandler.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Inbound/ApproverStatusChangedHandler.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/References/CapturingLogger.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/References/ReferenceEventFactory.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/References/CustomerRegisteredHandlerTests.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/References/CustomerStatusChangedHandlerTests.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/References/WorkshopRegisteredHandlerTests.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/References/WorkshopStatusChangedHandlerTests.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/References/ApproverRegisteredHandlerTests.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/References/ApproverStatusChangedHandlerTests.cs"
+      ]
+    },
+    {
+      "agent": "F6",
+      "status": "complete",
+      "notes": "Not compiled (gate does it). Relies on IFleetReferenceReader from F5 in RutaViva.Fleet.Application.References (FindCustomerAsync/FindWorkshopAsync/FindApproverAsync by id). Handlers, validators and mappers need DI registration by the infra/API agent (IVehicleRepository, IVehicleUniquenessChecker implementations pending).",
+      "files": [
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/IVehicleRepository.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/IVehicleUniquenessChecker.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/VehicleApplicationErrors.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/VehicleRuleBuilderExtensions.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/RegisterVehicleCommand.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/RegisterVehicleCommandValidator.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/RegisterVehicleHandler.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/VehicleIdentity.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/VehicleIdentityFactory.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/VehicleParties.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/VehicleReferenceResolver.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/AssignResponsibleCommand.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/AssignResponsibleCommandValidator.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/AssignResponsibleHandler.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/ChangeVehicleStatusCommand.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/ChangeVehicleStatusCommandValidator.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/ChangeVehicleStatusHandler.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Outbound/VehicleRegisteredMapper.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Outbound/VehicleStatusChangedMapper.cs",
+        "src/Services/Fleet/RutaViva.Fleet.Application/IntegrationEvents/Outbound/VehicleResponsibleAssignedMapper.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/Vehicles/VehicleTestFactory.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/Vehicles/RegisterVehicleHandlerTests.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/Vehicles/AssignResponsibleHandlerTests.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/Vehicles/ChangeVehicleStatusHandlerTests.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/Vehicles/VehicleRegisteredMapperTests.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/Vehicles/VehicleStatusChangedMapperTests.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/Vehicles/VehicleResponsibleAssignedMapperTests.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/Vehicles/RegisterVehicleCommandValidatorTests.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/Vehicles/ChangeVehicleStatusCommandValidatorTests.cs",
+        "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/Vehicles/AssignResponsibleCommandValidatorTests.cs"
       ]
     }
   ],
@@ -78,34 +195,27 @@
     {
       "round": 0,
       "gate": {
-        "passed": false,
-        "failedCheck": "4-build"
-      }
-    },
-    {
-      "round": 1,
-      "gate": {
         "passed": true,
         "failedCheck": null
       }
     },
     {
-      "round": 1,
+      "round": 0,
       "verdict": [
-        {
-          "taskId": "3.1",
-          "passed": true
-        },
         {
           "taskId": "3.2",
           "passed": true
         },
         {
-          "taskId": "3.3",
+          "taskId": "4.2",
           "passed": true
         },
         {
-          "taskId": "4.4",
+          "taskId": "5.1",
+          "passed": true
+        },
+        {
+          "taskId": "6.2",
           "passed": true
         }
       ]
