@@ -43,3 +43,11 @@ tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/
 src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/
 tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/
 openspec/changes/foundation-platform/design.md
+src/Services/
+tests/Services/
+samples/
+RutaViva.slnx
+openspec/changes/maintenance-core/
+openspec/changes/data-import/design.md
+openspec/changes/service-orders-core/design.md
+openspec/changes/supporting-contexts/design.md

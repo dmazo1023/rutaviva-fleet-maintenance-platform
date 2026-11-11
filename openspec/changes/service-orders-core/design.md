@@ -111,7 +111,7 @@ Las **guardas contextuales** que no dependen solo del estado viven en el agregad
 ### D-04 Agregado `ServiceOrder` (métodos con intención)
 
 ```csharp
-public sealed class ServiceOrder : AggregateRoot<ServiceOrderId>, IHasRowVersion
+public sealed class ServiceOrder : AggregateRoot<ServiceOrderId>
 {
     public static ServiceOrder CreateAutomatic(ServiceOrderNumber number, RoutineOverdueFacts facts, VehicleReference vehicle, DateTimeOffset now);
     public static Result<ServiceOrder> CreateManual(ServiceOrderNumber number, RoutineReference routine, VehicleReference vehicle, DateTimeOffset now);

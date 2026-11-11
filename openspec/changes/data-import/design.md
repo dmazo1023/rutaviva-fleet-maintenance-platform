@@ -20,7 +20,7 @@ DataImport es la **única excepción documentada** a «sin HTTP entre servicios�
 ### D-01 Modelo de dominio (`RutaViva.DataImport.Domain`)
 
 ```
-ImportJob (AggregateRoot<ImportJobId>, IHasRowVersion)
+ImportJob (AggregateRoot<ImportJobId>)
  ├─ Status: ImportJobStatus { Validating = 1, PendingConfirmation, Importing, Completed, CompletedWithErrors, Failed }
  ├─ RequestedBy, CreatedAt, ConfirmedAt?, CompletedAt?
  └─ Stages: IReadOnlyList<ImportStage>            (1..5, una por ImportEntityType)

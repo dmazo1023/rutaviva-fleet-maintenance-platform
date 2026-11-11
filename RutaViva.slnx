@@ -18,6 +18,13 @@
     <Project Path="src/Platform/EventBus/RutaViva.EventBus.Hub/RutaViva.EventBus.Hub.csproj" />
     <Project Path="src/Platform/EventBus/RutaViva.EventBus.Infrastructure/RutaViva.EventBus.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/Maintenance/">
+    <Project Path="src/Services/Maintenance/RutaViva.Maintenance.Api/RutaViva.Maintenance.Api.csproj" />
+    <Project Path="src/Services/Maintenance/RutaViva.Maintenance.Application/RutaViva.Maintenance.Application.csproj" />
+    <Project Path="src/Services/Maintenance/RutaViva.Maintenance.Domain/RutaViva.Maintenance.Domain.csproj" />
+    <Project Path="src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/RutaViva.Maintenance.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/RutaViva.Architecture.Tests/RutaViva.Architecture.Tests.csproj" />
     <Project Path="tests/RutaViva.IntegrationContracts.Tests/RutaViva.IntegrationContracts.Tests.csproj" />
@@ -30,5 +37,11 @@
   <Folder Name="/tests/Platform/">
     <Project Path="tests/Platform/RutaViva.EventBus.Application.UnitTests/RutaViva.EventBus.Application.UnitTests.csproj" />
     <Project Path="tests/Platform/RutaViva.EventBus.Hub.IntegrationTests/RutaViva.EventBus.Hub.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Services/" />
+  <Folder Name="/tests/Services/Maintenance/">
+    <Project Path="tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/RutaViva.Maintenance.Application.UnitTests.csproj" />
+    <Project Path="tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/RutaViva.Maintenance.Domain.UnitTests.csproj" />
+    <Project Path="tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/RutaViva.Maintenance.IntegrationTests.csproj" />
   </Folder>
 </Solution>

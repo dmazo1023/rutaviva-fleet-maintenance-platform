@@ -1,8 +1,10 @@
+> Plan de ejecución en paralelo: [parallel-execution.md](parallel-execution.md)
+
 > Rutas abreviadas: `{D}` = `src/Services/Maintenance/RutaViva.Maintenance.Domain`, `{A}` = `…Application`, `{I}` = `…Infrastructure`, `{W}` = `…Api`, `{TD}` = `tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests`, `{TA}` = `…Application.UnitTests`, `{TI}` = `…IntegrationTests`. Depende de `foundation-platform` (BuildingBlocks y `RutaViva.IntegrationContracts` compilando). Antes de la ola que los use, el orquestador incorpora CN-01 a CN-05 de `design.md` al registro de foundation.
 
 ## 1. Proyectos
 
-- [ ] 1.1 Crear `{D}`, `{A}`, `{I}`, `{W}`, `{TD}`, `{TA}`, `{TI}` con sus referencias permitidas, agregarlos a `RutaViva.slnx` y agregar `Maintenance` a la lista de servicios de `tests/RutaViva.Architecture.Tests`. Verificar con `dotnet build RutaViva.slnx` y `dotnet test tests/RutaViva.Architecture.Tests` en verde
+- [x] 1.1 Crear `{D}`, `{A}`, `{I}`, `{W}`, `{TD}`, `{TA}`, `{TI}` con sus referencias permitidas, agregarlos a `RutaViva.slnx` y agregar `Maintenance` a la lista de servicios de `tests/RutaViva.Architecture.Tests`. Verificar con `dotnet build RutaViva.slnx` y `dotnet test tests/RutaViva.Architecture.Tests` en verde
 
 ## 2. Contratos de dominio
 
@@ -65,4 +67,4 @@
 
 ## 11. Recortables
 
-- [ ] 11.1 (Recortable) `tests/RutaViva.Maintenance.AcceptanceTests` con Reqnroll: un `.feature` por regla (RN-1, RN-2, RN-5, RN-6) sobre el dominio y la API en proceso. Verificar con `dotnet test tests/RutaViva.Maintenance.AcceptanceTests` en verde
+- [ ] 11.1 (Recortada por plazo; fuera del alcance aprobado) `tests/RutaViva.Maintenance.AcceptanceTests` con Reqnroll: un `.feature` por regla (RN-1, RN-2, RN-5, RN-6) sobre el dominio y la API en proceso. Verificar con `dotnet test tests/RutaViva.Maintenance.AcceptanceTests` en verde

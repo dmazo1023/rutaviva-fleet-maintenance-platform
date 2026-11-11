@@ -48,7 +48,7 @@ src/Services/Maintenance/
 ### D-02 Modelo de dominio
 
 ```csharp
-public sealed class RoutineType : AggregateRoot<RoutineTypeId>, IHasRowVersion
+public sealed class RoutineType : AggregateRoot<RoutineTypeId>
 {
     public RoutineTypeCode Code { get; }  public string Name { get; }
     public MaintenanceInterval DefaultInterval { get; }  public DueSoonThreshold DueSoonThreshold { get; }
@@ -57,7 +57,7 @@ public sealed class RoutineType : AggregateRoot<RoutineTypeId>, IHasRowVersion
     public RoutineTypeParameters ToParameters();                     // raise RoutineTypeParametersChanged en UpdateParameters
 }
 
-public sealed class MaintenancePlan : AggregateRoot<VehicleId>, IHasRowVersion
+public sealed class MaintenancePlan : AggregateRoot<VehicleId>
 {
     public LicensePlate Plate { get; }  public CustomerId CustomerId { get; }  public MaintenancePlanStatus Status { get; }
     public Odometer Odometer { get; }  public DateOnly LastTimeEvaluationDate { get; }
@@ -83,7 +83,7 @@ public sealed class MaintenanceRoutine : Entity<RoutineId>
     internal EffectiveRoutineParameters ResolveParameters(RoutineTypeParameters type);
 }
 
-public sealed class Alert : AggregateRoot<AlertId>, IHasRowVersion
+public sealed class Alert : AggregateRoot<AlertId>
 {
     public static Alert Raise(AlertOrigin origin, AlertType type, AlertTrigger trigger, DateTimeOffset raisedAt);
     public Result Acknowledge(string acknowledgedBy, DateTimeOffset at);          // solo Active
