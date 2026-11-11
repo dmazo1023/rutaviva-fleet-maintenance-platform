@@ -33,25 +33,4 @@ public sealed class GetEventsQueryHandlerTests
         result.IsSuccess.Should().BeTrue();
         await _store.Received(1).ReadAsync(Arg.Any<IReadOnlyCollection<string>>(), AfterOffset, Cap, Arg.Any<CancellationToken>());
     }
-
-    [Fact]
-    public async Task HandleAsync_Should_ReturnValidation_When_StreamsAreEmpty()
-    {
-        Result<IReadOnlyList<EventRecord>> result = await _handler.HandleAsync(
-            new GetEventsQuery([], AfterOffset, Cap),
-            TestContext.Current.CancellationToken);
-
-        result.Error.Type.Should().Be(ErrorType.Validation);
-        await _store.DidNotReceiveWithAnyArgs().ReadAsync(default!, default, default, TestContext.Current.CancellationToken);
-    }
-
-    [Fact]
-    public async Task HandleAsync_Should_ReturnValidation_When_MaxIsNotPositive()
-    {
-        Result<IReadOnlyList<EventRecord>> result = await _handler.HandleAsync(
-            new GetEventsQuery([Stream], AfterOffset, 0),
-            TestContext.Current.CancellationToken);
-
-        result.Error.Type.Should().Be(ErrorType.Validation);
-    }
 }

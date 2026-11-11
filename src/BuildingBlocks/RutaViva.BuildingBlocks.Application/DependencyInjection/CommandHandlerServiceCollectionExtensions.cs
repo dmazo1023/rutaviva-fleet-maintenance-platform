@@ -1,5 +1,4 @@
 using System.Reflection;
-using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using RutaViva.BuildingBlocks.Application.Abstractions;
 using RutaViva.BuildingBlocks.Application.Decorators;
@@ -14,7 +13,7 @@ public static class CommandHandlerServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(assembly);
 
         RegisterHandlers(services, assembly);
-        services.AddValidatorsFromAssembly(assembly, ServiceLifetime.Scoped, includeInternalTypes: true);
+        ValidatorRegistration.AddOnce(services, assembly);
         DecorateHandlers(services);
         return services;
     }

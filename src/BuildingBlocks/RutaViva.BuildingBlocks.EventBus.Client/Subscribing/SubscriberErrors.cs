@@ -10,5 +10,7 @@ internal static class SubscriberErrors
 
     public static readonly Error PayloadInvalid = new(PayloadInvalidCode, PayloadInvalidMessage, ErrorType.Validation);
 
-    public static Error HandlerThrew(Exception exception) => new(HandlerThrewCode, exception.Message, ErrorType.BusinessRule);
+    public static Error HandlerThrew(Exception exception) => new(HandlerThrewCode, exception.Message, ErrorType.Conflict);
+
+    public static bool IsRetryable(Error error) => error.Type == ErrorType.Conflict;
 }

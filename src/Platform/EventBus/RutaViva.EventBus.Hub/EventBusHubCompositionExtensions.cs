@@ -2,11 +2,8 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
-using RutaViva.BuildingBlocks.Application.Abstractions;
-using RutaViva.EventBus.Application.Failures;
+using RutaViva.BuildingBlocks.Application.DependencyInjection;
 using RutaViva.EventBus.Application.Publishing;
-using RutaViva.EventBus.Application.Queries;
-using RutaViva.IntegrationContracts.EventBus;
 
 namespace RutaViva.EventBus.Hub;
 
@@ -21,10 +18,8 @@ internal static class EventBusHubCompositionExtensions
 
     public static IServiceCollection AddEventBusHandlers(this IServiceCollection services)
     {
-        services.AddScoped<ICommandHandler<PublishEventCommand, long>, PublishEventCommandHandler>();
-        services.AddScoped<IQueryHandler<GetEventsQuery, IReadOnlyList<EventRecord>>, GetEventsQueryHandler>();
-        services.AddScoped<IQueryHandler<GetLatestOffsetQuery, long>, GetLatestOffsetQueryHandler>();
-        services.AddScoped<ICommandHandler<ReportFailureCommand, bool>, ReportFailureCommandHandler>();
+        services.AddCommandHandlers(typeof(PublishEventCommand).Assembly);
+        services.AddQueryHandlers(typeof(PublishEventCommand).Assembly);
         return services;
     }
 

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RutaViva.BuildingBlocks.Application.Abstractions;
@@ -18,6 +19,8 @@ public sealed class OutboxBatchProcessor<TContext>(
 
     private const string PublishedTemplate = "Outbox message {MessageId} published to stream {Stream} at offset {Offset}";
     private const string FailedTemplate = "Outbox message {MessageId} failed on attempt {Attempts}";
+    private const string PermanentFailureTemplate = "Outbox message {MessageId} marked as permanently failed after {Attempts} attempts";
+    private const string UnavailableTemplate = "Event bus unavailable while publishing outbox message {MessageId}; the batch will be retried";
     private const string InvalidPayloadMessage = "The outbox payload is not a valid integration event envelope.";
 
     public async Task ProcessAsync(CancellationToken cancellationToken)
@@ -34,8 +37,8 @@ public sealed class OutboxBatchProcessor<TContext>(
 
     private async Task<IReadOnlyList<OutboxMessage>> ReadPendingAsync(CancellationToken cancellationToken) =>
         await context.Set<OutboxMessage>()
-            .Where(message => message.ProcessedAt == null)
-            .OrderBy(message => message.OccurredAt)
+            .Where(message => message.ProcessedAt == null && message.FailedAt == null)
+            .OrderBy(message => message.Sequence)
             .Take(BatchSize)
             .ToListAsync(cancellationToken);
 
@@ -63,19 +66,44 @@ public sealed class OutboxBatchProcessor<TContext>(
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            RegisterFailure(message, exception);
+            return HandleFailure(message, exception);
+        }
+    }
+
+    private bool HandleFailure(OutboxMessage message, Exception exception)
+    {
+        if (exception is JsonException or HubException)
+        {
+            MarkFailed(message, exception);
+            return true;
+        }
+
+        if (exception is EventBusUnavailableException)
+        {
+            logger.LogWarning(exception, UnavailableTemplate, message.Id);
             return false;
         }
+
+        RegisterFailure(message, exception);
+        return false;
+    }
+
+    private void MarkFailed(OutboxMessage message, Exception exception)
+    {
+        message.MarkFailed(DescribeError(exception), clock.UtcNow);
+        logger.LogError(exception, PermanentFailureTemplate, message.Id, message.Attempts);
     }
 
     private void RegisterFailure(OutboxMessage message, Exception exception)
     {
-        string error = string.IsNullOrWhiteSpace(exception.Message) ? exception.GetType().Name : exception.Message;
-        message.RegisterFailure(error);
+        message.RegisterFailure(DescribeError(exception), clock.UtcNow);
         logger.LogWarning(exception, FailedTemplate, message.Id, message.Attempts);
     }
 
+    private static string DescribeError(Exception exception) =>
+        string.IsNullOrWhiteSpace(exception.Message) ? exception.GetType().Name : exception.Message;
+
     private static IntegrationEventEnvelope Deserialize(OutboxMessage message) =>
         JsonSerializer.Deserialize<IntegrationEventEnvelope>(message.Payload, IntegrationEventJson.Options)
-        ?? throw new InvalidOperationException(InvalidPayloadMessage);
+        ?? throw new JsonException(InvalidPayloadMessage);
 }

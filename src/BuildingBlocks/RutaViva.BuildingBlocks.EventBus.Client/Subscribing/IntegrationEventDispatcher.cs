@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Polly;
 using RutaViva.BuildingBlocks.Application.Abstractions;
 using RutaViva.BuildingBlocks.Domain.Results;
+using RutaViva.IntegrationContracts;
 using RutaViva.IntegrationContracts.Abstractions;
 using RutaViva.IntegrationContracts.EventBus;
 
@@ -17,13 +18,14 @@ internal sealed class IntegrationEventDispatcher(
     ILogger<IntegrationEventDispatcher> logger)
 {
     private const string FailureFormat = "{0}: {1}";
+    private const string UnrecognizedTypeTemplate = "Event at offset {Offset} for subscriber {Subscriber} has the unrecognized type '{Type}' and was skipped";
     private const string FailureReportedTemplate = "Event at offset {Offset} failed for subscriber {Subscriber} after all retries and was reported: {Error}";
 
     private readonly ResiliencePipeline<Result> _pipeline = SubscriberRetryPipeline.Create(timeProvider);
 
     public async Task<Result> DispatchAsync(HubConnection connection, EventRecord record, CancellationToken cancellationToken)
     {
-        IEventDispatchStrategy strategy = registry.Resolve(EventNames.FromEnvelopeType(record.Envelope.Type));
+        IEventDispatchStrategy strategy = ResolveStrategy(record);
         Result outcome = await _pipeline.ExecuteAsync(token => new ValueTask<Result>(AttemptAsync(strategy, record, token)), cancellationToken);
         return outcome.IsSuccess ? outcome : await RecordFailureAsync(connection, record, outcome.Error, cancellationToken);
     }
@@ -31,7 +33,21 @@ internal sealed class IntegrationEventDispatcher(
     private static EventMetadata ToMetadata(EventRecord record)
         => new(record.Envelope.Id, record.Offset, record.Envelope.Type, record.Envelope.Subject, record.Envelope.Time);
 
-    private static string FormatError(Error error) => string.Format(FailureFormat, error.Code, error.Message);
+    private static string FormatError(Error error) => Truncate(string.Format(FailureFormat, error.Code, error.Message));
+
+    private static string Truncate(string text) =>
+        text.Length <= IntegrationEventLimits.FailureMaxLength ? text : text[..IntegrationEventLimits.FailureMaxLength];
+
+    private IEventDispatchStrategy ResolveStrategy(EventRecord record)
+    {
+        if (IntegrationEventType.TryParse(record.Envelope.Type, out IntegrationEventType? eventType))
+        {
+            return registry.Resolve(eventType);
+        }
+
+        logger.LogWarning(UnrecognizedTypeTemplate, record.Offset, options.SubscriberName, record.Envelope.Type);
+        return SkippedEventStrategy.Instance;
+    }
 
     private async Task<Result> AttemptAsync(IEventDispatchStrategy strategy, EventRecord record, CancellationToken cancellationToken)
     {

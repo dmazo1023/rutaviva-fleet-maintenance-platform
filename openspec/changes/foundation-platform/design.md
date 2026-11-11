@@ -353,7 +353,10 @@ Pedidos de los changes incorporados a este registro (el detalle está en la secc
 | Decorator | D-03 | Validación y logging transversales sin tocar handlers (OCP) |
 | Registry + Strategy | D-07 | Despacho de eventos por tipo sin `switch` |
 | Adapter | D-06, D-07 | El hub y el cliente SignalR traducen; Application no conoce el transporte (DIP) |
-| Template Method | `EntityTypeConfiguration` base de raíces (`rowversion`, eventos ignorados) | Configuración repetida en un solo lugar |
+| Template Method | `BulkRegistrationHandler<TRow, TCommand>` (D-03) | El flujo de la carga masiva se define una vez; cada servicio solo resuelve el command y la clave natural |
+| Convención de modelo | `ApplyRutaVivaConventions` (D-05): `RowVersion` sombra en toda `IAggregateRoot`, tipos y precisión comunes | Configuración repetida en un solo lugar sin acoplar el dominio a EF |
+| Value Object | `IntegrationEventType` y `IntegrationEventDescriptor` en `RutaViva.IntegrationContracts` | El `type` versionado del envelope se forma y se interpreta en un solo lugar |
+| Poison Message | `OutboxMessage.MaxAttempts` y `FailedAt`; *dead letter* del suscriptor | Un mensaje que no se puede entregar no bloquea a los demás |
 | Result / Notification | D-02 | Errores de negocio como valores |
 
 ## Antipatrones evitados
@@ -362,7 +365,7 @@ Pedidos de los changes incorporados a este registro (el detalle está en la secc
 |---|---|
 | Modelo anémico | Las clases base no exponen *setters*; la prueba `architecture-governance` lo verifica |
 | Objeto dios | El EventBus separa hub (Adapter), store (escritor único) y handlers; el cliente separa publisher, subscriber host y dispatcher |
-| Números mágicos | Intervalos, tamaños de lote y reintentos en `EventBusOptions` y `OutboxOptions` con valores por defecto como constantes |
+| Números mágicos | Intervalos, tamaños de lote, reintentos y longitudes como constantes con nombre en su dueño (`OutboxRelayService`, `OutboxBatchProcessor`, `SubscriberRetryPipeline`, `SubscriberOptions`, `IntegrationEventLimits`); se vuelven opciones configurables solo cuando un servicio lo necesite (YAGNI) |
 | Copy-paste | Outbox, checkpoints, convenciones EF y mapeo HTTP en BuildingBlocks; cada servicio solo declara |
 | Martillo dorado | El EventBus no transporta la telemetría (alto volumen, ADR-0014) ni las consultas |
 

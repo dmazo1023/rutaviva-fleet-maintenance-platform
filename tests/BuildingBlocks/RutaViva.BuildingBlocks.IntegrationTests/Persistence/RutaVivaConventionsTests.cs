@@ -9,7 +9,7 @@ public sealed class RutaVivaConventionsTests(SqlServerTestDatabase database) : I
 {
     private const string OutboxTable = "OutboxMessages";
     private const string CheckpointTable = "EventCheckpoints";
-    private const string ExpectedFilter = "([ProcessedAt] IS NULL)";
+    private const string ExpectedFilter = "([ProcessedAt] IS NULL AND [FailedAt] IS NULL)";
 
     [Theory]
     [InlineData(TestDbContext.OrdersTable, "Status", "varchar(20)")]
@@ -49,7 +49,7 @@ public sealed class RutaVivaConventionsTests(SqlServerTestDatabase database) : I
     }
 
     [Fact]
-    public async Task OutboxIndex_Should_BeFilteredByProcessedAt_When_ModelIsCreated()
+    public async Task OutboxIndex_Should_BeFilteredToPendingMessages_When_ModelIsCreated()
     {
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         await using TestDbContext context = await database.CreateDbContextAsync<TestDbContext>(cancellationToken);

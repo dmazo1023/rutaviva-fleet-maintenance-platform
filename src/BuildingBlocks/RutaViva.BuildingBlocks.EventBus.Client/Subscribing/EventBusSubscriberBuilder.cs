@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using RutaViva.BuildingBlocks.Application.Abstractions;
+using RutaViva.IntegrationContracts;
 using RutaViva.IntegrationContracts.Abstractions;
 
 namespace RutaViva.BuildingBlocks.EventBus.Client.Subscribing;
@@ -21,7 +22,7 @@ public sealed class EventBusSubscriberBuilder
         where THandler : class, IIntegrationEventHandler<TEvent>
     {
         _services.TryAddScoped<THandler>();
-        _registry.Register(EventNames.FromEventType(typeof(TEvent)), stream, new HandlerDispatchStrategy<TEvent, THandler>());
+        _registry.Register(IntegrationEventDescriptor.For<TEvent>().EventType, stream, new HandlerDispatchStrategy<TEvent, THandler>());
         return this;
     }
 
@@ -32,7 +33,7 @@ public sealed class EventBusSubscriberBuilder
         _services.TryAddScoped<THandler>();
         foreach (Type eventType in EventFamilyScanner.ConcreteEventTypes(typeof(TMarker)))
         {
-            _registry.Register(EventNames.FromEventType(eventType), stream, CreateStrategy(eventType, typeof(THandler)));
+            _registry.Register(IntegrationEventDescriptor.For(eventType).EventType, stream, CreateStrategy(eventType, typeof(THandler)));
         }
 
         return this;

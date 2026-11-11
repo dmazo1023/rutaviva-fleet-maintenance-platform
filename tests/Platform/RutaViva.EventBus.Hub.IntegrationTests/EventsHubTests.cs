@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using RutaViva.EventBus.Infrastructure.Persistence;
 using RutaViva.IntegrationContracts;
@@ -10,6 +11,7 @@ namespace RutaViva.EventBus.Hub.IntegrationTests;
 public sealed class EventsHubTests(SqlServerTestDatabase database) : IClassFixture<SqlServerTestDatabase>
 {
     private const int PageSize = 10;
+    private const char StreamFiller = 'a';
 
     [Fact]
     public async Task Publish_Should_NotifyOnlySubscribersOfTheStream_When_EventIsPublished()
@@ -43,6 +45,19 @@ public sealed class EventsHubTests(SqlServerTestDatabase database) : IClassFixtu
         EventRecord record = records.Should().ContainSingle().Subject;
         record.Offset.Should().Be(offset);
         record.Envelope.Id.Should().Be(envelope.Id);
+    }
+
+    [Fact]
+    public async Task Publish_Should_ThrowHubException_When_StreamExceedsMaxLength()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        await using EventBusHubFactory factory = await CreateFactoryAsync(cancellationToken);
+        await using HubSubscriber subscriber = await HubSubscriber.ConnectAsync(factory, Streams.FleetVehicle, cancellationToken);
+        string stream = new(StreamFiller, IntegrationEventLimits.StreamMaxLength + 1);
+
+        Func<Task> publish = () => PublishAsync(subscriber, stream, cancellationToken);
+
+        await publish.Should().ThrowAsync<HubException>();
     }
 
     private static Task<long> PublishAsync(HubSubscriber publisher, string stream, CancellationToken cancellationToken) =>

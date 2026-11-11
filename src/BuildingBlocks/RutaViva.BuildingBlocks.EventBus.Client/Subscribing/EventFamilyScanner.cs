@@ -1,4 +1,5 @@
 using System.Reflection;
+using RutaViva.IntegrationContracts;
 using RutaViva.IntegrationContracts.Abstractions;
 
 namespace RutaViva.BuildingBlocks.EventBus.Client.Subscribing;
@@ -14,7 +15,5 @@ internal static class EventFamilyScanner
         => new[] { typeof(IIntegrationEvent).Assembly, markerType.Assembly }.Distinct();
 
     private static bool IsConcreteEventOf(Type type, Type markerType)
-        => type is { IsClass: true, IsAbstract: false }
-            && markerType.IsAssignableFrom(type)
-            && EventNames.IsDeclaredBy(type);
+        => markerType.IsAssignableFrom(type) && IntegrationEventDescriptor.IsDescribable(type);
 }

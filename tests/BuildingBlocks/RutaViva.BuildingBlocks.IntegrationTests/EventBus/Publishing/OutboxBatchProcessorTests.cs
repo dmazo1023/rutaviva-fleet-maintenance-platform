@@ -1,8 +1,11 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using RutaViva.BuildingBlocks.EventBus.Client.Connection;
 using RutaViva.BuildingBlocks.EventBus.Client.Publishing;
 using RutaViva.BuildingBlocks.Infrastructure.Messaging;
@@ -26,10 +29,13 @@ public sealed class OutboxBatchProcessorTests(EventBusTestServer server, SqlServ
     private const string DataValue = "sample";
     private const int FailingCycles = 3;
     private const int ReadMax = 100;
+    private const string PoisonStream = "relay.poison";
+    private const string InvalidPayload = "not-json";
+    private const string HubFailureMessage = "Simulated hub failure";
+    private const string UnavailableMessage = "Simulated bus outage";
     private const long FromStart = 0;
-    private const int FirstMinute = 0;
-    private const int SecondMinute = 1;
-    private const int ThirdMinute = 2;
+    private const int NoAttempts = 0;
+    private const int SingleAttempt = 1;
 
     private static readonly DateTimeOffset Now = new(2026, 3, 1, 8, 30, 0, TimeSpan.Zero);
 
@@ -62,20 +68,106 @@ public sealed class OutboxBatchProcessorTests(EventBusTestServer server, SqlServ
     }
 
     [Fact]
-    public async Task ProcessAsync_Should_PublishInOccurredAtOrder_When_ThreeMessagesArePending()
+    public async Task ProcessAsync_Should_PublishInInsertionOrder_When_ThreeMessagesShareOccurredAt()
     {
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         await ClearOutboxAsync(cancellationToken);
-        OutboxMessage first = CreateMessage(OrderStream, Now.AddMinutes(FirstMinute));
-        OutboxMessage second = CreateMessage(OrderStream, Now.AddMinutes(SecondMinute));
-        OutboxMessage third = CreateMessage(OrderStream, Now.AddMinutes(ThirdMinute));
+        OutboxMessage first = CreateMessage(OrderStream, Now);
+        OutboxMessage second = CreateMessage(OrderStream, Now);
+        OutboxMessage third = CreateMessage(OrderStream, Now);
         await SeedAsync([third, first, second], cancellationToken);
         await using EventBusPublisher publisher = CreatePublisher();
 
         await RunCycleAsync(publisher, cancellationToken);
 
         IReadOnlyList<EventRecord> events = await ReadEventsAsync(OrderStream, cancellationToken);
-        events.Select(record => record.Envelope.Id).Should().Equal(first.Id, second.Id, third.Id);
+        events.Select(record => record.Envelope.Id).Should().Equal(third.Id, first.Id, second.Id);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_Should_MarkFailedAndPublishNext_When_MessageFailsTransientlyMaxAttemptsTimes()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        await ClearOutboxAsync(cancellationToken);
+        OutboxMessage poisoned = CreateMessage(PoisonStream, Now);
+        OutboxMessage healthy = CreateMessage(PoisonStream, Now);
+        await SeedAsync([poisoned, healthy], cancellationToken);
+        await using EventBusPublisher publisher = CreatePublisher();
+        FailingThenDelegatingTransport transport = new(publisher, OutboxMessage.MaxAttempts);
+
+        for (int cycle = 0; cycle < OutboxMessage.MaxAttempts; cycle++)
+        {
+            await RunCycleAsync(transport, cancellationToken);
+        }
+
+        OutboxMessage failed = await ReadMessageAsync(poisoned.Id, cancellationToken);
+        failed.FailedAt.Should().Be(Now);
+        failed.ProcessedAt.Should().BeNull();
+        failed.Attempts.Should().Be(OutboxMessage.MaxAttempts);
+
+        await RunCycleAsync(transport, cancellationToken);
+
+        OutboxMessage published = await ReadMessageAsync(healthy.Id, cancellationToken);
+        published.ProcessedAt.Should().Be(Now);
+        IReadOnlyList<EventRecord> events = await ReadEventsAsync(PoisonStream, cancellationToken);
+        events.Should().ContainSingle(record => record.Envelope.Id == healthy.Id);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_Should_MarkFailedWithoutRetries_When_PayloadIsInvalid()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        await ClearOutboxAsync(cancellationToken);
+        OutboxMessage message = new(Guid.NewGuid(), PoisonStream, EventType, EventSubject, InvalidPayload, Now);
+        await SeedAsync([message], cancellationToken);
+        IIntegrationEventTransport transport = Substitute.For<IIntegrationEventTransport>();
+
+        await RunCycleAsync(transport, cancellationToken);
+        await RunCycleAsync(transport, cancellationToken);
+
+        OutboxMessage failed = await ReadMessageAsync(message.Id, cancellationToken);
+        failed.FailedAt.Should().Be(Now);
+        failed.Attempts.Should().Be(SingleAttempt);
+        await transport.DidNotReceive().SendAsync(Arg.Any<string>(), Arg.Any<IntegrationEventEnvelope>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ProcessAsync_Should_MarkFailedWithoutRetries_When_HubRejectsTheMessage()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        await ClearOutboxAsync(cancellationToken);
+        OutboxMessage message = CreateMessage(PoisonStream, Now);
+        await SeedAsync([message], cancellationToken);
+        IIntegrationEventTransport transport = Substitute.For<IIntegrationEventTransport>();
+        transport.SendAsync(Arg.Any<string>(), Arg.Any<IntegrationEventEnvelope>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new HubException(HubFailureMessage));
+
+        await RunCycleAsync(transport, cancellationToken);
+        await RunCycleAsync(transport, cancellationToken);
+
+        OutboxMessage failed = await ReadMessageAsync(message.Id, cancellationToken);
+        failed.FailedAt.Should().Be(Now);
+        failed.LastError.Should().Be(HubFailureMessage);
+        await transport.Received(SingleAttempt).SendAsync(Arg.Any<string>(), Arg.Any<IntegrationEventEnvelope>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ProcessAsync_Should_KeepMessagePending_When_EventBusIsUnavailable()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        await ClearOutboxAsync(cancellationToken);
+        OutboxMessage message = CreateMessage(PoisonStream, Now);
+        await SeedAsync([message], cancellationToken);
+        IIntegrationEventTransport transport = Substitute.For<IIntegrationEventTransport>();
+        transport.SendAsync(Arg.Any<string>(), Arg.Any<IntegrationEventEnvelope>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new EventBusUnavailableException(UnavailableMessage));
+
+        await RunCycleAsync(transport, cancellationToken);
+
+        OutboxMessage pending = await ReadMessageAsync(message.Id, cancellationToken);
+        pending.FailedAt.Should().BeNull();
+        pending.ProcessedAt.Should().BeNull();
+        pending.Attempts.Should().Be(NoAttempts);
     }
 
     [Fact]
@@ -137,8 +229,11 @@ public sealed class OutboxBatchProcessorTests(EventBusTestServer server, SqlServ
     private async Task SeedAsync(IReadOnlyList<OutboxMessage> messages, CancellationToken cancellationToken)
     {
         await using OutboxRelayTestDbContext context = await database.CreateDbContextAsync<OutboxRelayTestDbContext>(cancellationToken);
-        context.Set<OutboxMessage>().AddRange(messages);
-        await context.SaveChangesAsync(cancellationToken);
+        foreach (OutboxMessage message in messages)
+        {
+            context.Set<OutboxMessage>().Add(message);
+            await context.SaveChangesAsync(cancellationToken);
+        }
     }
 
     private async Task<OutboxMessage> ReadMessageAsync(Guid id, CancellationToken cancellationToken)

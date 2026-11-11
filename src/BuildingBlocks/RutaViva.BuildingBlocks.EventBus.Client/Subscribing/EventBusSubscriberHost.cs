@@ -25,17 +25,31 @@ internal sealed class EventBusSubscriberHost(
     private const string CycleFailedTemplate = "Event subscriber {Subscriber} cycle failed and will be retried";
     private const string ResubscribeFailedTemplate = "Event subscriber {Subscriber} could not subscribe after reconnecting";
     private const string BatchStoppedTemplate = "Event subscriber {Subscriber} stopped the batch at offset {Offset}: {Error}";
+    private const string NoStreamsMessage = "The event subscriber '{0}' has no registered handlers. Register at least one with Handle or HandleFamily.";
 
     private readonly Channel<long> _signal = Channel.CreateBounded<long>(
         new BoundedChannelOptions(SignalCapacity) { FullMode = BoundedChannelFullMode.DropOldest });
 
     private readonly string[] _streams = registry.StreamNames();
     private bool _positionInitialized;
+    private volatile bool _subscribed;
+
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+        if (_streams.Length == 0)
+        {
+            throw new InvalidOperationException(string.Format(NoStreamsMessage, options.SubscriberName));
+        }
+
+        return base.StartAsync(cancellationToken);
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await using HubConnection connection = connectionFactory.Create();
         connection.On<string, long>(EventBusHubMethods.EventsAvailable, (_, _) => Wake());
+        connection.Reconnecting += _ => ResetSubscriptionAsync();
+        connection.Closed += _ => ResetSubscriptionAsync();
         connection.Reconnected += _ => OnReconnectedAsync(connection, stoppingToken);
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -62,12 +76,17 @@ internal sealed class EventBusSubscriberHost(
         _signal.Reader.TryRead(out _);
     }
 
+    private Task ResetSubscriptionAsync()
+    {
+        _subscribed = false;
+        return Task.CompletedTask;
+    }
+
     private async Task OnReconnectedAsync(HubConnection connection, CancellationToken cancellationToken)
     {
         try
         {
-            await SubscribeAsync(connection, cancellationToken);
-            Wake();
+            await EnsureSubscribedAsync(connection, cancellationToken);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
@@ -80,6 +99,7 @@ internal sealed class EventBusSubscriberHost(
         try
         {
             await EnsureConnectedAsync(connection, cancellationToken);
+            await EnsureSubscribedAsync(connection, cancellationToken);
             await InitializePositionAsync(connection, cancellationToken);
             await DrainAsync(connection, cancellationToken);
         }
@@ -101,12 +121,19 @@ internal sealed class EventBusSubscriberHost(
         }
 
         await connection.StartAsync(cancellationToken);
-        await SubscribeAsync(connection, cancellationToken);
-        Wake();
     }
 
-    private Task SubscribeAsync(HubConnection connection, CancellationToken cancellationToken)
-        => connection.InvokeAsync(EventBusHubMethods.Subscribe, _streams, cancellationToken);
+    private async Task EnsureSubscribedAsync(HubConnection connection, CancellationToken cancellationToken)
+    {
+        if (_subscribed)
+        {
+            return;
+        }
+
+        await connection.InvokeAsync(EventBusHubMethods.Subscribe, _streams, cancellationToken);
+        _subscribed = true;
+        Wake();
+    }
 
     private async Task InitializePositionAsync(HubConnection connection, CancellationToken cancellationToken)
     {

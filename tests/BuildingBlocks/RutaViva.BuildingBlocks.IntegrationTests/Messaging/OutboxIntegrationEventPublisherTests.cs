@@ -13,7 +13,7 @@ namespace RutaViva.BuildingBlocks.IntegrationTests.Messaging;
 public sealed class OutboxIntegrationEventPublisherTests(SqlServerTestDatabase database) : IClassFixture<SqlServerTestDatabase>
 {
     private const string ServiceName = "maintenance";
-    private const string ExpectedType = "rutaviva.maintenance.SampleHappened.v1";
+    private const string ExpectedType = "rutaviva.testing.SampleHappened.v1";
     private const string ExpectedSource = "/rutaviva/maintenance";
     private const string OrderIdProperty = "orderId";
 

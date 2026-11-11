@@ -3,14 +3,14 @@ using RutaViva.BuildingBlocks.Domain.Events;
 
 namespace RutaViva.BuildingBlocks.Domain.Primitives;
 
-public abstract class AggregateRoot<TId> : Entity<TId>
+public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot
     where TId : notnull
 {
     private readonly List<IDomainEvent> _domainEvents = [];
 
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-    public void ClearDomainEvents() => _domainEvents.Clear();
+    void IAggregateRoot.ClearDomainEvents() => _domainEvents.Clear();
 
     protected void Raise(IDomainEvent domainEvent)
     {

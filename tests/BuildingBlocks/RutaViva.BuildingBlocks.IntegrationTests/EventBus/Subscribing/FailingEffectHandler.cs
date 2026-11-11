@@ -6,14 +6,11 @@ namespace RutaViva.BuildingBlocks.IntegrationTests.EventBus.Subscribing;
 
 public sealed class FailingEffectHandler(AttemptCounter counter) : IIntegrationEventHandler<FailingHappenedV1>
 {
-    private const string FailureCode = "Testing.AlwaysFails";
-    private const string FailureMessage = "The handler always fails.";
-
-    private static readonly Error Failure = new(FailureCode, FailureMessage, ErrorType.BusinessRule);
+    private const string FailureMessage = "The handler always throws.";
 
     public Task<Result> HandleAsync(FailingHappenedV1 integrationEvent, EventMetadata metadata, CancellationToken cancellationToken)
     {
         counter.Increment();
-        return Task.FromResult(Result.Failure(Failure));
+        throw new InvalidOperationException(FailureMessage);
     }
 }

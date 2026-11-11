@@ -4,10 +4,8 @@ namespace RutaViva.BuildingBlocks.Infrastructure.Messaging;
 
 public sealed class OutboxMessage
 {
-    public const int StreamMaxLength = 60;
-    public const int EventTypeMaxLength = 150;
-    public const int SubjectMaxLength = 60;
     public const int LastErrorMaxLength = 1000;
+    public const int MaxAttempts = 10;
 
     public OutboxMessage(Guid id, string stream, string eventType, string subject, string payload, DateTimeOffset occurredAt)
     {
@@ -21,6 +19,8 @@ public sealed class OutboxMessage
 
     public Guid Id { get; private set; }
 
+    public long Sequence { get; private set; }
+
     public string Stream { get; private set; }
 
     public string EventType { get; private set; }
@@ -33,6 +33,8 @@ public sealed class OutboxMessage
 
     public DateTimeOffset? ProcessedAt { get; private set; }
 
+    public DateTimeOffset? FailedAt { get; private set; }
+
     public int Attempts { get; private set; }
 
     public string? LastError { get; private set; }
@@ -42,7 +44,22 @@ public sealed class OutboxMessage
         ProcessedAt = Guard.NotDefault(processedAt);
     }
 
-    public void RegisterFailure(string error)
+    public void RegisterFailure(string error, DateTimeOffset at)
+    {
+        RecordError(error);
+        if (Attempts >= MaxAttempts)
+        {
+            FailedAt = Guard.NotDefault(at);
+        }
+    }
+
+    public void MarkFailed(string error, DateTimeOffset at)
+    {
+        RecordError(error);
+        FailedAt = Guard.NotDefault(at);
+    }
+
+    private void RecordError(string error)
     {
         string validated = Guard.NotNullOrWhiteSpace(error);
         Attempts++;

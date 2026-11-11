@@ -33,12 +33,15 @@ public sealed class TestEventPublisher : IAsyncDisposable
     }
 
     public Task<long> PublishAsync<TEvent>(string stream, string eventName, TEvent payload, string subject, Guid messageId, CancellationToken cancellationToken)
+        => PublishWithTypeAsync(stream, TypeFor(eventName), payload, subject, messageId, cancellationToken);
+
+    public Task<long> PublishWithTypeAsync<TEvent>(string stream, string type, TEvent payload, string subject, Guid messageId, CancellationToken cancellationToken)
     {
         IntegrationEventEnvelope envelope = new()
         {
             Id = messageId,
             Source = Source,
-            Type = TypeFor(eventName),
+            Type = type,
             Subject = subject,
             Time = DateTimeOffset.UtcNow,
             Data = JsonSerializer.SerializeToElement(payload, IntegrationEventJson.Options),

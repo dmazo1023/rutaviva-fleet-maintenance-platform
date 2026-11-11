@@ -1,13 +1,10 @@
+using RutaViva.BuildingBlocks.Domain.Guards;
 using RutaViva.IntegrationContracts;
 
 namespace RutaViva.EventBus.Infrastructure.Persistence;
 
 public sealed class StoredEvent
 {
-    public const int StreamMaxLength = 60;
-    public const int TypeMaxLength = 150;
-    public const int SubjectMaxLength = 60;
-
     private StoredEvent()
     {
     }
@@ -28,14 +25,18 @@ public sealed class StoredEvent
 
     public string Payload { get; private set; } = string.Empty;
 
-    public static StoredEvent Create(string stream, IntegrationEventEnvelope envelope, string payload, DateTimeOffset storedAt) => new()
+    public static StoredEvent Create(string stream, IntegrationEventEnvelope envelope, string payload, DateTimeOffset storedAt)
     {
-        MessageId = envelope.Id,
-        Stream = stream,
-        Type = envelope.Type,
-        Subject = envelope.Subject,
-        OccurredAt = envelope.Time,
-        StoredAt = storedAt,
-        Payload = payload,
-    };
+        Guard.NotNull(envelope);
+        return new StoredEvent
+        {
+            MessageId = Guard.NotDefault(envelope.Id),
+            Stream = BoundedText.Require(stream, IntegrationEventLimits.StreamMaxLength),
+            Type = BoundedText.Require(envelope.Type, IntegrationEventLimits.TypeMaxLength),
+            Subject = BoundedText.Require(envelope.Subject, IntegrationEventLimits.SubjectMaxLength),
+            OccurredAt = Guard.NotDefault(envelope.Time),
+            StoredAt = Guard.NotDefault(storedAt),
+            Payload = Guard.NotNullOrWhiteSpace(payload),
+        };
+    }
 }

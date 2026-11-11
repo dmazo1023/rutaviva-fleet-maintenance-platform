@@ -10,7 +10,7 @@ namespace RutaViva.BuildingBlocks.EventBus.Client.Subscribing;
 
 internal sealed class HandlerDispatchStrategy<TEvent, THandler> : IEventDispatchStrategy
     where TEvent : IIntegrationEvent
-    where THandler : class
+    where THandler : class, IIntegrationEventHandler<TEvent>
 {
     public async Task<Result> ExecuteAsync(IServiceProvider services, IntegrationEventEnvelope envelope, EventMetadata metadata, CancellationToken cancellationToken)
     {
@@ -20,7 +20,7 @@ internal sealed class HandlerDispatchStrategy<TEvent, THandler> : IEventDispatch
             return Result.Failure(SubscriberErrors.PayloadInvalid);
         }
 
-        IIntegrationEventHandler<TEvent> handler = (IIntegrationEventHandler<TEvent>)services.GetRequiredService<THandler>();
+        THandler handler = services.GetRequiredService<THandler>();
         return await handler.HandleAsync(integrationEvent, metadata, cancellationToken);
     }
 }

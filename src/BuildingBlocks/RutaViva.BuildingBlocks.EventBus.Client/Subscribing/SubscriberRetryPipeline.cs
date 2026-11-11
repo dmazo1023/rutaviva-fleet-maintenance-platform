@@ -17,7 +17,9 @@ internal static class SubscriberRetryPipeline
                 Delay = TimeSpan.FromSeconds(BaseDelaySeconds),
                 BackoffType = DelayBackoffType.Exponential,
                 UseJitter = false,
-                ShouldHandle = new PredicateBuilder<Result>().HandleResult(result => result.IsFailure),
+                ShouldHandle = new PredicateBuilder<Result>().HandleResult(IsRetryableFailure),
             })
             .Build();
+
+    private static bool IsRetryableFailure(Result result) => result.IsFailure && SubscriberErrors.IsRetryable(result.Error);
 }

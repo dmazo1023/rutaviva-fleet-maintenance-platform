@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using RutaViva.IntegrationContracts;
 
 namespace RutaViva.EventBus.Infrastructure.Persistence;
 
@@ -25,9 +26,9 @@ public sealed class StoredEventConfiguration : IEntityTypeConfiguration<StoredEv
 
     private static void ConfigureColumns(EntityTypeBuilder<StoredEvent> builder)
     {
-        builder.Property(stored => stored.Stream).HasMaxLength(StoredEvent.StreamMaxLength).IsUnicode(false);
-        builder.Property(stored => stored.Type).HasMaxLength(StoredEvent.TypeMaxLength).IsUnicode(false);
-        builder.Property(stored => stored.Subject).HasMaxLength(StoredEvent.SubjectMaxLength).IsUnicode(false);
+        builder.Property(stored => stored.Stream).HasMaxLength(IntegrationEventLimits.StreamMaxLength).IsUnicode(false);
+        builder.Property(stored => stored.Type).HasMaxLength(IntegrationEventLimits.TypeMaxLength).IsUnicode(false);
+        builder.Property(stored => stored.Subject).HasMaxLength(IntegrationEventLimits.SubjectMaxLength).IsUnicode(false);
         builder.Property(stored => stored.Payload).IsRequired();
     }
 

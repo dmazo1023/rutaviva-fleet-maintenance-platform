@@ -1,3 +1,4 @@
+using System.Reflection;
 using RutaViva.BuildingBlocks.Domain.Events;
 using RutaViva.BuildingBlocks.Domain.Primitives;
 
@@ -42,9 +43,19 @@ public sealed class AggregateRootTests
         TestAggregate aggregate = new();
         aggregate.Trigger(new TestEvent());
 
-        aggregate.ClearDomainEvents();
+        ((IAggregateRoot)aggregate).ClearDomainEvents();
 
         aggregate.DomainEvents.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ClearDomainEvents_Should_NotBePublic_When_ExposedByAggregateRoot()
+    {
+        MethodInfo? publicMethod = typeof(AggregateRoot<Guid>).GetMethod(
+            nameof(IAggregateRoot.ClearDomainEvents),
+            BindingFlags.Public | BindingFlags.Instance);
+
+        publicMethod.Should().BeNull();
     }
 
     private sealed class TestAggregate : AggregateRoot<Guid>

@@ -12,10 +12,24 @@ internal sealed class IntegrationEventEnvelopeBuilder
 
     private Guid _id = Guid.NewGuid();
     private string _type = DefaultType;
+    private string _subject = DefaultSubject;
+    private string _source = DefaultSource;
 
     public IntegrationEventEnvelopeBuilder WithType(string type)
     {
         _type = type;
+        return this;
+    }
+
+    public IntegrationEventEnvelopeBuilder WithSubject(string subject)
+    {
+        _subject = subject;
+        return this;
+    }
+
+    public IntegrationEventEnvelopeBuilder WithSource(string source)
+    {
+        _source = source;
         return this;
     }
 
@@ -28,9 +42,9 @@ internal sealed class IntegrationEventEnvelopeBuilder
     public IntegrationEventEnvelope Build() => new()
     {
         Id = _id,
-        Source = DefaultSource,
+        Source = _source,
         Type = _type,
-        Subject = DefaultSubject,
+        Subject = _subject,
         Time = DateTimeOffset.UtcNow,
         Data = JsonDocument.Parse(EmptyJson).RootElement.Clone(),
     };

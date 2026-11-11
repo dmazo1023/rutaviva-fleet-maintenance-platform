@@ -42,3 +42,4 @@ tests/Platform/
 tests/BuildingBlocks/RutaViva.BuildingBlocks.UnitTests/
 src/BuildingBlocks/RutaViva.BuildingBlocks.Infrastructure/
 tests/BuildingBlocks/RutaViva.BuildingBlocks.IntegrationTests/
+openspec/changes/foundation-platform/design.md

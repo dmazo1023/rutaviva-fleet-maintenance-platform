@@ -10,7 +10,6 @@ namespace RutaViva.BuildingBlocks.Infrastructure.Messaging;
 public sealed class IntegrationEventEnvelopeFactory
 {
     private const string SourceFormat = "/rutaviva/{0}";
-    private const string TypeFormat = "rutaviva.{0}.{1}.v1";
 
     private readonly IClock _clock;
     private readonly string _serviceName;
@@ -26,13 +25,13 @@ public sealed class IntegrationEventEnvelopeFactory
         Guard.NotNull(integrationEvent);
         Guard.NotNullOrWhiteSpace(subject);
         Type eventType = integrationEvent.GetType();
-        IntegrationEventTypeInfo info = IntegrationEventTypeInfo.For(eventType);
+        IntegrationEventDescriptor descriptor = IntegrationEventDescriptor.For(eventType);
 
         return new IntegrationEventEnvelope
         {
             Id = Guid.NewGuid(),
             Source = string.Format(SourceFormat, _serviceName),
-            Type = string.Format(TypeFormat, _serviceName, info.EventName),
+            Type = descriptor.EventType.ToString(),
             Subject = subject,
             Time = _clock.UtcNow,
             TraceParent = Activity.Current?.Id,

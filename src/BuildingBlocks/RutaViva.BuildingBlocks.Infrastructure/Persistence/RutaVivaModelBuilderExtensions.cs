@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using RutaViva.BuildingBlocks.Domain.Primitives;
 
 namespace RutaViva.BuildingBlocks.Infrastructure.Persistence;
 
@@ -31,7 +32,7 @@ public static class RutaVivaModelBuilderExtensions
             return;
         }
 
-        if (!AggregateRootTypes.IsAggregateRoot(entityType.ClrType))
+        if (!typeof(IAggregateRoot).IsAssignableFrom(entityType.ClrType))
         {
             return;
         }

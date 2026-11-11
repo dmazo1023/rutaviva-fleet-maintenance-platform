@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using RutaViva.BuildingBlocks.Application.Abstractions;
 using RutaViva.BuildingBlocks.Infrastructure.DomainEvents;
-using RutaViva.BuildingBlocks.Infrastructure.Messaging;
+using RutaViva.BuildingBlocks.Infrastructure.DependencyInjection;
 using RutaViva.Testing.Fixtures;
 
 namespace RutaViva.BuildingBlocks.IntegrationTests.DomainEvents;
@@ -25,10 +25,7 @@ public sealed class DomainEventsTestHost : IAsyncDisposable
         await using EventsTestDbContext schemaContext = await database.CreateDbContextAsync<EventsTestDbContext>(cancellationToken);
         ServiceCollection services = new();
         services.AddSingleton<IClock>(new FakeClock(Now));
-        services.AddSingleton(new IntegrationEventSettings { ServiceName = ServiceName });
-        services.AddSingleton<IntegrationEventEnvelopeFactory>();
-        services.AddSingleton<OutboxMessageFactory>();
-        services.AddDomainEventsToOutbox();
+        services.AddRutaVivaPersistence<EventsTestDbContext>(ServiceName);
         services.AddScoped<IDomainEventHandler<ParentRegistered>, CreateChildOnParentRegisteredHandler>();
         services.AddScoped<IDomainEventHandler<LoopTriggered>, SpawnLoopOnLoopTriggeredHandler>();
         services.AddScoped<IIntegrationEventMapper<ParentRegistered>, ParentRegisteredMapper>();

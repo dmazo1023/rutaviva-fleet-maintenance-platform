@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using RutaViva.BuildingBlocks.EventBus.Client.Subscribing;
 using RutaViva.BuildingBlocks.IntegrationTests.Messaging;
+using RutaViva.IntegrationContracts;
 using RutaViva.IntegrationContracts.EventBus;
 using RutaViva.Testing.Fixtures;
 
@@ -15,6 +16,8 @@ public sealed class EventBusSubscriberTests(EventBusTestServer server, SqlServer
     private const int ProcessTimeoutSeconds = 30;
     private const int BackupPollSeconds = 5;
     private const int BackupPollMarginSeconds = 10;
+    private const int NewerVersion = 2;
+    private const string TestingService = "testing";
 
     private static readonly TimeSpan ProcessTimeout = TimeSpan.FromSeconds(ProcessTimeoutSeconds);
     private static readonly TimeSpan BackupPollTimeout = TimeSpan.FromSeconds(BackupPollSeconds + BackupPollMarginSeconds);
@@ -125,6 +128,53 @@ public sealed class EventBusSubscriberTests(EventBusTestServer server, SqlServer
         List<string> types = await host.ReadEffectTypesAsync(subject, cancellationToken);
         processed.Should().BeTrue();
         types.Should().Equal(TestEventPublisher.TypeFor(FamilyFirstV1.EventName), TestEventPublisher.TypeFor(FamilySecondV1.EventName));
+    }
+
+    [Fact]
+    public async Task Subscriber_Should_SkipEventAndAdvanceCheckpoint_When_TypeVersionIsNotRegistered()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        string stream = SubscribingTestNames.NewStream();
+        string subject = SubscribingTestNames.NewSubject();
+        string newerType = IntegrationEventType.Create(TestingService, SampleHappenedV1.EventName, NewerVersion).ToString();
+        await using SubscriberTestHost host = await CreateHostAsync(builder => builder.Handle<SampleHappenedV1, RecordEffectHandler>(stream), cancellationToken);
+        await using TestEventPublisher publisher = await TestEventPublisher.ConnectAsync(server, cancellationToken);
+        await host.StartAsync(cancellationToken);
+
+        long offset = await publisher.PublishWithTypeAsync(stream, newerType, new SampleHappenedV1(Guid.NewGuid()), subject, Guid.NewGuid(), cancellationToken);
+
+        bool advanced = await host.WaitForCheckpointAsync(offset, ProcessTimeout, cancellationToken);
+        List<long> offsets = await host.ReadEffectOffsetsAsync(subject, cancellationToken);
+        int deadLetters = await DeadLetterQuery.CountAsync(server.ConnectionString, host.SubscriberName, cancellationToken);
+        advanced.Should().BeTrue();
+        offsets.Should().BeEmpty();
+        deadLetters.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Subscriber_Should_Throw_When_SameEventTypeIsRegisteredTwice()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        string stream = SubscribingTestNames.NewStream();
+
+        Func<Task> create = () => CreateHostAsync(
+            builder => builder
+                .Handle<SampleHappenedV1, RecordEffectHandler>(stream)
+                .Handle<SampleHappenedV1, RecordEffectHandler>(stream),
+            cancellationToken);
+
+        await create.Should().ThrowAsync<InvalidOperationException>();
+    }
+
+    [Fact]
+    public async Task Subscriber_Should_FailToStart_When_NoHandlerIsRegistered()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        await using SubscriberTestHost host = await CreateHostAsync(_ => { }, cancellationToken);
+
+        Func<Task> start = () => host.StartAsync(cancellationToken);
+
+        await start.Should().ThrowAsync<InvalidOperationException>();
     }
 
     private Task<SubscriberTestHost> CreateHostAsync(Action<EventBusSubscriberBuilder> registerHandlers, CancellationToken cancellationToken)

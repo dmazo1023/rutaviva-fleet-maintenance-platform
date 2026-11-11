@@ -21,6 +21,7 @@ public sealed class EventCheckpoint
 
     public void MoveTo(long offset, DateTimeOffset updatedAt)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(offset, LastOffset);
         LastOffset = offset;
         UpdatedAt = Guard.NotDefault(updatedAt);
     }

@@ -89,6 +89,11 @@
         "Registry key is the EventName; the dispatcher extracts it from envelope.Type (rutaviva.{svc}.{Name}.v1 -> Name, or the raw type if not in that format).",
         "Host/dispatcher are internal; the service must register its own scoped IEventCheckpointStore and IUnitOfWork for Checkpoint (Latest gets in-memory and null defaults via TryAdd)."
       ]
+    },
+    "5": {
+      "runId": "wf_8d432328-14b",
+      "exports": {},
+      "decisions": []
     }
   }
 }

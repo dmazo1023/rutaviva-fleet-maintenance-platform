@@ -9,9 +9,9 @@ public sealed class OutboxMessageFactory(IntegrationEventEnvelopeFactory envelop
     public OutboxMessage Create(IIntegrationEvent integrationEvent, string subject)
     {
         IntegrationEventEnvelope envelope = envelopeFactory.Create(integrationEvent, subject);
-        IntegrationEventTypeInfo info = IntegrationEventTypeInfo.For(integrationEvent.GetType());
+        IntegrationEventDescriptor descriptor = IntegrationEventDescriptor.For(integrationEvent.GetType());
         string payload = JsonSerializer.Serialize(envelope, IntegrationEventJson.Options);
 
-        return new OutboxMessage(envelope.Id, info.Stream, envelope.Type, envelope.Subject, payload, envelope.Time);
+        return new OutboxMessage(envelope.Id, descriptor.Stream, envelope.Type, envelope.Subject, payload, envelope.Time);
     }
 }

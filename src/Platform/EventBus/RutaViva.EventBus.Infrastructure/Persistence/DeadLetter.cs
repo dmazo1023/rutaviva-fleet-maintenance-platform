@@ -1,10 +1,10 @@
+using RutaViva.BuildingBlocks.Domain.Guards;
+using RutaViva.IntegrationContracts;
+
 namespace RutaViva.EventBus.Infrastructure.Persistence;
 
 public sealed class DeadLetter
 {
-    public const int SubscriberNameMaxLength = 60;
-    public const int ErrorMaxLength = 2000;
-
     private DeadLetter()
     {
     }
@@ -21,9 +21,9 @@ public sealed class DeadLetter
 
     public static DeadLetter Create(string subscriberName, long offset, string error, DateTimeOffset reportedAt) => new()
     {
-        SubscriberName = subscriberName,
+        SubscriberName = BoundedText.Require(subscriberName, IntegrationEventLimits.SubscriberNameMaxLength),
         Offset = offset,
-        Error = error,
-        ReportedAt = reportedAt,
+        Error = BoundedText.Require(error, IntegrationEventLimits.FailureMaxLength),
+        ReportedAt = Guard.NotDefault(reportedAt),
     };
 }
