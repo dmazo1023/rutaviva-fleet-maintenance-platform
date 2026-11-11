@@ -105,6 +105,103 @@ public sealed class MaintenancePlan : AggregateRoot<VehicleId>
         return EvaluateActiveRoutines(context, catalog, StartOfDay(effectiveDate));
     }
 
+    public Result UpdateRoutineOverrides(
+        RoutineId id,
+        RoutineOverrides overrides,
+        string updatedBy,
+        RoutineParameterCatalog catalog,
+        DateOnly today)
+    {
+        Result<RoutineTarget> target = FindAuditedTarget(id, updatedBy, catalog);
+        if (target.IsFailure)
+        {
+            return Result.Failure(target.Error);
+        }
+
+        Result<EffectiveRoutineParameters> effective = EffectiveRoutineParameters.Resolve(
+            target.Value.Type.Interval,
+            target.Value.Type.Threshold,
+            overrides);
+        if (effective.IsFailure)
+        {
+            return Result.Failure(effective.Error);
+        }
+
+        target.Value.Routine.ReplaceOverrides(overrides);
+        ApplyAdministrativeChange(target.Value, today, ParametersChangedEvent);
+        return Result.Success();
+    }
+
+    public Result ChangeRoutineState(
+        RoutineId id,
+        RoutineState state,
+        string updatedBy,
+        RoutineParameterCatalog catalog,
+        DateOnly today)
+    {
+        Result<RoutineTarget> target = FindAuditedTarget(id, updatedBy, catalog);
+        if (target.IsFailure)
+        {
+            return Result.Failure(target.Error);
+        }
+
+        if (target.Value.Routine.State == state)
+        {
+            return Result.Success();
+        }
+
+        target.Value.Routine.ChangeState(state);
+        ApplyAdministrativeChange(target.Value, today, StateChangedEvent);
+        return Result.Success();
+    }
+
+    public Result RestartRoutine(RoutineId id, ServiceRecord service, Guid serviceOrderId, RoutineParameterCatalog catalog)
+    {
+        Result<RoutineTarget> target = FindTarget(id, catalog);
+        if (target.IsFailure)
+        {
+            return Result.Failure(target.Error);
+        }
+
+        target.Value.Routine.Restart(service);
+        AdvanceOdometerTo(service);
+        DateOnly effectiveDate = LatestOf(service.Date, LastTimeEvaluationDate);
+        RaiseChangeAndEvaluate(
+            target.Value,
+            effectiveDate,
+            (snapshot, occurredAt) => new RoutineRestarted(snapshot, serviceOrderId, service, occurredAt));
+        return Result.Success();
+    }
+
+    public void Suspend()
+    {
+        if (Status == MaintenancePlanStatus.Suspended)
+        {
+            return;
+        }
+
+        Status = MaintenancePlanStatus.Suspended;
+        RaisePlanStatusChanged(LastTimeEvaluationDate);
+    }
+
+    public ReevaluationOutcome Resume(DateOnly today, RoutineParameterCatalog catalog)
+    {
+        if (Status == MaintenancePlanStatus.Active)
+        {
+            return ReevaluationOutcome.None;
+        }
+
+        Status = MaintenancePlanStatus.Active;
+        RaisePlanStatusChanged(LatestOf(today, LastTimeEvaluationDate));
+        return Reevaluate(today, catalog);
+    }
+
+    private static IDomainEvent ParametersChangedEvent(RoutineStatusSnapshot snapshot, DateTimeOffset occurredAt) =>
+        new RoutineParametersChanged(snapshot, occurredAt);
+
+    private static IDomainEvent StateChangedEvent(RoutineStatusSnapshot snapshot, DateTimeOffset occurredAt) =>
+        new RoutineStateChanged(snapshot, occurredAt);
+
     private static DateOnly LatestOf(DateOnly first, DateOnly second)
     {
         if (first >= second)
@@ -135,6 +232,74 @@ public sealed class MaintenancePlan : AggregateRoot<VehicleId>
             RoutineTransitionType.BecameOverdue => new RoutineBecameOverdue(snapshot, transition.Trigger, occurredAt),
             _ => new RoutineDueStatusReverted(snapshot, occurredAt)
         };
+
+    private Result<RoutineTarget> FindAuditedTarget(RoutineId id, string updatedBy, RoutineParameterCatalog catalog)
+    {
+        if (string.IsNullOrWhiteSpace(updatedBy))
+        {
+            return MaintenanceErrors.UpdatedByRequired;
+        }
+
+        return FindTarget(id, catalog);
+    }
+
+    private Result<RoutineTarget> FindTarget(RoutineId id, RoutineParameterCatalog catalog)
+    {
+        MaintenanceRoutine? routine = _routines.FirstOrDefault(candidate => candidate.Id == id);
+        if (routine is null)
+        {
+            return MaintenanceErrors.RoutineNotFound;
+        }
+
+        Result<RoutineTypeParameters> type = catalog.Find(routine.RoutineTypeId);
+        if (type.IsFailure)
+        {
+            return type.Error;
+        }
+
+        return new RoutineTarget(routine, type.Value);
+    }
+
+    private void AdvanceOdometerTo(ServiceRecord service)
+    {
+        OdometerReading reading = OdometerReading.Create(service.Kilometers, StartOfDay(service.Date)).Value;
+        Odometer = Odometer.Advance(reading);
+    }
+
+    private void RaisePlanStatusChanged(DateOnly effectiveDate) =>
+        Raise(new MaintenancePlanStatusChanged(Id, Plate, CustomerId, Status, StartOfDay(effectiveDate)));
+
+    private void ApplyAdministrativeChange(
+        RoutineTarget target,
+        DateOnly today,
+        Func<RoutineStatusSnapshot, DateTimeOffset, IDomainEvent> changeEvent)
+    {
+        DateOnly effectiveDate = LatestOf(today, LastTimeEvaluationDate);
+        RaiseChangeAndEvaluate(target, effectiveDate, changeEvent);
+        if (CanBeEvaluated && target.Routine.IsActive)
+        {
+            LastTimeEvaluationDate = effectiveDate;
+        }
+    }
+
+    private void RaiseChangeAndEvaluate(
+        RoutineTarget target,
+        DateOnly effectiveDate,
+        Func<RoutineStatusSnapshot, DateTimeOffset, IDomainEvent> changeEvent)
+    {
+        EvaluationContext context = ContextAt(Odometer.Kilometers, effectiveDate);
+        DateTimeOffset occurredAt = StartOfDay(effectiveDate);
+        EffectiveRoutineParameters parameters = target.Routine.ResolveParameters(target.Type);
+        RoutineAssessment assessment = RoutineAssessor.Assess(target.Routine.Cycle, parameters, context);
+
+        Raise(changeEvent(BuildSnapshot(target.Routine, parameters, assessment, context.OdometerKm), occurredAt));
+        if (!CanBeEvaluated || !target.Routine.IsActive)
+        {
+            return;
+        }
+
+        ApplyAssessment(target.Routine, parameters, assessment, context.OdometerKm, occurredAt);
+    }
 
     private bool HasRoutineOfType(RoutineTypeId routineTypeId) =>
         _routines.Any(routine => routine.RoutineTypeId == routineTypeId);
@@ -248,4 +413,6 @@ public sealed class MaintenancePlan : AggregateRoot<VehicleId>
             NextDue.Calculate(routine.Cycle, parameters.Interval),
             odometerKm,
             assessment.ConsumedPercent);
+
+    private readonly record struct RoutineTarget(MaintenanceRoutine Routine, RoutineTypeParameters Type);
 }

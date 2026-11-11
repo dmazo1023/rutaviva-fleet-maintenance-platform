@@ -70,6 +70,18 @@ public sealed class MaintenanceRoutine : Entity<RoutineId>
         return transition;
     }
 
+    internal void ReplaceOverrides(RoutineOverrides overrides) => Overrides = overrides;
+
+    internal void ChangeState(RoutineState state) => State = state;
+
+    internal void Restart(ServiceRecord service)
+    {
+        Cycle = Cycle.Next(service);
+        DueStatus = RoutineDueStatus.UpToDate;
+        DueSoonNotified = false;
+        LastTrigger = null;
+    }
+
     internal EffectiveRoutineParameters ResolveParameters(RoutineTypeParameters type) =>
         EffectiveRoutineParameters.Resolve(type.Interval, type.Threshold, Overrides).Value;
 
