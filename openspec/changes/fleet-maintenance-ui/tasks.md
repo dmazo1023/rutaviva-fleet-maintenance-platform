@@ -14,10 +14,10 @@
 
 ## 3. Core
 
-- [ ] 3.1 `core/api/api-client.ts` (get/post/put/patch y `download` con `Content-Disposition`) y `problem-details.interceptor.ts` (400/409/422 → `ToastStore`, 409 de orden → evento de recarga). Verificar con pruebas usando `HttpTestingController`
-- [ ] 3.2 `core/feedback/toast.store.ts` (6 s, acción opcional, persistente para prioritarias) y `shared/toast-outlet` con `aria-live="polite"` y `role="alert"` para errores. Verificar con pruebas con temporizadores falsos
-- [ ] 3.3 `core/context/session.store.ts` (cliente, perfil, actor; `localStorage` con `try/catch`) y carga de clientes, aprobadores y talleres para el selector (CR-09). Verificar con prueba del store con `localStorage` que lanza error
-- [ ] 3.4 `core/realtime/notifications.service.ts`: conexión con reconexión automática, `connectionState` como *signal*, `JoinCustomer`/`LeaveCustomer`/`JoinApprover` al cambiar la sesión y evento `reconnected`. Verificar con pruebas con un `HubConnection` falso (cambio de cliente, reconexión)
+- [x] 3.1 `core/api/api-client.ts` (get/post/put/patch y `download` con `Content-Disposition`) y `problem-details.interceptor.ts` (400/409/422 → `ToastStore`, 409 de orden → evento de recarga). Verificar con pruebas usando `HttpTestingController`
+- [x] 3.2 `core/feedback/toast.store.ts` (6 s, acción opcional, persistente para prioritarias) y `shared/toast-outlet` con `aria-live="polite"` y `role="alert"` para errores. Verificar con pruebas con temporizadores falsos
+- [x] 3.3 `core/context/session.store.ts` (cliente, perfil, actor; `localStorage` con `try/catch`) y carga de clientes, aprobadores y talleres para el selector (CR-09). Verificar con prueba del store con `localStorage` que lanza error
+- [x] 3.4 `core/realtime/notifications.service.ts`: conexión con reconexión automática, `connectionState` como *signal*, `JoinCustomer`/`LeaveCustomer`/`JoinApprover` al cambiar la sesión y evento `reconnected`. Verificar con pruebas con un `HubConnection` falso (cambio de cliente, reconexión)
 
 ## 4. Shell
 
