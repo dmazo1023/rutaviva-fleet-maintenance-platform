@@ -4,4 +4,4 @@ using RutaViva.ServiceOrders.Domain.Common;
 
 namespace RutaViva.ServiceOrders.Application.Orders;
 
-public sealed record CreateServiceOrderCommand(ServiceOrderReference Reference, string? CreatedBy) : ICommand<ServiceOrderId>;
+public sealed record CreateServiceOrderCommand(Guid VehicleId, Guid RoutineId, ServiceOrderOrigin Origin, string? CreatedBy) : ICommand<ServiceOrderId>;

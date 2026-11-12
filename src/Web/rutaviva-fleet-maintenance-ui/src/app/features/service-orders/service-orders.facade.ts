@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { DestroyRef, inject, Injectable, Signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, Observable, tap, throwError } from 'rxjs';
+import { catchError, EMPTY, Observable, tap, throwError } from 'rxjs';
 import { SessionStore } from '../../core/context/session.store';
 import { ToastStore } from '../../core/feedback/toast.store';
 import { NotificationsService } from '../../core/realtime/notifications.service';
@@ -101,14 +101,24 @@ export class ServiceOrdersFacade {
   }
 
   approve(orderId: string): Observable<ServiceOrderDetailVm> {
-    return this.executeMutation(orderId, () =>
-      this.api.approve(orderId, { approvedBy: this.sessionStore.currentActorName() })
+    return this.asApprover((approverId: string) =>
+      this.executeMutation(orderId, () =>
+        this.api.approve(orderId, {
+          approvedBy: this.sessionStore.currentActorName(),
+          approverId,
+        })
+      )
     );
   }
 
   reject(orderId: string): Observable<ServiceOrderDetailVm> {
-    return this.executeMutation(orderId, () =>
-      this.api.reject(orderId, { rejectedBy: this.sessionStore.currentActorName() })
+    return this.asApprover((approverId: string) =>
+      this.executeMutation(orderId, () =>
+        this.api.reject(orderId, {
+          rejectedBy: this.sessionStore.currentActorName(),
+          approverId,
+        })
+      )
     );
   }
 
@@ -135,6 +145,17 @@ export class ServiceOrdersFacade {
 
   vehicleOdometerKm(vehicleId: string): Observable<number | null> {
     return this.api.getVehicleOdometerKm(vehicleId);
+  }
+
+  private asApprover(
+    call: (approverId: string) => Observable<ServiceOrderDetailVm>
+  ): Observable<ServiceOrderDetailVm> {
+    const approverId: string | null = this.sessionStore.actorId();
+    if (!approverId) {
+      this.toastStore.show({ message: SERVICE_ORDERS_TEXTS.approverRequiredMessage, tone: 'warn' });
+      return EMPTY;
+    }
+    return call(approverId);
   }
 
   private executeMutation(

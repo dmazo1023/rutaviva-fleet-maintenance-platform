@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of, Subject, throwError } from 'rxjs';
+import { SessionStore } from '../../core/context/session.store';
 import { ToastStore } from '../../core/feedback/toast.store';
 import { NotificationsService } from '../../core/realtime/notifications.service';
 import {
@@ -21,6 +22,7 @@ describe('ServiceOrdersFacade', () => {
   const sampleDetail: ServiceOrderDetailVm = {
     id: 'OS-2026-001',
     number: 'OS-2026-001',
+    origin: 'Manual',
     vehicleId: 'RVA102',
     plate: 'RVA102',
     routineId: 'RT-RVA102-OIL',
@@ -85,10 +87,15 @@ describe('ServiceOrdersFacade', () => {
     facade.loadOrderDetail('OS-2026-001');
     expect(facade.detailLoadable().data?.availableActions.length).toBe(2);
 
+    TestBed.inject(SessionStore).setActor('APR-1');
     facade.approve('OS-2026-001').subscribe({
       error: () => undefined,
     });
     expect(getOrderByIdSpy).toHaveBeenCalledTimes(2);
+    expect(approveSpy).toHaveBeenCalledWith('OS-2026-001', {
+      approvedBy: expect.any(String),
+      approverId: 'APR-1',
+    });
 
     approvalRequestedSubject.next({
       serviceOrderId: 'OS-2026-002',
@@ -106,5 +113,16 @@ describe('ServiceOrdersFacade', () => {
     expect(toasts.length).toBe(1);
     expect(toasts[0]?.persistent).toBe(true);
     expect(toasts[0]?.message).toContain('OS-2026-002');
+  });
+
+  it('should not call approve and should warn when no approver is selected in the session', () => {
+    const facade: ServiceOrdersFacade = TestBed.inject(ServiceOrdersFacade);
+    const toastStore: ToastStore = TestBed.inject(ToastStore);
+
+    TestBed.inject(SessionStore).setActor(null);
+    facade.approve('OS-2026-001').subscribe();
+
+    expect(approveSpy).not.toHaveBeenCalled();
+    expect(toastStore.toasts()[0]?.message).toContain('Elige el aprobador');
   });
 });

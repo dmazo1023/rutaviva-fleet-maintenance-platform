@@ -6,17 +6,25 @@ using RutaViva.ServiceOrders.Domain.Common;
 
 namespace RutaViva.ServiceOrders.Application.Orders;
 
-public sealed class CreateServiceOrderHandler(IServiceOrderRepository orders, IUnitOfWork unitOfWork)
-    : ICommandHandler<CreateServiceOrderCommand, ServiceOrderId>
+public sealed class CreateServiceOrderHandler(
+    IServiceOrderRepository orders,
+    ServiceOrderReferenceResolver resolver,
+    IUnitOfWork unitOfWork) : ICommandHandler<CreateServiceOrderCommand, ServiceOrderId>
 {
     public async Task<Result<ServiceOrderId>> HandleAsync(CreateServiceOrderCommand command, CancellationToken cancellationToken)
     {
-        if (await orders.HasOpenOrderForRoutineAsync(command.Reference.RoutineId, cancellationToken))
+        Result<ServiceOrderReference> reference = await resolver.ResolveAsync(command.VehicleId, command.RoutineId, cancellationToken);
+        if (reference.IsFailure)
+        {
+            return reference.Error;
+        }
+
+        if (await orders.HasOpenOrderForRoutineAsync(command.RoutineId, cancellationToken))
         {
             return ServiceOrderErrors.OpenOrderExists;
         }
 
-        Result<ServiceOrder> order = ServiceOrder.Create(command.Reference, command.CreatedBy);
+        Result<ServiceOrder> order = ServiceOrder.Create(reference.Value, command.Origin, command.CreatedBy);
         if (order.IsFailure)
         {
             return order.Error;

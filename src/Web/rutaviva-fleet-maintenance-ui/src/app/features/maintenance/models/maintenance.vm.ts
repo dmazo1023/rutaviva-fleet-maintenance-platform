@@ -103,13 +103,7 @@ export interface AlertVm {
 
 export interface CreateServiceOrderRequest {
   readonly vehicleId: string;
-  readonly plate: string;
-  readonly customerId: string;
-  readonly workshopId: string;
-  readonly workshopName: string;
   readonly routineId: string;
-  readonly routineName: string;
-  readonly routineTypeCode: string;
   readonly createdBy: string;
 }
 

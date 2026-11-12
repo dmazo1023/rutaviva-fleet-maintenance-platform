@@ -38,8 +38,9 @@ public sealed class ServiceOrderHappyPathTests(SqlServerTestDatabase database) :
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         await using ServiceOrdersApiFactory factory = await ServiceOrdersApiFactory.CreateAsync(database, cancellationToken);
         using HttpClient client = factory.CreateClient();
+        ServiceOrderTestReferences references = await ServiceOrderTestReferences.SeedAsync(database, cancellationToken);
 
-        using HttpResponseMessage created = await client.PostAsJsonAsync(OrdersRoute, NewOrder(), cancellationToken);
+        using HttpResponseMessage created = await client.PostAsJsonAsync(OrdersRoute, new CreateServiceOrderRequest(references.VehicleId, references.RoutineId, Operator), cancellationToken);
         created.StatusCode.Should().Be(HttpStatusCode.Created);
         string id = (await created.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty(IdProperty).GetString()!;
 
@@ -50,7 +51,7 @@ public sealed class ServiceOrderHappyPathTests(SqlServerTestDatabase database) :
         JsonElement forApprover = await client.GetFromJsonAsync<JsonElement>(string.Format(ApproverDetailFormat, id), cancellationToken);
         forApprover.GetProperty(ActionsProperty).EnumerateArray().Select(item => item.GetProperty(ActionProperty).GetString()).Should().Contain(Approve);
 
-        await PostAsync(client, id, "approve", new ApproveServiceOrderRequest(Approver), cancellationToken);
+        await PostAsync(client, id, "approve", new ApproveServiceOrderRequest(Approver, references.ApproverId), cancellationToken);
         await PostAsync(client, id, "start", new StartServiceOrderRequest(Workshop), cancellationToken);
         JsonElement completed = await PostAsync(client, id, "complete", new CompleteServiceOrderRequest(Workshop, ServicedKm), cancellationToken);
 
@@ -60,9 +61,6 @@ public sealed class ServiceOrderHappyPathTests(SqlServerTestDatabase database) :
         List<OutboxMessage> messages = await reader.Set<OutboxMessage>().ToListAsync(cancellationToken);
         messages.Should().ContainSingle(message => message.EventType.Contains(ServiceOrderCompletedV1.EventName));
     }
-
-    private static CreateServiceOrderRequest NewOrder() =>
-        new(Guid.CreateVersion7(), "RVA104", Guid.CreateVersion7(), Guid.CreateVersion7(), Workshop, Guid.CreateVersion7(), "Frenos", "BRAKES", Operator);
 
     private static async Task<JsonElement> PostAsync<TRequest>(HttpClient client, string id, string action, TRequest request, CancellationToken cancellationToken)
     {

@@ -103,6 +103,112 @@ namespace RutaViva.ServiceOrders.Infrastructure.Persistence.Migrations
                     b.ToTable("OutboxMessages", "serviceorders");
                 });
 
+            modelBuilder.Entity("RutaViva.ServiceOrders.Domain.References.ApproverReference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("ApproverId");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasPrecision(0)
+                        .HasColumnType("datetimeoffset(0)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApproverReferences", "serviceorders");
+                });
+
+            modelBuilder.Entity("RutaViva.ServiceOrders.Domain.References.RoutineReference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("RoutineId");
+
+                    b.Property<string>("RoutineName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("RoutineTypeCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasPrecision(0)
+                        .HasColumnType("datetimeoffset(0)");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RoutineReferences", "serviceorders");
+                });
+
+            modelBuilder.Entity("RutaViva.ServiceOrders.Domain.References.VehicleReference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("VehicleId");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Plate")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<Guid?>("ResponsibleApproverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasPrecision(0)
+                        .HasColumnType("datetimeoffset(0)");
+
+                    b.Property<Guid>("WorkshopId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VehicleReferences", "serviceorders");
+                });
+
+            modelBuilder.Entity("RutaViva.ServiceOrders.Domain.References.WorkshopReference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("WorkshopId");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasPrecision(0)
+                        .HasColumnType("datetimeoffset(0)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WorkshopReferences", "serviceorders");
+                });
+
             modelBuilder.Entity("RutaViva.ServiceOrders.Domain.ServiceOrder", b =>
                 {
                     b.Property<Guid>("Id")
@@ -120,6 +226,12 @@ namespace RutaViva.ServiceOrders.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetimeoffset(0)");
 
                     b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("Origin")
                         .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
@@ -152,6 +264,8 @@ namespace RutaViva.ServiceOrders.Infrastructure.Persistence.Migrations
 
                     b.ToTable("ServiceOrders", "serviceorders", t =>
                         {
+                            t.HasCheckConstraint("CK_ServiceOrders_Origin", "[Origin] IN ('Automatic', 'Manual')");
+
                             t.HasCheckConstraint("CK_ServiceOrders_Status", "[Status] IN ('Created', 'Quoted', 'PendingApproval', 'Approved', 'InProgress', 'Completed', 'Cancelled')");
                         });
                 });
@@ -205,6 +319,10 @@ namespace RutaViva.ServiceOrders.Infrastructure.Persistence.Migrations
                                 .HasMaxLength(10)
                                 .HasColumnType("nvarchar(10)")
                                 .HasColumnName("Plate");
+
+                            b1.Property<Guid?>("ResponsibleApproverId")
+                                .HasColumnType("uniqueidentifier")
+                                .HasColumnName("ResponsibleApproverId");
 
                             b1.Property<Guid>("RoutineId")
                                 .HasColumnType("uniqueidentifier")

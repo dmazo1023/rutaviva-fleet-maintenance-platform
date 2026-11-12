@@ -14,7 +14,8 @@ RutaViva rastrea flotas con GPS y sus clientes llevaban el mantenimiento en hoja
 | RN-5: el servicio realizado reinicia el ciclo de la rutina y resuelve sus alertas | Implementado: al completar la orden de servicio o con el registro manual del operador ([ADR-0029](docs/adr/adr-0029-scope-mvp-service-record-without-service-orders.md)) | Maintenance |
 | RN-6: lecturas repetidas o fuera de orden se ignoran sin efectos | Implementado | Maintenance ([ADR-0014](docs/adr/adr-0014-data-odometer-ingestion-acl.md)) |
 | Clientes, aprobadores, talleres y vehículos con carga masiva | Implementado | [supporting-contexts](openspec/changes/supporting-contexts/) |
-| RN-3 y RN-4: orden de servicio, cotización del taller y aprobación de costos altos por tope | Implementado en versión mínima ([ADR-0030](docs/adr/adr-0030-scope-minimal-service-orders-mvp.md)); citas, servicios adicionales y políticas por cliente en la siguiente fase | ServiceOrders, [service-orders-core](openspec/changes/service-orders-core/) |
+| RN-3: una orden por vencimiento, automática al vencer, como máximo una abierta por rutina y manual si la anterior se canceló | Implementado ([ADR-0031](docs/adr/adr-0031-int-service-orders-replicas-automatic-orders.md)) | ServiceOrders |
+| RN-4: cotización del taller, aprobación por encima del tope por el dueño o el responsable, rechazo y cancelación | Implementado con tope global ([ADR-0030](docs/adr/adr-0030-scope-minimal-service-orders-mvp.md)); citas, servicios adicionales y políticas por cliente en la siguiente fase | ServiceOrders, [service-orders-core](openspec/changes/service-orders-core/) |
 | ApiGateway, notificaciones en tiempo real, reportes e importación con asistente | Siguiente fase | [edge-gateway-notifications](openspec/changes/edge-gateway-notifications/), [reporting](openspec/changes/reporting/), [data-import](openspec/changes/data-import/) |
 
 ## Componentes
@@ -25,7 +26,7 @@ RutaViva rastrea flotas con GPS y sus clientes llevaban el mantenimiento en hoja
 | `RutaViva.Fleet.Api` | API REST | `src/Services/Fleet` | 5102 | Activo |
 | `RutaViva.Customers.Api` | API REST | `src/Services/Customers` | 5103 | Activo |
 | `RutaViva.Workshops.Api` | API REST | `src/Services/Workshops` | 5104 | Activo |
-| `RutaViva.ServiceOrders.Api` | API REST | `src/Services/ServiceOrders` | 5105 | Activo (mínimo) |
+| `RutaViva.ServiceOrders.Api` | API REST | `src/Services/ServiceOrders` | 5105 | Activo |
 | `RutaViva.EventBus.Hub` | Hub SignalR + log de eventos en SQL | `src/Platform/EventBus` | 5100 | Activo |
 | `rutaviva-fleet-maintenance-ui` | SPA Angular ([README](src/Web/rutaviva-fleet-maintenance-ui/README.md)) | `src/Web` | 4200 | Activo |
 | `RutaViva.BuildingBlocks.*` e `IntegrationContracts` | Librerías compartidas | `src/BuildingBlocks`, `src/Contracts` | — | Activo |
@@ -45,6 +46,7 @@ flowchart LR
     F -- "Outbox → VehicleRegistered" --> EB
     EB -- "crea el plan" --> M
     SO -- "Outbox → ServiceOrderCompleted" --> EB
+    EB -- "réplicas y orden automática" --> SO
     EB -- "reinicia la rutina" --> M
     M & F & C & W & SO --> DB[("SQL Server<br/>un schema por servicio")]
 ```
@@ -53,7 +55,7 @@ flowchart LR
 - **Consistencia entre servicios por eventos**: cada servicio escribe sus eventos en su Outbox en la misma transacción, un relay los publica en el EventBus y los suscriptores avanzan con checkpoint idempotente ([ADR-0024](docs/adr/adr-0024-int-eventbus-signalr-sql-log.md)).
 - **Dominio rico**: agregados con invariantes, objetos de valor, `Result<T>` en lugar de excepciones de negocio y políticas puras de evaluación por dimensión (Strategy).
 - **Una base de datos, un schema por servicio** ([ADR-0013](docs/adr/adr-0013-data-sqlserver-schema-per-service.md)); migraciones EF Core por servicio.
-- Diseño completo por change en [`openspec/changes/`](openspec/changes/) y 30 decisiones en el [registro de ADRs](docs/adr/README.md).
+- Diseño completo por change en [`openspec/changes/`](openspec/changes/) y 31 decisiones en el [registro de ADRs](docs/adr/README.md).
 
 ## Requisitos previos
 
@@ -89,8 +91,8 @@ Los datos de [`samples/import/`](samples/import/) producen, evaluados el 2026-11
 
 1. **Flota**: filtra por estado y busca por placa o modelo. La columna «Próximo mantenimiento» muestra la rutina más urgente y lo que le resta (por ejemplo, TAN202 «Cambio de aceite, −23 d»).
 2. **Detalle del vehículo** (clic en una placa): cada rutina muestra su avance por km y por tiempo con el umbral de aviso. «Ajustar» cambia el intervalo o el porcentaje de la rutina con vista previa.
-3. **Crear orden** en una rutina vencida (perfil Operador, por ejemplo TAN202): se abre el detalle de la orden.
-4. **Órdenes** (cambia el perfil arriba a la derecha): como **Taller**, «Cotizar» con un valor mayor a 1.000.000 deja la orden «Por aprobar» (RN-4); como **Aprobador**, «Aprobar» o «Rechazar»; de nuevo como **Taller**, «Iniciar» y «Completar» con el kilometraje. Al completar, Maintenance reinicia la rutina y resuelve la alerta (RN-5). Los mismos pasos están en [`samples/http/service-orders.http`](samples/http/service-orders.http).
+3. **Crear orden** en una rutina vencida (perfil Operador, por ejemplo TAN202): se abre el detalle de la orden. Una segunda orden para la misma rutina se rechaza mientras la primera esté abierta (RN-3). Las rutinas que vencen a partir de ahora generan su orden **automática** sola (etiqueta «Automática»): pruébalo en el **Simulador** con una lectura que deje vencida una rutina por vencer.
+4. **Órdenes** (cambia el perfil arriba a la derecha): como **Taller**, «Cotizar» con un valor mayor a 1.000.000 deja la orden «Por aprobar» (RN-4); como **Aprobador** (elige en la barra superior un aprobador del dueño del vehículo; otro cliente recibe un rechazo), «Aprobar» o «Rechazar»; el Operador puede «Cancelar» la orden; de nuevo como **Taller**, «Iniciar» y «Completar» con el kilometraje. Al completar, Maintenance reinicia la rutina y resuelve la alerta (RN-5). Los mismos pasos están en [`samples/http/service-orders.http`](samples/http/service-orders.http).
 5. **Registrar servicio realizado**: alternativa del operador para cerrar una rutina sin orden.
 6. **Alertas**: bandeja con filtros Activas, Atendidas y Resueltas; «Atender» marca la alerta.
 7. **Simulador** (perfil Operador): envía una lectura de odómetro (los casos de [`samples/http/odometer-readings.http`](samples/http/odometer-readings.http)) o ejecuta la revisión diaria para una fecha y observa los cambios.
@@ -99,8 +101,8 @@ Los datos de [`samples/import/`](samples/import/) producen, evaluados el 2026-11
 
 | Suite | Comando | Cobertura |
 |---|---|---|
-| Backend (unitarias, integración, arquitectura y contratos) | `dotnet test --solution RutaViva.slnx --max-parallel-test-modules 4` | 1389 pruebas |
-| SPA | `npm test` y `npm run lint` en `src/Web/rutaviva-fleet-maintenance-ui` | 100 pruebas |
+| Backend (unitarias, integración, arquitectura y contratos) | `dotnet test --solution RutaViva.slnx --max-parallel-test-modules 4` | 1394 pruebas |
+| SPA | `npm test` y `npm run lint` en `src/Web/rutaviva-fleet-maintenance-ui` | 104 pruebas |
 
 Las pruebas de integración crean y borran una base desechable por clase en el SQL Server local (cadena configurable con la variable `RUTAVIVA_TEST_SQL`). Incluyen el escenario completo de la demo y la idempotencia de RN-5. Las reglas de estilo del proyecto se aplican en la compilación: sin `var` (IDE0008 como error), analizadores con *warnings as errors* y snapshots de los contratos de integración.
 
@@ -123,7 +125,7 @@ Las pruebas de integración crean y borran una base desechable por clase en el S
 ## Documentación
 
 - [Análisis del reto](docs/architecture/analisis-del-reto.md) y [modelo de datos](docs/architecture/data-model.md)
-- [Registro de decisiones (ADR-0001 a ADR-0030)](docs/adr/README.md)
+- [Registro de decisiones (ADR-0001 a ADR-0031)](docs/adr/README.md)
 - [Diseño UX aprobado](docs/ux/crm-flota.mockup.html) y [handoff](docs/ux/crm-flota.handoff.md)
 - Changes de OpenSpec: [foundation-platform](openspec/changes/foundation-platform/), [maintenance-core](openspec/changes/maintenance-core/), [supporting-contexts](openspec/changes/supporting-contexts/), [fleet-maintenance-ui](openspec/changes/fleet-maintenance-ui/)
 

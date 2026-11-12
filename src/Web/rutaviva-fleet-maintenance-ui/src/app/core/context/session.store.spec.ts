@@ -61,6 +61,10 @@ describe('SessionStore', () => {
     httpMock.expectOne('/api/v1/customers').flush([CUSTOMER_SUMMARY]);
     httpMock.expectOne('/api/v1/workshops?status=Active').flush([]);
     await flushPromises();
+    httpMock
+      .match((request) => request.url.startsWith('/api/v1/customers/'))
+      .forEach((request) => request.flush({ ...CUSTOMER_DETAIL, approvers: [] }));
+    await flushPromises();
     await loading;
   }
 
