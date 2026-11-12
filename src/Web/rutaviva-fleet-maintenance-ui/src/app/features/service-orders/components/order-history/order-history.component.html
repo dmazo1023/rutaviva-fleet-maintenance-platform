@@ -1,0 +1,18 @@
+<details class="order-history">
+  <summary class="order-history__summary">
+    {{ texts.historySummaryPrefix }}{{ entries().length }}{{ texts.historySummarySuffix }}
+  </summary>
+
+  <ol class="order-history__list">
+    @for (entry of entries(); track entry.id) {
+      <li class="order-history__item">
+        <span class="ms order-history__icon" aria-hidden="true">{{ entry.icon }}</span>
+        <div class="order-history__content">
+          <span class="order-history__detail">{{ entry.detail }}</span>
+          <span class="order-history__meta">{{ entry.changedBy }} · {{ entry.changedAt }}</span>
+        </div>
+      </li>
+    }
+  </ol>
+</details>
+

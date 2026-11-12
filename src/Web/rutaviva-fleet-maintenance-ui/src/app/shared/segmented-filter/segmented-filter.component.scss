@@ -1,0 +1,67 @@
+.seg {
+  display: inline-flex;
+  gap: 2px;
+  margin: 0;
+  padding: 3px;
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  background: var(--c-surface);
+}
+
+.seg legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.seg input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.seg label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--c-muted);
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.seg label:hover {
+  color: var(--c-text);
+}
+
+.seg input:checked + label {
+  background: var(--c-sunken);
+  color: var(--c-text);
+}
+
+.seg input:focus-visible + label {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 1px;
+}
+
+.seg .n {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-muted);
+}
+
+.seg .sw {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bar);
+}
+

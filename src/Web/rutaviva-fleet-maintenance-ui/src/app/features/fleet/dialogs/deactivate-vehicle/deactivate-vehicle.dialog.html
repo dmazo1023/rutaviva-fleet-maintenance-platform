@@ -1,0 +1,11 @@
+<app-confirm-impact-dialog
+  [open]="open()"
+  [title]="dialogTitle()"
+  [items]="impactItems()"
+  [confirmLabel]="confirmText()"
+  [cancelLabel]="texts.deactivateCancel"
+  [busy]="busy()"
+  (confirmed)="confirmed.emit()"
+  (closed)="closed.emit()"
+/>
+

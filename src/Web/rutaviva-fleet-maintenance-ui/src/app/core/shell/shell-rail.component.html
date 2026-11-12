@@ -1,0 +1,39 @@
+<nav class="rail" [attr.aria-label]="texts.navAriaLabel">
+  <a class="brand" routerLink="/flota" [attr.aria-label]="texts.brandHomeAria">
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path
+        d="M8 25c0-6 4-8 8-8s8-2 8-8"
+        stroke="currentColor"
+        stroke-width="3.2"
+        stroke-linecap="round"
+      />
+      <circle cx="8" cy="25" r="2.6" fill="currentColor" />
+      <circle cx="24" cy="8" r="3.6" fill="var(--c-pulse)" />
+    </svg>
+  </a>
+  <ul class="nav">
+    @for (item of navItems(); track item.route) {
+      <li>
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="is-active"
+          ariaCurrentWhenActive="page"
+          [attr.data-route]="item.route"
+        >
+          <span class="ms" aria-hidden="true">{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
+          @if (item.badgeCount > 0) {
+            <span
+              class="dot"
+              [class.dot--warn]="item.badgeTone === 'warn'"
+              [attr.data-badge]="item.route"
+            >
+              {{ item.badgeCount }}
+            </span>
+          }
+        </a>
+      </li>
+    }
+  </ul>
+</nav>
+

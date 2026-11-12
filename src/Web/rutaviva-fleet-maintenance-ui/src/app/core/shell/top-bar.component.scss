@@ -1,0 +1,127 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 10px clamp(var(--s-4), 3cqi, var(--s-8));
+  background: color-mix(in srgb, var(--c-bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.wordmark {
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -.02em;
+  color: var(--c-text);
+}
+
+.wordmark span {
+  color: var(--c-brand);
+}
+
+.topbar .grow {
+  flex: 1;
+}
+
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  height: 32px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-muted);
+}
+
+.live i {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c-pulse);
+}
+
+.live i::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--c-pulse);
+  opacity: 0;
+  animation: pulse 2.4s var(--ease) infinite;
+}
+
+.live.is-off i {
+  background: var(--c-neutral);
+}
+
+.live.is-off i::after {
+  animation: none;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(.6);
+    opacity: .7;
+  }
+
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+.select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.select select {
+  appearance: none;
+  height: 36px;
+  padding: 0 32px 0 12px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-ctl);
+  background: var(--c-surface);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  max-width: 230px;
+  text-overflow: ellipsis;
+}
+
+.select .ms {
+  position: absolute;
+  right: 8px;
+  pointer-events: none;
+  color: var(--c-muted);
+}
+
+.select--icon select {
+  padding-left: 36px;
+}
+
+.select--icon .ms:first-child {
+  left: 10px;
+  right: auto;
+}
+
+@media (width <= 760px) {
+  .wordmark {
+    display: none;
+  }
+
+  .live b {
+    display: none;
+  }
+
+  .select--cust select {
+    max-width: 150px;
+  }
+}

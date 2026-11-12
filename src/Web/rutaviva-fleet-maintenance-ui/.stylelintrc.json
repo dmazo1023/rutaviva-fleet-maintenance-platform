@@ -1,0 +1,35 @@
+{
+  "extends": ["stylelint-config-standard-scss"],
+  "rules": {
+    "color-no-hex": true,
+    "selector-pseudo-element-disallowed-list": ["ng-deep"],
+    "declaration-property-value-disallowed-list": {
+      "transition": ["/\\ball\\b/"]
+    },
+    "no-empty-source": null,
+    "selector-class-pattern": null,
+    "custom-property-pattern": null,
+    "keyframes-name-pattern": null,
+    "scss/dollar-variable-pattern": null,
+    "scss/percent-placeholder-pattern": null,
+    "value-keyword-case": null,
+    "alpha-value-notation": null,
+    "color-function-notation": null,
+    "shorthand-property-no-redundant-values": null,
+    "declaration-block-no-redundant-longhand-properties": null,
+    "no-descending-specificity": null,
+    "property-no-vendor-prefix": null,
+    "custom-property-empty-line-before": null,
+    "color-hex-length": null,
+    "property-no-deprecated": null
+  },
+  "overrides": [
+    {
+      "files": ["src/styles/_tokens.scss"],
+      "rules": {
+        "color-no-hex": null
+      }
+    }
+  ]
+}
+

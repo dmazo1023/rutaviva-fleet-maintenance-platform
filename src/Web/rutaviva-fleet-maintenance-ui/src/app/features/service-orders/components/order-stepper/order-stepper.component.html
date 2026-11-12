@@ -1,0 +1,21 @@
+@if (isPaused()) {
+  <div class="stepper-paused-banner" role="status">
+    <span class="ms" aria-hidden="true">pause_circle</span>
+    <span>{{ pausedBannerText() }}</span>
+  </div>
+}
+
+<ol class="order-stepper">
+  @for (step of steps(); track step.key; let idx = $index) {
+    <li
+      class="order-stepper__step"
+      [class.is-done]="step.state === 'done'"
+      [class.is-current]="step.state === 'current'"
+      [attr.aria-current]="step.state === 'current' ? 'step' : null"
+    >
+      <span class="order-stepper__dot">{{ idx + 1 }}</span>
+      <span class="order-stepper__label">{{ step.label }}</span>
+    </li>
+  }
+</ol>
+

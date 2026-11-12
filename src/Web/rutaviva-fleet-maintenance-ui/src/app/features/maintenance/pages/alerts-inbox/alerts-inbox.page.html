@@ -1,0 +1,64 @@
+<div class="alerts-page">
+  <header class="alerts-page__header">
+    <h1 id="h1" tabindex="-1" class="alerts-page__title">{{ texts.alertsTitle }}</h1>
+
+    <app-segmented-filter
+      [legend]="texts.alertsLegend"
+      name="alerts-status"
+      [options]="filterOptions()"
+      [selectedValue]="activeStatus()"
+      defaultValue="Active"
+      queryParamKey="status"
+      (valueChange)="onFilterChange($event)"
+    />
+  </header>
+
+  @if (alertsLoadable().status === 'loading' && alertsLoadable().data.length === 0) {
+    <app-skeleton [rows]="4" />
+  } @else if (alertsLoadable().status === 'error') {
+    <app-error-state
+      [title]="texts.alertsErrorTitle"
+      [message]="texts.alertsErrorMessage"
+      [retryLabel]="texts.retry"
+      (retryClicked)="onRetry()"
+    />
+  } @else if (filteredAlerts().length === 0) {
+    <app-empty-state icon="verified" [title]="texts.alertsEmptyTitle" tone="is-ok" />
+  } @else {
+    <div class="alerts-list">
+      @for (alert of filteredAlerts(); track alert.alertId) {
+        <article class="alert-row" [class.flash-change]="isFlashed(alert.alertId)">
+          <div class="alert-row__left">
+            <app-plate-chip [plate]="alert.plate" [link]="'/flota/' + alert.plate" />
+            <div class="alert-row__info">
+              <div class="alert-row__top">
+                <span class="alert-row__routine">{{ alert.routineName }}</span>
+                <app-status-pill [status]="alert.type" [trigger]="alert.triggeredBy" />
+              </div>
+              <span class="alert-row__meta">{{ alert.raisedAt }}</span>
+            </div>
+          </div>
+
+          <div class="alert-row__right">
+            @if (alert.status === 'Active') {
+              <button
+                type="button"
+                class="btn btn--primary alert-row__ack-btn"
+                (click)="onAcknowledge(alert)"
+              >
+                {{ texts.acknowledgeAction }}
+              </button>
+            } @else if (alert.status === 'Acknowledged') {
+              <span class="alert-row__status-note">{{ alert.acknowledgedBy }}</span>
+            } @else if (alert.status === 'Resolved' && alert.resolutionReason) {
+              <span class="alert-row__status-note">
+                {{ getResolutionLabel(alert.resolutionReason) }}
+              </span>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>
+

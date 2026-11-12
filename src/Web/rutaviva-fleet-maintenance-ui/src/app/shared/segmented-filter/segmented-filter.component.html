@@ -1,0 +1,28 @@
+<fieldset class="seg">
+  <legend>{{ legend() }}</legend>
+  @for (option of options(); track option.value) {
+    <input
+      type="radio"
+      [name]="name()"
+      [id]="name() + '-' + option.value"
+      [value]="option.value"
+      [checked]="selectedValue() === option.value"
+      (change)="onSelect(option.value)"
+    />
+    <label
+      [for]="name() + '-' + option.value"
+      [class]="option.toneClass ?? ''"
+    >
+      @if (option.toneClass) {
+        <i class="sw" aria-hidden="true"></i>
+        <span class="lbl">{{ option.label }}</span>
+      } @else {
+        <span>{{ option.label }}</span>
+      }
+      @if (option.count !== undefined) {
+        <span class="n">{{ option.count }}</span>
+      }
+    </label>
+  }
+</fieldset>
+

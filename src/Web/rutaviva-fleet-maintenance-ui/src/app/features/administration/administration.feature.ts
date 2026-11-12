@@ -1,0 +1,1 @@
+export const APPROVAL_POLICY_FEATURE_ENABLED = false;

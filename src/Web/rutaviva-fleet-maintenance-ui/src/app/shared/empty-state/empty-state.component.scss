@@ -1,0 +1,32 @@
+.state {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-3);
+  padding: var(--s-12) var(--s-6);
+  text-align: center;
+}
+
+.state .ill {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.state .ill .ms {
+  font-size: 32px;
+}
+
+.state h2 {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.state p {
+  max-width: 42ch;
+  color: var(--c-muted);
+}
+

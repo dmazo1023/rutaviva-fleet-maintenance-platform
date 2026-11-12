@@ -1,0 +1,11 @@
+<div class="panel" aria-busy="true" [attr.aria-label]="ariaLabel()">
+  @for (idx of rowIndices(); track idx) {
+    <div class="sk-row">
+      <span class="sk sk--plate"></span>
+      <span class="sk sk--text"></span>
+      <span class="sk sk--bar"></span>
+      <span class="sk sk--pill"></span>
+    </div>
+  }
+</div>
+

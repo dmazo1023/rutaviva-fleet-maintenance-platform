@@ -1,0 +1,46 @@
+.sk {
+  display: block;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--c-sunken) 25%, var(--c-bg) 50%, var(--c-sunken) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.sk-row {
+  display: grid;
+  grid-template-columns: 64px 1fr 120px 90px;
+  gap: var(--s-4);
+  align-items: center;
+  height: 64px;
+  padding: 0 var(--s-4);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.sk-row:last-child {
+  border-bottom: 0;
+}
+
+.sk--plate {
+  height: 24px;
+}
+
+.sk--text {
+  height: 14px;
+  width: 75%;
+}
+
+.sk--bar {
+  height: 10px;
+}
+
+.sk--pill {
+  height: 24px;
+  border-radius: 12px;
+}
+

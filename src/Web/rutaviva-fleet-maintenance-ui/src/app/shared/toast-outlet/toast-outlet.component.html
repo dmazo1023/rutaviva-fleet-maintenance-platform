@@ -1,0 +1,34 @@
+<div class="toasts" aria-live="polite">
+  @for (toast of toastStore.toasts(); track toast.id) {
+    <div
+      [class]="toneClass(toast)"
+      [attr.role]="toast.isError ? 'alert' : 'status'"
+    >
+      <span class="ms ms--fill" aria-hidden="true">{{ toast.icon }}</span>
+      <span class="grow">
+        <span>{{ toast.message }}</span>
+        @if (toast.detail) {
+          <small class="toast-detail">{{ toast.detail }}</small>
+        }
+      </span>
+      @if (toast.action; as action) {
+        @if (action.route) {
+          <a [routerLink]="action.route" (click)="onDismiss(toast.id)">{{ action.label }}</a>
+        } @else {
+          <button type="button" (click)="onActionClick(toast)">{{ action.label }}</button>
+        }
+      }
+      @if (toast.persistent) {
+        <button
+          type="button"
+          class="toast-close"
+          [attr.aria-label]="texts.dismissAriaLabel"
+          (click)="onDismiss(toast.id)"
+        >
+          <span class="ms ms--s" aria-hidden="true">close</span>
+        </button>
+      }
+    </div>
+  }
+</div>
+

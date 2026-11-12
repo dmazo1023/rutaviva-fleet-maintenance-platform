@@ -1,0 +1,17 @@
+.skip {
+  position: absolute;
+  left: 8px;
+  top: -60px;
+  z-index: 300;
+  padding: 8px 12px;
+  background: var(--c-brand);
+  color: var(--c-on-brand);
+  border-radius: var(--r-ctl);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.skip:focus {
+  top: 8px;
+}
+

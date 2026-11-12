@@ -1,0 +1,66 @@
+<section class="service-lines">
+  <header class="service-lines__header">
+    <h2 class="service-lines__title">{{ texts.linesTitle }}</h2>
+    @if (autoApproved()) {
+      <span class="service-lines__auto-badge">
+        {{ texts.autoApprovedBadge }}{{ formatCop(autoApprovalMaxAmount()) }}
+      </span>
+    }
+  </header>
+
+  @if (status() === 'Created' && lines().length === 0) {
+    <p class="service-lines__waiting">{{ texts.waitingWorkshopQuote }}</p>
+  } @else {
+    <ul class="service-lines__list">
+      @for (line of lines(); track line.id) {
+        <li class="service-lines__item">
+          <div class="service-lines__item-left">
+            <span class="service-lines__desc">{{ line.description }}</span>
+            <div class="service-lines__badges">
+              <span class="service-lines__type">
+                {{ labels.serviceLineType[line.lineType] }}
+              </span>
+              <app-status-pill [status]="line.approvalStatus" [small]="true" />
+            </div>
+          </div>
+
+          <div class="service-lines__item-right">
+            @if (line.pricingStatus === 'PendingPricing') {
+              @if (isWorkshop()) {
+                <div class="service-lines__price-form">
+                  <input
+                    type="number"
+                    class="input service-lines__price-input"
+                    [value]="getDraftPrice(line.id)"
+                    [placeholder]="texts.priceInputPlaceholder"
+                    [attr.aria-label]="texts.priceInputAria"
+                    (input)="onPriceInput(line.id, $event)"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn--primary service-lines__save-btn"
+                    (click)="onSavePrice(line.id)"
+                  >
+                    {{ texts.savePriceAction }}
+                  </button>
+                </div>
+              } @else {
+                <span class="service-lines__pending">
+                  {{ labels.pricingStatus.PendingPricing }}
+                </span>
+              }
+            } @else if (line.amount !== null) {
+              <span class="service-lines__amount">{{ formatCop(line.amount) }}</span>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+
+    <footer class="service-lines__footer">
+      <span>{{ texts.totalLabel }}</span>
+      <strong class="service-lines__total">{{ formatCop(total()) }}</strong>
+    </footer>
+  }
+</section>
+

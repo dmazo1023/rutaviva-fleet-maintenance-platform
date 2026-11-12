@@ -1,0 +1,15 @@
+<button
+  class="switch"
+  type="button"
+  role="switch"
+  [attr.aria-checked]="checked()"
+  [attr.aria-label]="ariaLabel()"
+  [disabled]="disabled()"
+  (click)="onToggle()"
+>
+  <span class="knob" aria-hidden="true"></span>
+  @if (label(); as textLabel) {
+    <span>{{ textLabel }}</span>
+  }
+</button>
+

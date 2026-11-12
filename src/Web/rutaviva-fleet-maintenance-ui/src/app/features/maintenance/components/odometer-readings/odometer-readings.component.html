@@ -1,0 +1,40 @@
+@if (readings().length === 0) {
+  <app-empty-state icon="speed" [title]="texts.noReadings" />
+} @else {
+  <div class="readings-table-wrap">
+    <table class="readings-table">
+      <tbody>
+        @for (reading of readings(); track reading.readAt + '-' + reading.kilometers) {
+          <tr
+            class="readings-table__row"
+            [class.readings-table__row--ignored]="isIgnored(reading)"
+          >
+            <td class="readings-table__date">{{ reading.readAt }}</td>
+            <td
+              class="readings-table__num"
+              [class.readings-table__km--ignored]="isIgnored(reading)"
+            >
+              {{ formatKm(reading.kilometers) }}
+            </td>
+            <td>
+              <app-status-pill
+                [status]="reading.outcome"
+                [customLabel]="getOutcomeLabel(reading)"
+                [customTone]="isIgnored(reading) ? 'is-neutral' : 'is-ok'"
+                [customIcon]="isIgnored(reading) ? 'block' : 'check_circle'"
+                [small]="true"
+              />
+            </td>
+            <td class="readings-table__reason">
+              @if (reading.ignoredReason) {
+                <span>{{ getReasonLabel(reading.ignoredReason) }}</span>
+              } @else {
+                <span>—</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

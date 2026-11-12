@@ -1,0 +1,88 @@
+@if (open() && impactConfig(); as impact) {
+  <app-confirm-impact-dialog
+    [open]="open()"
+    [title]="impact.title"
+    [items]="impact.items"
+    [confirmLabel]="texts.dialogConfirm"
+    [cancelLabel]="texts.dialogCancel"
+    [busy]="busy()"
+    (confirmed)="onImpactConfirmed()"
+    (closed)="onCancel()"
+  />
+} @else if (open() && formConfig(); as cfg) {
+  <div class="modal-backdrop">
+    <dialog open class="order-form-dialog" tabindex="-1" aria-labelledby="order-form-dlg-title">
+      <form (submit)="onSubmitForm($event)" novalidate>
+        <div class="order-form-dialog__head">
+          <h2 id="order-form-dlg-title" class="order-form-dialog__title">{{ cfg.title }}</h2>
+          <button
+            type="button"
+            class="icon-btn"
+            [attr.aria-label]="texts.dialogCloseAria"
+            (click)="onCancel()"
+          >
+            <span class="ms" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <div class="order-form-dialog__body">
+          @if (cfg.showDescription) {
+            <label class="order-form-dialog__field">
+              <span>{{ texts.additionalDescLabel }}</span>
+              <input
+                type="text"
+                class="input order-form-dialog__desc-input"
+                [value]="descriptionInput()"
+                (input)="onDescriptionChange($event)"
+              />
+            </label>
+          }
+
+          @if (cfg.showAmount) {
+            <label class="order-form-dialog__field">
+              <span>{{ cfg.amountLabel }}</span>
+              <input
+                type="number"
+                class="input order-form-dialog__amount-input"
+                [value]="amountInput()"
+                (input)="onAmountChange($event)"
+              />
+            </label>
+          }
+
+          @if (cfg.showAppointmentDate) {
+            <label class="order-form-dialog__field">
+              <span>{{ texts.scheduleDateLabel }}</span>
+              <input
+                type="text"
+                class="input order-form-dialog__date-input"
+                [value]="dateInput()"
+                placeholder="15/11/2026 09:00"
+                (input)="onDateChange($event)"
+              />
+            </label>
+          }
+
+          @if (validationError(); as err) {
+            <p class="order-form-dialog__error" role="alert">{{ err }}</p>
+          }
+        </div>
+
+        <div class="order-form-dialog__foot">
+          <button type="button" class="btn btn--ghost" (click)="onCancel()">
+            {{ texts.dialogCancel }}
+          </button>
+          <button
+            type="submit"
+            class="btn btn--primary order-form-dialog__submit-btn"
+            [disabled]="busy()"
+            [attr.aria-busy]="busy() ? 'true' : null"
+          >
+            {{ texts.dialogConfirm }}
+          </button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+}
+

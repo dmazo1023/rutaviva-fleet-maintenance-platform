@@ -1,0 +1,88 @@
+<article
+  class="routine-row"
+  [class.routine-row--paused]="!isActive()"
+  [class.flash-change]="flashed()"
+>
+  <div class="routine-row__header">
+    <div class="routine-row__title-group">
+      <span class="material-symbols-outlined routine-row__icon" aria-hidden="true">
+        {{ routine().icon }}
+      </span>
+      <div>
+        <div class="routine-row__title-line">
+          <h3 class="routine-row__name">{{ routine().name }}</h3>
+          <code class="routine-row__code">{{ routine().typeCode }}</code>
+          @if (isActive()) {
+            <app-status-pill
+              [status]="routine().dueStatus"
+              [trigger]="routine().triggeredBy"
+            />
+          } @else {
+            <app-status-pill [status]="routine().state" />
+          }
+        </div>
+        <div class="routine-row__meta">
+          <span class="routine-row__threshold">{{ thresholdLabel() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="routine-row__actions">
+      @if (routine().openServiceOrderId) {
+        <button
+          type="button"
+          class="btn btn--secondary routine-row__order-link"
+          (click)="onOpenOrder()"
+        >
+          <span>{{ routine().openServiceOrderNumber }}</span>
+          @if (routine().openServiceOrderStatus) {
+            <app-status-pill [status]="routine().openServiceOrderStatus!" [small]="true" />
+          }
+        </button>
+      } @else if (canShowCreateOrder()) {
+        <button
+          type="button"
+          class="btn btn--primary routine-row__create-btn"
+          disabled
+          [attr.title]="texts.createOrderNextPhaseHint"
+        >
+          {{ texts.createOrderNextPhase }}
+        </button>
+      }
+
+      @if (canRegisterService()) {
+        <button
+          type="button"
+          class="btn btn--secondary routine-row__service-btn"
+          [attr.aria-label]="texts.registerServiceAriaPrefix + routine().name"
+          (click)="onRegisterService()"
+        >
+          {{ texts.registerServiceAction }}
+        </button>
+      }
+
+      @if (canManage()) {
+        <button
+          type="button"
+          class="btn btn--ghost routine-row__params-btn"
+          [attr.aria-label]="texts.adjustPrefix + routine().name"
+          (click)="onEditParameters()"
+        >
+          {{ texts.adjustTooltip }}
+        </button>
+        <app-switch
+          [checked]="isActive()"
+          [disabled]="!vehicleActive()"
+          [ariaLabel]="routine().name + texts.activeSuffix"
+          (toggled)="onSwitchToggle()"
+        />
+      }
+    </div>
+  </div>
+
+  <div class="routine-row__tracks">
+    @for (track of routine().tracks; track track.kind) {
+      <app-routine-track [track]="track" [inactive]="!isActive()" />
+    }
+  </div>
+</article>

@@ -1,0 +1,12 @@
+<section class="panel state is-danger" role="alert">
+  <span class="ill">
+    <span class="ms" aria-hidden="true">cloud_off</span>
+  </span>
+  <h2>{{ title() }}</h2>
+  <p>{{ message() }}</p>
+  <button class="btn btn--ghost" type="button" (click)="onRetry()">
+    <span class="ms" aria-hidden="true">refresh</span>
+    <span>{{ retryLabel() }}</span>
+  </button>
+</section>
+

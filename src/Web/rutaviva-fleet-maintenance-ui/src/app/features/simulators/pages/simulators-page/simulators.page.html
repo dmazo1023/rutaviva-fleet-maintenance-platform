@@ -1,0 +1,125 @@
+<div class="simulators-page">
+  <header class="simulators-page__header">
+    <h1 id="h1" tabindex="-1" class="simulators-page__title">{{ texts.title }}</h1>
+  </header>
+
+  @if (!isOperator()) {
+    <div class="simulators-page__restricted" role="status">
+      <span class="ms" aria-hidden="true">lock</span>
+      <span>{{ texts.restrictedMessage }}</span>
+    </div>
+  } @else {
+    @if (errorMessage(); as err) {
+      <p class="simulators-page__restricted" role="alert">{{ err }}</p>
+    }
+    <div class="simulators-grid">
+      <section class="sim-card">
+        <div class="sim-card__head">
+          <h2 class="sim-card__title">{{ texts.odometerCardTitle }}</h2>
+          <p class="sim-card__sub">{{ texts.odometerCardSub }}</p>
+        </div>
+
+        <form class="sim-card__form" (submit)="onSubmitOdometer($event)" novalidate>
+          <label class="sim-card__field">
+            <span>{{ texts.plateLabel }}</span>
+            <input
+              type="text"
+              class="input sim-card__plate-input"
+              [value]="plateInput()"
+              [placeholder]="texts.platePlaceholder"
+              (input)="onPlateChange($event)"
+            />
+          </label>
+
+          <label class="sim-card__field">
+            <span>{{ texts.kmLabel }}</span>
+            <input
+              type="number"
+              class="input sim-card__km-input"
+              [value]="kmInput()"
+              [placeholder]="texts.kmPlaceholder"
+              (input)="onKmChange($event)"
+            />
+          </label>
+
+          <label class="sim-card__field">
+            <span>{{ texts.readAtLabel }}</span>
+            <input
+              type="datetime-local"
+              class="input sim-card__readat-input"
+              [value]="readAtInput()"
+              (input)="onReadAtChange($event)"
+            />
+          </label>
+
+          <button type="submit" class="btn btn--primary sim-card__odo-btn">
+            {{ texts.sendReadingAction }}
+          </button>
+        </form>
+
+        @if (odometerResult(); as odo) {
+          <div class="sim-card__result">
+            <app-status-pill
+              [status]="odo.outcome"
+              [customLabel]="labels.odometerReadingOutcome[odo.outcome]"
+              [customTone]="odo.outcome === 'Accepted' ? 'is-ok' : 'is-neutral'"
+              [customIcon]="odo.outcome === 'Accepted' ? 'check_circle' : 'block'"
+            />
+            @if (odo.ignoredReason) {
+              <span class="sim-card__reason">{{ getIgnoredReasonLabel(odo.ignoredReason) }}</span>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="sim-card">
+        <div class="sim-card__head">
+          <h2 class="sim-card__title">{{ texts.timeCardTitle }}</h2>
+          <p class="sim-card__sub">{{ texts.timeCardSub }}</p>
+        </div>
+
+        <form class="sim-card__form" (submit)="onSubmitTimeEvaluation($event)" novalidate>
+          <label class="sim-card__field">
+            <span>{{ texts.asOfDateLabel }}</span>
+            <input
+              type="date"
+              class="input sim-card__date-input"
+              [value]="asOfDateInput()"
+              (input)="onAsOfDateChange($event)"
+            />
+          </label>
+
+          <button type="submit" class="btn btn--primary sim-card__time-btn">
+            {{ texts.runTimeAction }}
+          </button>
+        </form>
+
+        @if (timeResult(); as tr) {
+          <dl class="sim-card__summary">
+            <div>
+              <dt>{{ texts.asOfDateResultLabel }}</dt>
+              <dd>{{ tr.asOfDate }}</dd>
+            </div>
+            <div>
+              <dt>{{ texts.evaluatedPlansLabel }}</dt>
+              <dd>{{ tr.evaluatedPlans }}</dd>
+            </div>
+            <div>
+              <dt>{{ texts.dueSoonLabel }}</dt>
+              <dd>{{ tr.dueSoon }}</dd>
+            </div>
+            <div>
+              <dt>{{ texts.overdueLabel }}</dt>
+              <dd>{{ tr.overdue }}</dd>
+            </div>
+            <div>
+              <dt>{{ texts.requestedOrdersLabel }}</dt>
+              <dd>{{ tr.ordersRequested }}</dd>
+            </div>
+          </dl>
+        }
+      </section>
+    </div>
+  }
+</div>
+

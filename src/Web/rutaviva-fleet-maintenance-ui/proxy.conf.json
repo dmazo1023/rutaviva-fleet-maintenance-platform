@@ -1,0 +1,22 @@
+{
+  "/api/v1/maintenance": {
+    "target": "http://localhost:5101",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/api/v1/fleet": {
+    "target": "http://localhost:5102",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/api/v1/customers": {
+    "target": "http://localhost:5103",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/api/v1/workshops": {
+    "target": "http://localhost:5104",
+    "secure": false,
+    "changeOrigin": true
+  }
+}
