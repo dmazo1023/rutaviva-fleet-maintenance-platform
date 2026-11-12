@@ -52,3 +52,4 @@ openspec/changes/data-import/design.md
 openspec/changes/service-orders-core/design.md
 openspec/changes/supporting-contexts/design.md
 openspec/changes/supporting-contexts/
+docs/adr/

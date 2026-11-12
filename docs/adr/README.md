@@ -32,3 +32,4 @@ Decisiones arquitectónicas de **RutaViva CRM de Mantenimiento**. Contexto gener
 | [ADR-0026](adr-0026-proc-naming-conventions.md) | Nombres de proyectos, carpetas y aplicación web según el tipo de componente (`.Api`, `.Hub`, `ApiGateway`, `-ui`) | Proposed | process | 2026-11-10 |
 | [ADR-0027](adr-0027-proc-integration-tests-local-sqlserver.md) | Pruebas de integración contra el SQL Server local con BD desechable (enmienda Testcontainers de ADR-0009 y ADR-0013) | Proposed | process | 2026-11-10 |
 | [ADR-0028](adr-0028-data-local-windows-authentication.md) | Servicios conectados con autenticación de Windows en local; usuarios por servicio como control verificable | Proposed | data | 2026-11-11 |
+| [ADR-0029](adr-0029-scope-mvp-service-record-without-service-orders.md) | MVP: registro de servicio realizado en Maintenance; ServiceOrders en la siguiente fase | Accepted | scope | 2026-11-11 |
