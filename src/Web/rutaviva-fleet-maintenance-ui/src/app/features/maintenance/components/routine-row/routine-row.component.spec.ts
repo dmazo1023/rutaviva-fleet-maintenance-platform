@@ -57,17 +57,16 @@ describe('RoutineRowComponent', () => {
     }).compileComponents();
   });
 
-  it('should render tracks, disabled next-phase order button, and emit toggleState on switch click', () => {
+  it('should render tracks, next-phase create-order label when overdue, and emit toggleState on switch click', () => {
     const fixture: ComponentFixture<RoutineRowComponent> =
       TestBed.createComponent(RoutineRowComponent);
-    fixture.componentRef.setInput('routine', baseRoutine);
+    fixture.componentRef.setInput('routine', { ...baseRoutine, dueStatus: 'Overdue' });
     fixture.detectChanges();
 
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
     expect(host.querySelectorAll('app-routine-track').length).toBe(2);
-    const createBtn: HTMLButtonElement | null = host.querySelector('.routine-row__create-btn');
-    expect(createBtn?.textContent).toContain('Próxima fase');
-    expect(createBtn?.disabled).toBe(true);
+    const createLabel: HTMLElement | null = host.querySelector('.routine-row__create-btn');
+    expect(createLabel?.textContent).toContain('Próxima fase');
 
     let toggled: RoutineVm | undefined;
     fixture.componentInstance.toggleState.subscribe((val: RoutineVm) => {
@@ -110,6 +109,16 @@ describe('RoutineRowComponent', () => {
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
     host.querySelector<HTMLButtonElement>('.routine-row__service-btn')?.click();
     expect(registered?.routineId).toBe('RT-RVA101-OIL');
+  });
+
+  it('should hide the create-order label unless the routine is overdue', () => {
+    const fixture: ComponentFixture<RoutineRowComponent> =
+      TestBed.createComponent(RoutineRowComponent);
+    fixture.componentRef.setInput('routine', baseRoutine);
+    fixture.detectChanges();
+
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('.routine-row__create-btn')).toBeNull();
   });
 
   it('should hide the service button when the routine is UpToDate', () => {

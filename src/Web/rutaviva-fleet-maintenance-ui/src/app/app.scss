@@ -1,8 +1,8 @@
 .app-shell {
   min-height: 100dvh;
   display: grid;
-  grid-template-columns: 78px minmax(0, 1fr);
-  background: var(--bg-canvas);
+  grid-template-columns: 88px minmax(0, 1fr);
+  background: var(--c-bg);
 
   @media (width <= 760px) {
     grid-template-columns: 1fr;
@@ -18,9 +18,8 @@
 .app-main {
   flex: 1;
   width: 100%;
-  max-width: 1360px;
-  margin: 0 auto;
-  padding: var(--space-5) clamp(var(--space-4), 3cqi, var(--space-8));
+  padding: clamp(var(--s-4), 3cqi, var(--s-8));
+  padding-bottom: var(--s-12);
   outline: none;
 }
 

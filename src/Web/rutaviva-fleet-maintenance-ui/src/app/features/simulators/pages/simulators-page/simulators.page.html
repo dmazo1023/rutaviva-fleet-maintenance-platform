@@ -1,7 +1,7 @@
 <div class="simulators-page">
-  <header class="simulators-page__header">
-    <h1 id="h1" tabindex="-1" class="simulators-page__title">{{ texts.title }}</h1>
-  </header>
+  <div class="page-head">
+    <h1 id="h1" tabindex="-1">{{ texts.title }}</h1>
+  </div>
 
   @if (!isOperator()) {
     <div class="simulators-page__restricted" role="status">
@@ -13,46 +13,50 @@
       <p class="simulators-page__restricted" role="alert">{{ err }}</p>
     }
     <div class="simulators-grid">
-      <section class="sim-card">
+      <section class="panel sim-card">
         <div class="sim-card__head">
           <h2 class="sim-card__title">{{ texts.odometerCardTitle }}</h2>
           <p class="sim-card__sub">{{ texts.odometerCardSub }}</p>
         </div>
 
         <form class="sim-card__form" (submit)="onSubmitOdometer($event)" novalidate>
-          <label class="sim-card__field">
-            <span>{{ texts.plateLabel }}</span>
-            <input
+          <div class="field">
+            <label for="sim-plate">{{ texts.plateLabel }}</label>
+            <div class="inp">
+              <input id="sim-plate"
               type="text"
-              class="input sim-card__plate-input"
               [value]="plateInput()"
               [placeholder]="texts.platePlaceholder"
               (input)="onPlateChange($event)"
             />
-          </label>
+            </div>
+          </div>
 
-          <label class="sim-card__field">
-            <span>{{ texts.kmLabel }}</span>
-            <input
+          <div class="field">
+            <label for="sim-km">{{ texts.kmLabel }}</label>
+            <div class="inp">
+              <input id="sim-km"
               type="number"
-              class="input sim-card__km-input"
               [value]="kmInput()"
               [placeholder]="texts.kmPlaceholder"
               (input)="onKmChange($event)"
             />
-          </label>
+            </div>
+          </div>
 
-          <label class="sim-card__field">
-            <span>{{ texts.readAtLabel }}</span>
-            <input
+          <div class="field">
+            <label for="sim-read-at">{{ texts.readAtLabel }}</label>
+            <div class="inp">
+              <input id="sim-read-at"
               type="datetime-local"
-              class="input sim-card__readat-input"
               [value]="readAtInput()"
               (input)="onReadAtChange($event)"
             />
-          </label>
+            </div>
+          </div>
 
           <button type="submit" class="btn btn--primary sim-card__odo-btn">
+            <span class="ms" aria-hidden="true">send</span>
             {{ texts.sendReadingAction }}
           </button>
         </form>
@@ -72,24 +76,26 @@
         }
       </section>
 
-      <section class="sim-card">
+      <section class="panel sim-card">
         <div class="sim-card__head">
           <h2 class="sim-card__title">{{ texts.timeCardTitle }}</h2>
           <p class="sim-card__sub">{{ texts.timeCardSub }}</p>
         </div>
 
         <form class="sim-card__form" (submit)="onSubmitTimeEvaluation($event)" novalidate>
-          <label class="sim-card__field">
-            <span>{{ texts.asOfDateLabel }}</span>
-            <input
+          <div class="field">
+            <label for="sim-as-of">{{ texts.asOfDateLabel }}</label>
+            <div class="inp">
+              <input id="sim-as-of"
               type="date"
-              class="input sim-card__date-input"
               [value]="asOfDateInput()"
               (input)="onAsOfDateChange($event)"
             />
-          </label>
+            </div>
+          </div>
 
           <button type="submit" class="btn btn--primary sim-card__time-btn">
+            <span class="ms" aria-hidden="true">play_arrow</span>
             {{ texts.runTimeAction }}
           </button>
         </form>

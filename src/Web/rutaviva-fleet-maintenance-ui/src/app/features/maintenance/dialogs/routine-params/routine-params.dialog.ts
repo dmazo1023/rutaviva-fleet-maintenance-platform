@@ -11,18 +11,26 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { DueStatus } from '../../../../core/models/enums';
+import { DueStatus, TriggeredBy } from '../../../../core/models/enums';
 import { RoutineTrackVm } from '../../../../shared/models/routine-track.vm';
 import { RoutineTrackComponent } from '../../../../shared/routine-track/routine-track.component';
+import { StatusPillComponent } from '../../../../shared/status-pill/status-pill.component';
 import { UpdateRoutineParametersRequest } from '../../data/maintenance.api';
 import { MAINTENANCE_TEXTS } from '../../maintenance.texts';
 import { RoutineVm } from '../../models/maintenance.vm';
+import { ModalDialogDirective } from '../modal-dialog.directive';
 
 const DAYS_PER_MONTH = 30;
 const PERCENT_MAX = 100;
 const PERCENT_MIN = 0;
 const MONTHS_MIN = 1;
 const MONTHS_MAX = 120;
+const NUMBER_FORMATTER: Intl.NumberFormat = new Intl.NumberFormat('es-CO');
+const STATUS_SEVERITY: Readonly<Record<DueStatus, number>> = {
+  UpToDate: 0,
+  DueSoon: 1,
+  Overdue: 2,
+};
 
 interface ParsedField {
   readonly valid: boolean;
@@ -60,6 +68,33 @@ function statusOf(remaining: number, consumedPercent: number, warnStartPercent: 
   return consumedPercent >= warnStartPercent ? 'DueSoon' : 'UpToDate';
 }
 
+function placeholderOf(value: number | null | undefined): string {
+  return value === null || value === undefined ? '' : NUMBER_FORMATTER.format(value);
+}
+
+function worstStatusOf(tracks: readonly RoutineTrackVm[]): DueStatus {
+  return tracks.reduce<DueStatus>(
+    (worst: DueStatus, track: RoutineTrackVm) =>
+      STATUS_SEVERITY[track.status] > STATUS_SEVERITY[worst] ? track.status : worst,
+    'UpToDate'
+  );
+}
+
+function triggerOf(tracks: readonly RoutineTrackVm[]): TriggeredBy | null {
+  const kinds: ReadonlySet<string> = new Set<string>(
+    tracks
+      .filter((t: RoutineTrackVm) => t.status !== 'UpToDate')
+      .map((t: RoutineTrackVm) => t.kind)
+  );
+  if (kinds.has('km') && kinds.has('time')) {
+    return 'DistanceAndTime';
+  }
+  if (kinds.has('km')) {
+    return 'Distance';
+  }
+  return kinds.has('time') ? 'Time' : null;
+}
+
 function positiveNumberOf(raw: string): number | null {
   const parsed: number = Number(raw.trim());
   return raw.trim() !== '' && Number.isFinite(parsed) && parsed > 0 ? parsed : null;
@@ -67,7 +102,7 @@ function positiveNumberOf(raw: string): number | null {
 
 @Component({
   selector: 'app-routine-params-dialog',
-  imports: [RoutineTrackComponent],
+  imports: [RoutineTrackComponent, StatusPillComponent, ModalDialogDirective],
   templateUrl: './routine-params.dialog.html',
   styleUrl: './routine-params.dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -111,10 +146,24 @@ export class RoutineParamsDialogComponent {
     return r?.defaultDueSoonPercent ?? r?.effectiveDueSoonPercent ?? PERCENT_MIN;
   });
 
-  readonly thresholdSourceText: Signal<string> = computed(() =>
-    this.percentInput().trim() !== ''
-      ? this.texts.thresholdFromRoutine
-      : this.texts.thresholdFromType
+  readonly isOpen: Signal<boolean> = computed(() => this.open() && this.routine() !== null);
+
+  readonly previewStatus: Signal<DueStatus> = computed(() => worstStatusOf(this.previewTracks()));
+
+  readonly previewTrigger: Signal<TriggeredBy | null> = computed(() =>
+    triggerOf(this.previewTracks())
+  );
+
+  readonly kmPlaceholder: Signal<string> = computed(() =>
+    placeholderOf(this.routine()?.defaultIntervalKm)
+  );
+
+  readonly monthsPlaceholder: Signal<string> = computed(() =>
+    placeholderOf(this.routine()?.defaultIntervalMonths)
+  );
+
+  readonly percentPlaceholder: Signal<string> = computed(() =>
+    placeholderOf(this.routine()?.defaultDueSoonPercent)
   );
 
   readonly previewTracks: Signal<readonly RoutineTrackVm[]> = computed(() => {

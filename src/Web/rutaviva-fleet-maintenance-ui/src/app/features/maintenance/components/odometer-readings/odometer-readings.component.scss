@@ -1,56 +1,9 @@
-.readings-table-wrap {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow-x: auto;
-}
+.rd-ignored {
+  color: var(--c-muted);
 
-.readings-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-
-  th,
-  td {
-    padding: 10px 14px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-  }
-
-  th {
-    font-size: 11px;
+  .t {
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--ink-500);
-    background: var(--bg-subtle);
-  }
-
-  &__num {
-    text-align: right;
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-  }
-
-  &__date {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-    color: var(--ink-700);
-  }
-
-  &__row--ignored {
-    color: var(--ink-500);
-    background: var(--bg-subtle);
-  }
-
-  &__km--ignored {
     text-decoration: line-through;
-    color: var(--ink-500);
-  }
-
-  &__reason {
-    color: var(--ink-600);
-    font-size: 12px;
+    text-decoration-thickness: 1px;
   }
 }
-

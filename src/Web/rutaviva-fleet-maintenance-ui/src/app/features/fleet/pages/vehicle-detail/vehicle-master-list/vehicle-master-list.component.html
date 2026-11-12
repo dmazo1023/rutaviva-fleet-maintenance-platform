@@ -1,0 +1,39 @@
+<section class="panel vlist" [attr.aria-label]="texts.vehiclesSectionAria">
+  @for (v of vehicles(); track v.vehicleId) {
+    <a
+      class="vrow"
+      [routerLink]="['/flota', v.plate]"
+      [class.is-off]="v.status === 'Inactive'"
+      [class.flash-change]="isFlashed(v.vehicleId)"
+      [attr.aria-current]="v.plate === selectedPlate() ? 'true' : null"
+    >
+      <span class="vid">
+        <app-plate-chip [plate]="v.plate" />
+        <span class="vmodel">
+          {{ v.brand }} {{ v.model }}
+          <small>{{ v.modelYear }}</small>
+        </span>
+      </span>
+      <span class="vst">
+        @if (v.status === 'Inactive') {
+          <app-status-pill status="Inactive" />
+        } @else {
+          <app-status-pill [status]="v.worstDueStatus ?? 'UpToDate'" />
+        }
+      </span>
+      <span class="vnext">
+        @if (nextOf(v); as next) {
+          <b>{{ next.routineName }}</b>
+          <span class="tabular vrem" [class]="toneOf(next.dueStatus)">{{ formatRemaining(next) }}</span>
+          <app-mini-bar
+            class="mini-slot"
+            [percent]="v.maxConsumedPercent"
+            [status]="next.dueStatus"
+          />
+        } @else {
+          <span class="muted">{{ texts.noPlan }}</span>
+        }
+      </span>
+    </a>
+  }
+</section>

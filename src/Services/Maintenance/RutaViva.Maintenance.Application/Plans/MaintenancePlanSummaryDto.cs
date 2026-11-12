@@ -13,4 +13,5 @@ public sealed record MaintenancePlanSummaryDto(
     int UpToDateCount,
     int DueSoonCount,
     int OverdueCount,
-    int InactiveCount);
+    int InactiveCount,
+    NextMaintenanceDto? NextMaintenance);

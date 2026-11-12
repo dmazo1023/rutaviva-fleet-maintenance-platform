@@ -13,6 +13,7 @@ import {
   ImpactItemVm,
 } from '../../../../shared/confirm-impact-dialog/confirm-impact.dialog';
 import { FLEET_TEXTS } from '../../fleet.texts';
+import { DEACTIVATE_VEHICLE_TEXTS } from './deactivate-vehicle.texts';
 
 @Component({
   selector: 'app-deactivate-vehicle-dialog',
@@ -32,6 +33,7 @@ export class DeactivateVehicleDialogComponent {
   readonly closed: OutputEmitterRef<void> = output<void>();
 
   readonly texts: typeof FLEET_TEXTS = FLEET_TEXTS;
+  readonly dialogTexts: typeof DEACTIVATE_VEHICLE_TEXTS = DEACTIVATE_VEHICLE_TEXTS;
 
   readonly dialogTitle: Signal<string> = computed(
     () => `${this.texts.deactivateTitlePrefix}${this.plate()}`
@@ -42,20 +44,26 @@ export class DeactivateVehicleDialogComponent {
   );
 
   readonly impactItems: Signal<readonly ImpactItemVm[]> = computed(() => {
-    const orders: number = this.openOrdersCount();
-    const routines: number = this.activeRoutinesCount();
-    const orderText: string =
-      orders === 1 ? this.texts.impactSingleOrder : `${orders}${this.texts.impactMultiOrdersSuffix}`;
-    const routineText: string =
-      routines === 1
-        ? this.texts.impactSingleRoutine
-        : `${routines}${this.texts.impactMultiRoutinesSuffix}`;
-
+    const orderItems: readonly ImpactItemVm[] =
+      this.openOrdersCount() > 0 ? [{ icon: 'assignment', text: this.ordersText() }] : [];
     return [
-      { icon: 'pause_circle', text: orderText },
-      { icon: 'event_busy', text: routineText },
+      ...orderItems,
+      { icon: 'event_busy', text: this.routinesText() },
       { icon: 'speed', text: this.texts.impactOdometerContinues },
     ];
   });
-}
 
+  private ordersText(): string {
+    const orders: number = this.openOrdersCount();
+    return orders === 1
+      ? this.texts.impactSingleOrder
+      : `${orders}${this.texts.impactMultiOrdersSuffix}`;
+  }
+
+  private routinesText(): string {
+    const routines: number = this.activeRoutinesCount();
+    return routines === 1
+      ? this.texts.impactSingleRoutine
+      : `${routines}${this.texts.impactMultiRoutinesSuffix}`;
+  }
+}

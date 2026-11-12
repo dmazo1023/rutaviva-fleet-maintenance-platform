@@ -21,6 +21,8 @@ import {
   AlertVm,
   MaintenancePlanDetailVm,
   MaintenancePlanSummaryVm,
+  NextMaintenanceKind,
+  NextMaintenanceVm,
   OdometerReadingVm,
   ReevaluationSummaryVm,
   RegisterServiceRequest,
@@ -36,6 +38,14 @@ export interface PagedResultDto<T> {
   readonly totalCount: number;
 }
 
+export interface NextMaintenanceDto {
+  readonly routineName: string;
+  readonly kind: NextMaintenanceKind;
+  readonly remaining: number;
+  readonly dueStatus: DueStatus;
+  readonly triggeredBy: TriggeredBy | null;
+}
+
 export interface MaintenancePlanSummaryDto {
   readonly vehicleId: string;
   readonly plate: string;
@@ -47,6 +57,7 @@ export interface MaintenancePlanSummaryDto {
   readonly dueSoonCount: number;
   readonly overdueCount: number;
   readonly inactiveCount: number;
+  readonly nextMaintenance?: NextMaintenanceDto | null;
 }
 
 export interface RoutineDto {
@@ -151,6 +162,21 @@ function tracksOf(dto: RoutineDto): readonly RoutineTrackVm[] {
     .map((track: RoutineTrackVm) => ({ ...track }));
 }
 
+function mapNextMaintenanceDto(
+  dto: NextMaintenanceDto | null | undefined
+): NextMaintenanceVm | null {
+  if (!dto) {
+    return null;
+  }
+  return {
+    routineName: dto.routineName,
+    kind: dto.kind,
+    remaining: dto.remaining,
+    dueStatus: dto.dueStatus,
+    triggeredBy: dto.triggeredBy,
+  };
+}
+
 export function mapPlanSummaryDtoToVm(dto: MaintenancePlanSummaryDto): MaintenancePlanSummaryVm {
   return {
     vehicleId: dto.vehicleId,
@@ -163,6 +189,7 @@ export function mapPlanSummaryDtoToVm(dto: MaintenancePlanSummaryDto): Maintenan
     dueSoonCount: dto.dueSoonCount,
     overdueCount: dto.overdueCount,
     inactiveCount: dto.inactiveCount,
+    nextMaintenance: mapNextMaintenanceDto(dto.nextMaintenance),
   };
 }
 

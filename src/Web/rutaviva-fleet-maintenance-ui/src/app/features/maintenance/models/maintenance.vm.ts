@@ -55,6 +55,16 @@ export interface MaintenancePlanDetailVm {
   readonly routines: readonly RoutineVm[];
 }
 
+export type NextMaintenanceKind = 'km' | 'time';
+
+export interface NextMaintenanceVm {
+  readonly routineName: string;
+  readonly kind: NextMaintenanceKind;
+  readonly remaining: number;
+  readonly dueStatus: DueStatus;
+  readonly triggeredBy: TriggeredBy | null;
+}
+
 export interface MaintenancePlanSummaryVm {
   readonly vehicleId: string;
   readonly plate: string;
@@ -66,6 +76,7 @@ export interface MaintenancePlanSummaryVm {
   readonly dueSoonCount: number;
   readonly overdueCount: number;
   readonly inactiveCount: number;
+  readonly nextMaintenance: NextMaintenanceVm | null;
 }
 
 export interface OdometerReadingVm {

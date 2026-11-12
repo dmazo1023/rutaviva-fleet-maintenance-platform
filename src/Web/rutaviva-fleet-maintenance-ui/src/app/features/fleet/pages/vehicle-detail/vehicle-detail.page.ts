@@ -7,20 +7,26 @@ import {
   inject,
   input,
   InputSignal,
+  OnInit,
   Signal,
   signal,
   viewChildren,
   WritableSignal,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ENUM_LABELS } from '../../../../core/models/enum-labels';
+import { VehicleStatus } from '../../../../core/models/enums';
 import { SessionStore } from '../../../../core/context/session.store';
 import { ShowToastOptions, ToastStore } from '../../../../core/feedback/toast.store';
 import { ViewRefreshService } from '../../../../core/shell/view-refresh.service';
 import { EmptyStateComponent } from '../../../../shared/empty-state/empty-state.component';
 import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
 import { PlateChipComponent } from '../../../../shared/plate-chip/plate-chip.component';
+import {
+  SegmentedFilterComponent,
+  SegmentedFilterOption,
+} from '../../../../shared/segmented-filter/segmented-filter.component';
 import { SkeletonComponent } from '../../../../shared/skeleton/skeleton.component';
-import { StatusPillComponent } from '../../../../shared/status-pill/status-pill.component';
 import { SwitchComponent } from '../../../../shared/switch/switch.component';
 import { OdometerReadingsComponent } from '../../../maintenance/components/odometer-readings/odometer-readings.component';
 import { RoutineRowComponent } from '../../../maintenance/components/routine-row/routine-row.component';
@@ -33,6 +39,9 @@ import { DeactivateVehicleDialogComponent } from '../../dialogs/deactivate-vehic
 import { FleetFacade } from '../../fleet.facade';
 import { FLEET_TEXTS } from '../../fleet.texts';
 import { VehicleDetailVm } from '../../models/fleet.vm';
+import { FleetFilterKey } from '../../state/fleet.store';
+import { VEHICLE_DETAIL_TEXTS } from './vehicle-detail.texts';
+import { VehicleMasterListComponent } from './vehicle-master-list/vehicle-master-list.component';
 
 export type VehicleDetailTab = 'rutinas' | 'ordenes' | 'lecturas';
 
@@ -44,13 +53,27 @@ const OPERATION_ERROR_TOAST: ShowToastOptions = {
 };
 const TAB_ORDER: readonly VehicleDetailTab[] = ['rutinas', 'ordenes', 'lecturas'];
 const NUMBER_FORMATTER: Intl.NumberFormat = new Intl.NumberFormat('es-CO');
+const VALID_FILTERS: ReadonlySet<string> = new Set<string>([
+  'All',
+  'Overdue',
+  'DueSoon',
+  'UpToDate',
+  'Inactive',
+]);
+
+export interface VehicleDetailTabItem {
+  readonly key: VehicleDetailTab;
+  readonly label: string;
+  readonly count: number;
+}
 
 @Component({
   selector: 'app-vehicle-detail-page',
   imports: [
     RouterLink,
     PlateChipComponent,
-    StatusPillComponent,
+    SegmentedFilterComponent,
+    VehicleMasterListComponent,
     SwitchComponent,
     SkeletonComponent,
     EmptyStateComponent,
@@ -65,7 +88,7 @@ const NUMBER_FORMATTER: Intl.NumberFormat = new Intl.NumberFormat('es-CO');
   styleUrl: './vehicle-detail.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class VehicleDetailPageComponent {
+export class VehicleDetailPageComponent implements OnInit {
   private readonly facade: FleetFacade = inject(FleetFacade);
   private readonly sessionStore: SessionStore = inject(SessionStore);
   private readonly router: Router = inject(Router);
@@ -80,6 +103,13 @@ export class VehicleDetailPageComponent {
   readonly tabButtons = viewChildren<ElementRef<HTMLButtonElement>>('tabBtn');
 
   readonly texts: typeof FLEET_TEXTS = FLEET_TEXTS;
+  readonly detailTexts: typeof VEHICLE_DETAIL_TEXTS = VEHICLE_DETAIL_TEXTS;
+  readonly listLoadable = this.facade.listLoadable;
+  readonly filteredVehicles = this.facade.filteredVehicles;
+  readonly searchQuery = this.facade.searchQuery;
+  readonly activeFilter = this.facade.activeFilter;
+  readonly filterCounts = this.facade.filterCounts;
+  readonly flashedVehicleIds = this.facade.flashedVehicleIds;
   readonly detailLoadable = this.facade.detailLoadable;
   readonly planLoadable = this.facade.planLoadable;
   readonly readingsLoadable = this.facade.readingsLoadable;
@@ -99,6 +129,42 @@ export class VehicleDetailPageComponent {
   });
 
   readonly openOrdersCount: number = NO_OPEN_ORDERS;
+
+  readonly filterOptions: Signal<readonly SegmentedFilterOption[]> = computed(() => {
+    const counts = this.filterCounts();
+    return [
+      { value: 'All', label: this.texts.filterAll, count: counts.All },
+      {
+        value: 'Overdue',
+        label: this.texts.filterOverdue,
+        count: counts.Overdue,
+        toneClass: 'is-danger',
+      },
+      {
+        value: 'DueSoon',
+        label: this.texts.filterDueSoon,
+        count: counts.DueSoon,
+        toneClass: 'is-warn',
+      },
+      {
+        value: 'UpToDate',
+        label: this.texts.filterUpToDate,
+        count: counts.UpToDate,
+        toneClass: 'is-ok',
+      },
+      { value: 'Inactive', label: this.texts.filterInactive, count: counts.Inactive },
+    ];
+  });
+
+  readonly tabItems: Signal<readonly VehicleDetailTabItem[]> = computed(() => [
+    {
+      key: 'rutinas',
+      label: this.texts.tabRoutines,
+      count: this.planLoadable().data?.routines.length ?? 0,
+    },
+    { key: 'ordenes', label: this.texts.tabOrders, count: this.openOrdersCount },
+    { key: 'lecturas', label: this.texts.tabReadings, count: this.readingsLoadable().data.length },
+  ]);
 
   readonly currentOdometerKm: Signal<number | null> = computed(
     () => this.planLoadable().data?.odometerKm ?? this.detailLoadable().data?.initialOdometerKm ?? null
@@ -123,11 +189,28 @@ export class VehicleDetailPageComponent {
     });
   }
 
-  formatKm(km: number | null): string {
-    if (km === null) {
-      return this.texts.emptyValue;
+  ngOnInit(): void {
+    if (this.listLoadable().status === 'idle') {
+      this.facade.loadFleetList();
     }
-    return `${NUMBER_FORMATTER.format(km)}\u00A0${this.texts.kmUnit}`;
+  }
+
+  formatNumber(value: number | null): string {
+    return value === null ? this.texts.emptyValue : NUMBER_FORMATTER.format(value);
+  }
+
+  statusLabel(status: VehicleStatus): string {
+    return ENUM_LABELS.vehicleStatus[status];
+  }
+
+  onSearchInput(event: Event): void {
+    this.facade.setSearchQuery((event.target as HTMLInputElement).value);
+  }
+
+  onFilterChange(value: string): void {
+    if (VALID_FILTERS.has(value)) {
+      this.facade.setActiveFilter(value as FleetFilterKey);
+    }
   }
 
   isRoutineFlashed(routineId: string): boolean {

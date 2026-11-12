@@ -1,201 +1,212 @@
-@if (detailLoadable().status === 'loading' && !detailLoadable().data) {
-  <app-skeleton [rows]="4" />
-} @else if (detailLoadable().status === 'error') {
-  <app-error-state
-    [title]="texts.errorTitle"
-    [message]="texts.errorMessage"
-    [retryLabel]="texts.retry"
-    (retryClicked)="onRetry()"
-  />
-} @else if (detailLoadable().status === 'ready' && !detailLoadable().data) {
-  <app-empty-state icon="search_off" [title]="texts.notFoundTitle" [message]="texts.notFoundMessage" />
-} @else if (detailLoadable().data; as vehicle) {
-  <div class="vehicle-detail">
-    <header class="vehicle-detail__header">
-      <div class="vehicle-detail__header-left">
-        <a
-          routerLink="/flota"
-          class="icon-btn vehicle-detail__back"
-          [attr.aria-label]="texts.backToFleetAria"
-        >
-          <span class="ms" aria-hidden="true">arrow_back</span>
-        </a>
-        <h1 id="d-title" tabindex="-1" class="sr-only">{{ vehicle.plate }}</h1>
-        <app-plate-chip [plate]="vehicle.plate" size="lg" />
-        <div class="vehicle-detail__title-meta">
-          <span class="vehicle-detail__brand">
-            {{ vehicle.brand }} {{ vehicle.model }} · {{ vehicle.modelYear }}
-          </span>
-          <span class="vehicle-detail__odo">
-            {{ formatKm(currentOdometerKm()) }}
-          </span>
-        </div>
-      </div>
+<div class="vehicle-detail">
+  <div class="page-head">
+    <h1 id="h1" tabindex="-1">{{ texts.title }}</h1>
+    <span class="count tabular">{{ filterCounts().All }}</span>
+  </div>
 
-      <div class="vehicle-detail__header-right">
-        <app-status-pill [status]="vehicle.status" />
-        @if (canManage()) {
-          <app-switch
-            [checked]="vehicle.status === 'Active'"
-            [ariaLabel]="vehicle.plate"
-            (toggled)="onVehicleStatusSwitch(vehicle)"
-          />
+  <div class="toolbar">
+    <app-segmented-filter
+      [legend]="texts.statusLegend"
+      name="fleet-status"
+      [options]="filterOptions()"
+      [selectedValue]="activeFilter()"
+      defaultValue="All"
+      (valueChange)="onFilterChange($event)"
+    />
+    <div class="search">
+      <span class="ms" aria-hidden="true">search</span>
+      <input
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        [value]="searchQuery()"
+        [placeholder]="texts.searchPlaceholder"
+        [attr.aria-label]="texts.searchAriaLabel"
+        (input)="onSearchInput($event)"
+      />
+    </div>
+  </div>
+
+  <div class="vehicle-detail__layout">
+    <app-vehicle-master-list
+      class="vehicle-detail__list"
+      [vehicles]="filteredVehicles()"
+      [selectedPlate]="plate()"
+      [flashedIds]="flashedVehicleIds()"
+    />
+
+    <section class="panel detail" aria-labelledby="d-title">
+      @if (detailLoadable().status === 'loading' && !detailLoadable().data) {
+        <app-skeleton [rows]="4" />
+      } @else if (detailLoadable().status === 'error') {
+        <app-error-state
+          [title]="texts.errorTitle"
+          [message]="texts.errorMessage"
+          [retryLabel]="texts.retry"
+          (retryClicked)="onRetry()"
+        />
+      } @else if (detailLoadable().status === 'ready' && !detailLoadable().data) {
+        <app-empty-state
+          icon="search_off"
+          [title]="texts.notFoundTitle"
+          [message]="texts.notFoundMessage"
+        />
+      } @else if (detailLoadable().data; as vehicle) {
+        <header class="d-head">
+          <a
+            routerLink="/flota"
+            class="icon-btn d-head__back"
+            [attr.aria-label]="texts.backToFleetAria"
+          >
+            <span class="ms" aria-hidden="true">arrow_back</span>
+          </a>
+          <div class="d-id">
+            <app-plate-chip [plate]="vehicle.plate" size="lg" />
+            <div>
+              <h2 id="d-title" tabindex="-1">{{ vehicle.brand }} {{ vehicle.model }}</h2>
+              <div class="d-sub">
+                <span>
+                  <span class="ms ms--s" aria-hidden="true">calendar_month</span>
+                  {{ vehicle.modelYear }}
+                </span>
+                @if (vehicle.vin; as vin) {
+                  <span class="mono" [attr.aria-label]="detailTexts.vinLabel + ' ' + vin">
+                    <span class="ms ms--s" aria-hidden="true">pin</span>
+                    {{ vin }}
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="odo" role="group" [attr.aria-label]="detailTexts.odometerAria">
+            <span class="odo-val">{{ formatNumber(currentOdometerKm()) }}</span>
+            <span class="odo-unit">{{ texts.kmUnit }}</span>
+          </div>
+        </header>
+
+        <dl class="d-meta">
+          <div>
+            <dt>
+              <span class="ms" aria-hidden="true">apartment</span>
+              <span class="sr-only">{{ texts.ownerLabel }}</span>
+            </dt>
+            <dd>{{ vehicle.customerName }}</dd>
+          </div>
+          <div>
+            <dt>
+              <span class="ms" aria-hidden="true">build</span>
+              <span class="sr-only">{{ texts.workshopLabel }}</span>
+            </dt>
+            <dd>{{ vehicle.workshopName }}</dd>
+          </div>
+          <div>
+            <dt>
+              <span class="ms" aria-hidden="true">person</span>
+              <span class="sr-only">{{ texts.responsibleLabel }}</span>
+            </dt>
+            <dd>{{ vehicle.responsibleApproverName ?? texts.noResponsible }}</dd>
+          </div>
+          <div class="push">
+            <app-switch
+              [checked]="vehicle.status === 'Active'"
+              [disabled]="!canManage()"
+              [label]="statusLabel(vehicle.status)"
+              (toggled)="onVehicleStatusSwitch(vehicle)"
+            />
+          </div>
+        </dl>
+
+        @if (vehicle.status === 'Inactive') {
+          <div class="banner is-neutral" role="status">
+            <span class="ms" aria-hidden="true">pause_circle</span>
+            <span class="grow">{{ texts.inactiveBanner }}</span>
+          </div>
         }
-      </div>
-    </header>
 
-    @if (vehicle.status === 'Inactive') {
-      <div class="vehicle-detail__inactive-banner" role="status">
-        <span class="ms" aria-hidden="true">pause_circle</span>
-        <span>{{ texts.inactiveBanner }}</span>
-      </div>
-    }
-
-    <div class="vehicle-detail__layout">
-      <div class="vehicle-detail__main">
         <div
-          class="vehicle-detail__tabs"
+          class="tabs"
           role="tablist"
           [attr.aria-label]="texts.vehicleSectionsAria"
           tabindex="-1"
           (keydown)="onTabKeydown($event)"
         >
-          <button
-            #tabBtn
-            id="tab-rutinas"
-            type="button"
-            role="tab"
-            class="vehicle-detail__tab"
-            [class.is-active]="activeTab() === 'rutinas'"
-            [attr.aria-selected]="activeTab() === 'rutinas'"
-            aria-controls="panel-rutinas"
-            [attr.tabindex]="activeTab() === 'rutinas' ? 0 : -1"
-            (click)="selectTab('rutinas')"
-          >
-            {{ texts.tabRoutines }}
-          </button>
-
-          <button
-            #tabBtn
-            id="tab-ordenes"
-            type="button"
-            role="tab"
-            class="vehicle-detail__tab"
-            [class.is-active]="activeTab() === 'ordenes'"
-            [attr.aria-selected]="activeTab() === 'ordenes'"
-            aria-controls="panel-ordenes"
-            [attr.tabindex]="activeTab() === 'ordenes' ? 0 : -1"
-            (click)="selectTab('ordenes')"
-          >
-            {{ texts.tabOrders }}
-          </button>
-
-          <button
-            #tabBtn
-            id="tab-lecturas"
-            type="button"
-            role="tab"
-            class="vehicle-detail__tab"
-            [class.is-active]="activeTab() === 'lecturas'"
-            [attr.aria-selected]="activeTab() === 'lecturas'"
-            aria-controls="panel-lecturas"
-            [attr.tabindex]="activeTab() === 'lecturas' ? 0 : -1"
-            (click)="selectTab('lecturas')"
-          >
-            {{ texts.tabReadings }}
-          </button>
+          @for (item of tabItems(); track item.key) {
+            <button
+              #tabBtn
+              type="button"
+              role="tab"
+              class="tab"
+              [id]="'tab-' + item.key"
+              [attr.aria-selected]="activeTab() === item.key"
+              [attr.aria-controls]="'panel-' + item.key"
+              [attr.tabindex]="activeTab() === item.key ? 0 : -1"
+              (click)="selectTab(item.key)"
+            >
+              {{ item.label }}
+              <span class="n">{{ item.count }}</span>
+            </button>
+          }
         </div>
 
         @if (activeTab() === 'rutinas') {
-          <section
-            id="panel-rutinas"
-            role="tabpanel"
-            aria-labelledby="tab-rutinas"
-            class="vehicle-detail__panel"
-          >
+          <div id="panel-rutinas" role="tabpanel" aria-labelledby="tab-rutinas">
             @if (planLoadable().data; as plan) {
-              <div class="vehicle-detail__routines">
+              <ul class="routines">
                 @for (routine of plan.routines; track routine.routineId) {
-                  <app-routine-row
-                    [routine]="routine"
-                    [vehicleActive]="vehicle.status === 'Active'"
-                    [canManage]="canManage()"
-                    [flashed]="isRoutineFlashed(routine.routineId)"
-                    (toggleState)="onToggleRoutine($event)"
-                    (editParams)="onOpenRoutineParams($event)"
-                    (registerService)="onRegisterService($event)"
-                  />
+                  <li class="routines__item">
+                    <app-routine-row
+                      [routine]="routine"
+                      [vehicleActive]="vehicle.status === 'Active'"
+                      [canManage]="canManage()"
+                      [flashed]="isRoutineFlashed(routine.routineId)"
+                      (toggleState)="onToggleRoutine($event)"
+                      (editParams)="onOpenRoutineParams($event)"
+                      (registerService)="onRegisterService($event)"
+                    />
+                  </li>
                 }
-              </div>
+              </ul>
             }
-          </section>
+          </div>
         }
 
         @if (activeTab() === 'ordenes') {
-          <section
-            id="panel-ordenes"
-            role="tabpanel"
-            aria-labelledby="tab-ordenes"
-            class="vehicle-detail__panel"
-          >
+          <div id="panel-ordenes" role="tabpanel" aria-labelledby="tab-ordenes">
             <app-empty-state
               icon="assignment"
               [title]="texts.ordersNextPhaseTitle"
               [message]="texts.ordersNextPhaseMessage"
             />
-          </section>
+          </div>
         }
 
         @if (activeTab() === 'lecturas') {
-          <section
-            id="panel-lecturas"
-            role="tabpanel"
-            aria-labelledby="tab-lecturas"
-            class="vehicle-detail__panel"
-          >
+          <div id="panel-lecturas" role="tabpanel" aria-labelledby="tab-lecturas">
             <app-odometer-readings [readings]="readingsLoadable().data" />
-          </section>
+          </div>
         }
-      </div>
 
-      <aside class="vehicle-detail__aside">
-        <dl class="vehicle-detail__facts">
-          <div class="vehicle-detail__fact">
-            <dt>{{ texts.ownerLabel }}</dt>
-            <dd>{{ vehicle.customerName }}</dd>
-          </div>
-          <div class="vehicle-detail__fact">
-            <dt>{{ texts.workshopLabel }}</dt>
-            <dd>{{ vehicle.workshopName }}</dd>
-          </div>
-          <div class="vehicle-detail__fact">
-            <dt>{{ texts.responsibleLabel }}</dt>
-            <dd>{{ vehicle.responsibleApproverName ?? texts.noResponsible }}</dd>
-          </div>
-        </dl>
-      </aside>
-    </div>
+        <app-routine-params-dialog
+          [open]="editingRoutine() !== null"
+          [routine]="editingRoutine()"
+          [currentOdometerKm]="currentOdometerKm() ?? vehicle.initialOdometerKm"
+          [busy]="savingRoutineParams()"
+          (saved)="onSaveRoutineParams($event)"
+          (closed)="onCloseRoutineParams()"
+        />
 
-    <app-routine-params-dialog
-      [open]="editingRoutine() !== null"
-      [routine]="editingRoutine()"
-      [currentOdometerKm]="currentOdometerKm() ?? vehicle.initialOdometerKm"
-      [busy]="savingRoutineParams()"
-      (saved)="onSaveRoutineParams($event)"
-      (closed)="onCloseRoutineParams()"
-    />
+        <app-service-registration-host />
 
-    <app-service-registration-host />
-
-    <app-deactivate-vehicle-dialog
-      [open]="deactivateDialogOpen()"
-      [plate]="vehicle.plate"
-      [openOrdersCount]="openOrdersCount"
-      [activeRoutinesCount]="activeRoutinesCount()"
-      [busy]="deactivatingVehicle()"
-      (confirmed)="onConfirmDeactivate(vehicle)"
-      (closed)="onCloseDeactivateDialog()"
-    />
+        <app-deactivate-vehicle-dialog
+          [open]="deactivateDialogOpen()"
+          [plate]="vehicle.plate"
+          [openOrdersCount]="openOrdersCount"
+          [activeRoutinesCount]="activeRoutinesCount()"
+          [busy]="deactivatingVehicle()"
+          (confirmed)="onConfirmDeactivate(vehicle)"
+          (closed)="onCloseDeactivateDialog()"
+        />
+      }
+    </section>
   </div>
-}
-
+</div>

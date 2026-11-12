@@ -1,25 +1,25 @@
 .order-detail {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--s-4);
 
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-4);
+    gap: var(--s-4);
     flex-wrap: wrap;
-    padding: var(--space-4);
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
+    padding: var(--s-4);
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-panel);
   }
 
   &__header-left,
   &__header-right {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: var(--s-3);
     flex-wrap: wrap;
   }
 
@@ -28,20 +28,20 @@
     font-family: var(--font-mono);
     font-size: 18px;
     font-weight: 700;
-    color: var(--ink-900);
+    color: var(--c-text);
   }
 
   &__routine {
     font-size: 14px;
     font-weight: 600;
-    color: var(--ink-700);
+    color: var(--c-text);
   }
 
   &__priority {
     padding: 3px 8px;
-    border-radius: var(--radius-xs);
-    background: var(--danger-soft);
-    color: var(--danger);
+    border-radius: var(--r-chip);
+    background: var(--c-danger-soft);
+    color: var(--c-danger);
     font-size: 12px;
     font-weight: 600;
   }
@@ -49,7 +49,7 @@
   &__layout {
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--space-4);
+    gap: var(--s-4);
     align-items: start;
 
     @media (width >= 1100px) {
@@ -60,21 +60,21 @@
   &__main {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--s-4);
   }
 
   &__aside {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: var(--space-4);
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-panel);
+    padding: var(--s-4);
   }
 
   &__facts {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--s-3);
   }
 
   &__fact {
@@ -82,14 +82,14 @@
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
-      color: var(--ink-500);
+      color: var(--c-muted);
     }
 
     dd {
       margin: 4px 0 0;
       font-size: 13px;
       font-weight: 500;
-      color: var(--ink-900);
+      color: var(--c-text);
     }
   }
 }

@@ -1,67 +1,82 @@
-@if (routine(); as r) {
-  <div class="modal-backdrop">
-    <dialog open class="service-dialog" tabindex="-1" aria-labelledby="service-dlg-title">
-      <form (submit)="onSubmit($event)" novalidate>
-        <div class="service-dialog__head">
-          <div>
-            <h2 id="service-dlg-title" class="service-dialog__title">
-              {{ texts.serviceDialogTitle }}
-            </h2>
-            <p class="service-dialog__sub">{{ r.plate }} · {{ r.name }}</p>
-          </div>
-          <button
-            type="button"
-            class="icon-btn"
-            [attr.aria-label]="texts.closeAria"
-            (click)="onCancel()"
-          >
-            <span class="ms" aria-hidden="true">close</span>
-          </button>
-        </div>
+<dialog
+  class="service-dialog"
+  tabindex="-1"
+  aria-labelledby="service-dlg-title"
+  [appModalDialog]="routine() !== null"
+  (dismissed)="onCancel()"
+>
+  @if (routine(); as r) {
+    <form (submit)="onSubmit($event)" novalidate>
+      <div class="m-head">
+        <span class="rt-ico is-brand">
+          <span class="ms" aria-hidden="true">{{ r.icon }}</span>
+        </span>
+        <h2 id="service-dlg-title">{{ texts.serviceDialogTitle }}</h2>
+        <button
+          type="button"
+          class="icon-btn"
+          [attr.aria-label]="texts.closeAria"
+          (click)="onCancel()"
+        >
+          <span class="ms" aria-hidden="true">close</span>
+        </button>
+      </div>
 
-        <div class="service-dialog__body">
-          <div class="service-dialog__grid">
-            <label class="service-dialog__field">
-              <span>{{ texts.serviceKmLabel }} ({{ texts.kmUnit }})</span>
+      <div class="m-body">
+        <p class="service-dialog__context">
+          <span class="service-dialog__plate">{{ r.plate }}</span>
+          <span>{{ r.name }}</span>
+        </p>
+
+        <div class="service-dialog__fields">
+          <div class="field">
+            <label for="service-km">{{ texts.serviceKmLabel }}</label>
+            <div class="inp">
               <input
-                type="number"
-                min="0"
-                class="input service-dialog__input-km"
+                id="service-km"
+                class="service-dialog__input-km"
+                inputmode="numeric"
+                autocomplete="off"
+                autofocus
                 [value]="kmInput()"
                 (input)="onKmInput($event)"
               />
-            </label>
+              <span class="unit">{{ texts.kmUnit }}</span>
+            </div>
+          </div>
 
-            <label class="service-dialog__field">
-              <span>{{ texts.serviceDateLabel }}</span>
+          <div class="field">
+            <label for="service-date">{{ texts.serviceDateLabel }}</label>
+            <div class="inp">
               <input
+                id="service-date"
                 type="date"
-                class="input service-dialog__input-date"
+                class="service-dialog__input-date"
                 [value]="dateInput()"
                 (input)="onDateInput($event)"
               />
-            </label>
+            </div>
           </div>
-
-          @if (validationError() ?? serverError(); as err) {
-            <p class="service-dialog__error" role="alert">{{ err }}</p>
-          }
         </div>
 
-        <div class="service-dialog__foot">
-          <button type="button" class="btn btn--ghost" (click)="onCancel()">
-            {{ texts.cancel }}
-          </button>
-          <button
-            type="submit"
-            class="btn btn--primary service-dialog__confirm-btn"
-            [disabled]="busy()"
-            [attr.aria-busy]="busy() ? 'true' : null"
-          >
-            {{ busy() ? texts.serviceRegistering : texts.serviceConfirm }}
-          </button>
-        </div>
-      </form>
-    </dialog>
-  </div>
-}
+        @if (validationError() ?? serverError(); as err) {
+          <p class="err service-dialog__error" role="alert">{{ err }}</p>
+        }
+      </div>
+
+      <div class="m-foot">
+        <button type="button" class="btn btn--ghost" (click)="onCancel()">
+          {{ texts.cancel }}
+        </button>
+        <button
+          type="submit"
+          class="btn btn--primary service-dialog__confirm-btn"
+          [disabled]="busy()"
+          [attr.aria-busy]="busy() ? 'true' : null"
+        >
+          {{ busy() ? texts.serviceRegistering : texts.serviceConfirm }}
+        </button>
+      </div>
+    </form>
+  }
+</dialog>

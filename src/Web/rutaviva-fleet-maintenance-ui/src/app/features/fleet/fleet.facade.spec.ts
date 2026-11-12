@@ -50,6 +50,7 @@ function buildPlan(
     dueSoonCount: worstDueStatus === 'DueSoon' ? 1 : 0,
     overdueCount: worstDueStatus === 'Overdue' ? 1 : 0,
     inactiveCount: 0,
+    nextMaintenance: null,
   };
 }
 

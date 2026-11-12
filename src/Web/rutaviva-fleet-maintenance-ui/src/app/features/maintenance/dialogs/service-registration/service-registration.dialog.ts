@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { MAINTENANCE_TEXTS } from '../../maintenance.texts';
 import { RegisterServiceRequest, RoutineVm } from '../../models/maintenance.vm';
+import { ModalDialogDirective } from '../modal-dialog.directive';
 
 export const SERVICE_TIMEZONE_OFFSET = '-05:00';
 export const SERVICE_TIME_OF_DAY = '00:00:00';
@@ -27,6 +28,7 @@ export function toServicedAt(isoDate: string): string {
 
 @Component({
   selector: 'app-service-registration-dialog',
+  imports: [ModalDialogDirective],
   templateUrl: './service-registration.dialog.html',
   styleUrl: './service-registration.dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

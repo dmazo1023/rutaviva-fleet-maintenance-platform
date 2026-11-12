@@ -1,118 +1,142 @@
-.vehicle-list-wrap {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow-x: auto;
+:host {
+  display: block;
 }
 
-.vehicle-table {
-  width: 100%;
-  border-collapse: collapse;
+.vlist {
+  overflow: hidden;
+}
+
+.vhead,
+.vrow {
+  display: grid;
+  grid-template-columns: minmax(170px, 1.25fr) minmax(130px, 1fr) 96px minmax(190px, 1.5fr) 132px 88px;
+  align-items: center;
+  gap: var(--s-4);
+  padding: 0 var(--s-4);
+}
+
+.vhead {
+  height: 40px;
+  border-bottom: 1px solid var(--c-border);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--c-muted);
+}
+
+.r {
+  text-align: right;
+  justify-self: end;
+}
+
+.vrow {
+  position: relative;
+  min-height: 64px;
+  border-bottom: 1px solid var(--c-border);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.vrow:last-child {
+  border-bottom: 0;
+}
+
+.vrow:hover {
+  background: var(--c-sunken);
+}
+
+.vrow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--c-flash);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vrow.flash::after {
+  animation: flash 1.6s var(--ease);
+}
+
+@keyframes flash {
+  0%,
+  30% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.vid {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-width: 0;
+}
+
+.vmodel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.vmodel small {
+  font-weight: 500;
+  font-size: 12.5px;
+  color: var(--c-muted);
+}
+
+.vcust {
+  font-size: 13.5px;
+  color: var(--c-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vodo {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.vnext {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 10px;
+  align-items: center;
   font-size: 13px;
-
-  th,
-  td {
-    padding: 12px 14px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-  }
-
-  th {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--ink-500);
-    background: var(--bg-subtle);
-  }
-
-  &__row {
-    cursor: pointer;
-    transition: background-color 140ms ease;
-
-    &:hover {
-      background: var(--bg-subtle);
-    }
-
-    &--inactive {
-      opacity: 0.68;
-    }
-  }
-
-  &__vehicle-cell {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-  }
-
-  &__model {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  &__brand {
-    font-weight: 600;
-    color: var(--ink-900);
-  }
-
-  &__year {
-    font-size: 11px;
-    color: var(--ink-500);
-  }
-
-  &__num {
-    text-align: right;
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-  }
-
-  &__next {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 170px;
-  }
-
-  &__next-top {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-2);
-    font-size: 12px;
-  }
-
-  &__routine {
-    font-weight: 500;
-    color: var(--ink-800);
-  }
-
-  &__rem {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-    color: var(--ink-600);
-
-    &--neg {
-      color: var(--danger);
-      font-weight: 600;
-    }
-  }
-
-  &__muted {
-    color: var(--ink-500);
-    font-size: 12px;
-  }
-
-  &__order-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 8px;
-  }
-
-  &__order-num {
-    font-family: var(--font-mono);
-    font-size: 12px;
-  }
 }
 
+.vnext b {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vnext app-mini-bar {
+  grid-column: 1 / -1;
+}
+
+.vrem {
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.vorder {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 500 12.5px var(--font-mono);
+  color: var(--c-muted);
+}
+
+.vrow.is-off .vid,
+.vrow.is-off .vnext,
+.vrow.is-off .vodo {
+  opacity: .55;
+}

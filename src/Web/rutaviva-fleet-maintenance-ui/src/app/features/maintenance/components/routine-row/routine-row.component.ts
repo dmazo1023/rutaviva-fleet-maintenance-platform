@@ -8,11 +8,32 @@ import {
   OutputEmitterRef,
   Signal,
 } from '@angular/core';
+import { DueStatus, TriggeredBy } from '../../../../core/models/enums';
 import { RoutineTrackComponent } from '../../../../shared/routine-track/routine-track.component';
 import { StatusPillComponent } from '../../../../shared/status-pill/status-pill.component';
 import { SwitchComponent } from '../../../../shared/switch/switch.component';
 import { MAINTENANCE_TEXTS } from '../../maintenance.texts';
 import { RoutineVm } from '../../models/maintenance.vm';
+
+const NUMBER_FORMATTER: Intl.NumberFormat = new Intl.NumberFormat('es-CO');
+const DATE_FORMATTER: Intl.DateTimeFormat = new Intl.DateTimeFormat('es-CO', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+const NON_BREAKING_SPACE = ' ';
+const TONE_BY_DUE_STATUS: Readonly<Record<DueStatus, string>> = {
+  UpToDate: 'is-ok',
+  DueSoon: 'is-warn',
+  Overdue: 'is-danger',
+};
+const OFF_TONE = 'is-neutral';
+const DATE_PREFIX_LENGTH = 10;
+
+function formatDueDate(isoDate: string): string {
+  return DATE_FORMATTER.format(new Date(`${isoDate.slice(0, DATE_PREFIX_LENGTH)}T00:00:00Z`));
+}
 
 @Component({
   selector: 'app-routine-row',
@@ -36,26 +57,43 @@ export class RoutineRowComponent {
 
   readonly isActive: Signal<boolean> = computed(() => this.routine().state === 'Active');
 
+  readonly isOff: Signal<boolean> = computed(() => !this.isActive() || !this.vehicleActive());
+
+  readonly iconTone: Signal<string> = computed(() =>
+    this.isOff() ? OFF_TONE : TONE_BY_DUE_STATUS[this.routine().dueStatus]
+  );
+
+  readonly pillTrigger: Signal<TriggeredBy | null> = computed(() =>
+    this.routine().dueStatus === 'UpToDate' ? null : this.routine().triggeredBy
+  );
+
+  readonly hasOwnParameters: Signal<boolean> = computed(
+    () => this.routine().thresholdSource === 'Routine'
+  );
+
+  readonly nextKmText: Signal<string | null> = computed(() => {
+    const km: number | null = this.routine().nextDueKm;
+    return km === null
+      ? null
+      : `${NUMBER_FORMATTER.format(km)}${NON_BREAKING_SPACE}${this.texts.kmUnit}`;
+  });
+
+  readonly nextDateText: Signal<string | null> = computed(() => {
+    const date: string | null = this.routine().nextDueDate;
+    return date === null ? null : formatDueDate(date);
+  });
+
   readonly canRegisterService: Signal<boolean> = computed(
-    () =>
-      this.isActive() &&
-      this.vehicleActive() &&
-      this.canManage() &&
-      this.routine().dueStatus !== 'UpToDate'
+    () => !this.isOff() && this.canManage() && this.routine().dueStatus !== 'UpToDate'
   );
 
   readonly canShowCreateOrder: Signal<boolean> = computed(
-    () => this.isActive() && this.vehicleActive() && this.canManage()
+    () =>
+      !this.isOff() &&
+      this.canManage() &&
+      this.routine().dueStatus === 'Overdue' &&
+      !this.routine().openServiceOrderId
   );
-
-  readonly thresholdLabel: Signal<string> = computed(() => {
-    const r: RoutineVm = this.routine();
-    const sourceLabel: string =
-      r.thresholdSource === 'Routine'
-        ? this.texts.thresholdFromRoutine
-        : this.texts.thresholdFromType;
-    return `${r.effectiveDueSoonPercent}% · ${sourceLabel}`;
-  });
 
   onSwitchToggle(): void {
     this.toggleState.emit(this.routine());

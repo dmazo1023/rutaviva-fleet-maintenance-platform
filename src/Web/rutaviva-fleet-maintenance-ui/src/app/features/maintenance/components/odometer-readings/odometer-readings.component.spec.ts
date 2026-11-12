@@ -33,11 +33,11 @@ describe('OdometerReadingsComponent', () => {
     fixture.detectChanges();
 
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
-    const rows: NodeListOf<HTMLTableRowElement> = host.querySelectorAll('tbody tr');
+    const rows: NodeListOf<HTMLLIElement> = host.querySelectorAll('li.row');
     expect(rows.length).toBe(2);
-    expect(rows[0]?.classList.contains('readings-table__row--ignored')).toBe(false);
-    expect(rows[1]?.classList.contains('readings-table__row--ignored')).toBe(true);
-    expect(rows[1]?.querySelector('.readings-table__km--ignored')).not.toBeNull();
+    expect(rows[0]?.classList.contains('rd-ignored')).toBe(false);
+    expect(rows[1]?.classList.contains('rd-ignored')).toBe(true);
+    expect(rows[1]?.querySelector('.t')).not.toBeNull();
     expect(rows[1]?.textContent).toContain('Ignorada');
     expect(rows[1]?.textContent).toContain('No es mayor que el odómetro actual');
   });

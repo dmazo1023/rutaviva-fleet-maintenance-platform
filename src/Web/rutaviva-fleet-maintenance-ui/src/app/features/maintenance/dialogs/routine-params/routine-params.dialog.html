@@ -1,95 +1,111 @@
-@if (open() && routine(); as r) {
-  <div class="modal-backdrop">
-    <dialog open class="params-dialog" tabindex="-1" aria-labelledby="params-dlg-title">
-      <form (submit)="onSubmit($event)" novalidate>
-        <div class="params-dialog__head">
-          <div>
-            <h2 id="params-dlg-title" class="params-dialog__title">
-              {{ texts.adjustPrefix }}{{ r.name }}
-            </h2>
-            <p class="params-dialog__sub">{{ r.plate }} · {{ thresholdSourceText() }}</p>
-          </div>
-          <button
-            type="button"
-            class="icon-btn"
-            [attr.aria-label]="texts.closeAria"
-            (click)="onCancel()"
-          >
-            <span class="ms" aria-hidden="true">close</span>
-          </button>
-        </div>
+<dialog
+  class="params-dialog"
+  tabindex="-1"
+  aria-labelledby="params-dlg-title"
+  [appModalDialog]="isOpen()"
+  (dismissed)="onCancel()"
+>
+  @if (routine(); as r) {
+    <form (submit)="onSubmit($event)" novalidate>
+      <div class="m-head">
+        <span class="rt-ico is-brand">
+          <span class="ms" aria-hidden="true">{{ r.icon }}</span>
+        </span>
+        <h2 id="params-dlg-title">{{ r.name }}</h2>
+        <button
+          type="button"
+          class="icon-btn"
+          [attr.aria-label]="texts.closeAria"
+          (click)="onCancel()"
+        >
+          <span class="ms" aria-hidden="true">close</span>
+        </button>
+      </div>
 
-        <div class="params-dialog__body">
-          <div class="params-dialog__grid">
-            <label class="params-dialog__field">
-              <span>{{ texts.everyKmLabel }} ({{ texts.kmUnit }})</span>
+      <div class="m-body">
+        <div class="fields">
+          <div class="field">
+            <label for="params-km">{{ texts.everyKmLabel }}</label>
+            <div class="inp">
               <input
-                type="number"
-                class="input params-dialog__input-km"
+                id="params-km"
+                class="params-dialog__input-km"
+                inputmode="numeric"
+                autocomplete="off"
+                autofocus
                 [value]="kmInput()"
-                [placeholder]="r.defaultIntervalKm?.toString() ?? ''"
+                [placeholder]="kmPlaceholder()"
                 (input)="onKmInput($event)"
               />
-            </label>
+              <span class="unit">{{ texts.kmUnit }}</span>
+            </div>
+          </div>
 
-            <label class="params-dialog__field">
-              <span>{{ texts.orEveryMonthsLabel }} ({{ texts.monthsUnit }})</span>
+          <div class="field">
+            <label for="params-months">{{ texts.orEveryMonthsLabel }}</label>
+            <div class="inp">
               <input
-                type="number"
-                class="input params-dialog__input-months"
+                id="params-months"
+                class="params-dialog__input-months"
+                inputmode="numeric"
+                autocomplete="off"
                 [value]="monthsInput()"
-                [placeholder]="r.defaultIntervalMonths?.toString() ?? ''"
+                [placeholder]="monthsPlaceholder()"
                 (input)="onMonthsInput($event)"
               />
-            </label>
+              <span class="unit">{{ texts.monthsUnit }}</span>
+            </div>
+          </div>
 
-            <label class="params-dialog__field">
-              <span>{{ texts.warnAtPercentLabel }} ({{ texts.percentFinalUnit }})</span>
+          <div class="field">
+            <label for="params-percent">{{ texts.warnAtPercentLabel }}</label>
+            <div class="inp">
               <input
-                type="number"
-                class="input params-dialog__input-percent"
+                id="params-percent"
+                class="params-dialog__input-percent"
+                inputmode="decimal"
+                autocomplete="off"
                 [value]="percentInput()"
-                [placeholder]="r.defaultDueSoonPercent?.toString() ?? ''"
+                [placeholder]="percentPlaceholder()"
                 (input)="onPercentInput($event)"
               />
-            </label>
+              <span class="unit">{{ texts.percentFinalUnit }}</span>
+            </div>
           </div>
+        </div>
 
-          @if (validationError(); as err) {
-            <p class="params-dialog__error" role="alert">{{ err }}</p>
+        @if (validationError(); as err) {
+          <p class="err params-dialog__error" role="alert">{{ err }}</p>
+        }
+
+        <div class="params-dialog__preview" aria-live="polite">
+          <div class="params-dialog__preview-title">
+            <span class="params-dialog__plate">{{ r.plate }}</span>
+            <app-status-pill [status]="previewStatus()" [trigger]="previewTrigger()" />
+          </div>
+          @for (track of previewTracks(); track track.kind) {
+            <app-routine-track [track]="track" />
           }
-
-          <div class="params-dialog__preview">
-            @for (track of previewTracks(); track track.kind) {
-              <app-routine-track [track]="track" />
-            }
-          </div>
         </div>
+      </div>
 
-        <div class="params-dialog__foot">
-          <button
-            type="button"
-            class="btn btn--ghost params-dialog__reset-btn"
-            (click)="onResetDefaults()"
-          >
-            {{ texts.resetToTypeDefaults }}
-          </button>
-          <div class="params-dialog__foot-right">
-            <button type="button" class="btn btn--ghost" (click)="onCancel()">
-              {{ texts.cancel }}
-            </button>
-            <button
-              type="submit"
-              class="btn btn--primary params-dialog__save-btn"
-              [disabled]="busy()"
-              [attr.aria-busy]="busy() ? 'true' : null"
-            >
-              {{ busy() ? texts.saving : texts.save }}
-            </button>
-          </div>
-        </div>
-      </form>
-    </dialog>
-  </div>
-}
-
+      <div class="m-foot">
+        <button type="button" class="btn btn--quiet left" (click)="onResetDefaults()">
+          <span class="ms" aria-hidden="true">restart_alt</span>
+          {{ texts.resetToTypeDefaults }}
+        </button>
+        <button type="button" class="btn btn--ghost" (click)="onCancel()">
+          {{ texts.cancel }}
+        </button>
+        <button
+          type="submit"
+          class="btn btn--primary params-dialog__save-btn"
+          [disabled]="busy()"
+          [attr.aria-busy]="busy() ? 'true' : null"
+        >
+          {{ busy() ? texts.saving : texts.save }}
+        </button>
+      </div>
+    </form>
+  }
+</dialog>

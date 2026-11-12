@@ -133,6 +133,7 @@ body {
   letter-spacing: -.02em;
 }
 
+h1[tabindex="-1"]:focus,
 .page-head h1:focus {
   outline: none;
 }
@@ -451,6 +452,7 @@ dialog[open] {
 }
 
 .field .unit {
+  white-space: nowrap;
   padding: 0 12px 0 6px;
   font-size: 13px;
   font-weight: 700;

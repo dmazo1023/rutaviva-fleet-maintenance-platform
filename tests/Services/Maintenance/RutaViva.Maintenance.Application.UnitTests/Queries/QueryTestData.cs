@@ -53,7 +53,8 @@ internal static class QueryTestData
             SingleCount,
             NoCount,
             NoCount,
-            NoCount);
+            NoCount,
+            null);
 
     internal static OdometerReadingDto Reading() =>
         new(OdometerKilometers, Instant(), Instant(), OdometerReadingOutcome.Accepted, null);

@@ -14,6 +14,7 @@ public sealed class MaintenancePlanQueriesTests(SqlServerTestDatabase database) 
 {
     private const string OverduePlate = "TAN201";
     private const string SummaryPlate = "RVA104";
+    private const string BrakesRoutineName = "Frenos";
     private const string OtherPlate = "EVA301";
     private const string OilServiceDate = "2026-09-01";
     private const string BrakesServiceDate = "2026-06-10";
@@ -126,6 +127,10 @@ public sealed class MaintenancePlanQueriesTests(SqlServerTestDatabase database) 
         summary.DueSoonCount.Should().Be(NoCount);
         summary.OverdueCount.Should().Be(SingleCount);
         summary.InactiveCount.Should().Be(SingleCount);
+        summary.NextMaintenance.Should().NotBeNull();
+        summary.NextMaintenance!.RoutineName.Should().Be(BrakesRoutineName);
+        summary.NextMaintenance.DueStatus.Should().Be(RoutineDueStatus.Overdue);
+        summary.NextMaintenance.Remaining.Should().BeNegative();
     }
 
     [Fact]

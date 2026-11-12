@@ -22,6 +22,15 @@ describe('VehicleDetailPageComponent', () => {
             const fs: FleetStore = TestBed.inject(FleetStore);
             const ps: PlanStore = TestBed.inject(PlanStore);
             return {
+              listLoadable: fs.listLoadable,
+              filteredVehicles: fs.filteredVehicles,
+              filterCounts: fs.filterCounts,
+              searchQuery: fs.searchQuery,
+              activeFilter: fs.activeFilter,
+              flashedVehicleIds: fs.flashedVehicleIds,
+              loadFleetList: () => undefined,
+              setSearchQuery: () => undefined,
+              setActiveFilter: () => undefined,
               detailLoadable: fs.detailLoadable,
               planLoadable: ps.planLoadable,
               readingsLoadable: ps.readingsLoadable,

@@ -1,62 +1,49 @@
-<section class="vehicle-list-wrap" [attr.aria-label]="texts.vehiclesSectionAria">
-  <table class="vehicle-table">
-    <thead>
-      <tr>
-        <th scope="col">{{ texts.colVehicle }}</th>
-        <th scope="col">{{ texts.colCustomer }}</th>
-        <th scope="col" class="vehicle-table__num">{{ texts.colOdometer }}</th>
-        <th scope="col">{{ texts.colNextMaintenance }}</th>
-        <th scope="col">{{ texts.colStatus }}</th>
-        <th scope="col">{{ texts.colOrder }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (v of vehicles(); track v.vehicleId) {
-        <tr
-          class="vehicle-table__row"
-          [class.vehicle-table__row--inactive]="v.status === 'Inactive'"
-          [class.flash-change]="isFlashed(v.vehicleId)"
-          (click)="onRowClick(v.plate)"
-        >
-          <td>
-            <div class="vehicle-table__vehicle-cell">
-              <app-plate-chip [plate]="v.plate" [link]="'/flota/' + v.plate" />
-              <div class="vehicle-table__model">
-                <span class="vehicle-table__brand">{{ v.brand }} {{ v.model }}</span>
-                <span class="vehicle-table__year">{{ v.modelYear }}</span>
-              </div>
-            </div>
-          </td>
-          <td class="vehicle-table__customer">{{ v.customerName }}</td>
-          <td class="vehicle-table__num">{{ formatOdometer(v.odometerKm) }}</td>
-          <td>
-            @if (v.maintenance; as m) {
-              <div class="vehicle-table__next">
-                <div class="vehicle-table__next-top">
-                  <span class="vehicle-table__routine">{{ formatConsumed(m.maxConsumedPercent) }}</span>
-                  <span class="vehicle-table__rem">{{ formatCounts(m) }}</span>
-                </div>
-                <app-mini-bar [percent]="m.maxConsumedPercent" [status]="m.worstDueStatus ?? 'UpToDate'" />
-              </div>
-            } @else {
-              <span class="vehicle-table__muted">{{ texts.noPlan }}</span>
-            }
-          </td>
-          <td>
-            @if (v.status === 'Inactive') {
-              <app-status-pill status="Inactive" />
-            } @else if (v.worstDueStatus) {
-              <app-status-pill [status]="v.worstDueStatus" />
-            } @else {
-              <app-status-pill status="UpToDate" />
-            }
-          </td>
-          <td>
-            <span class="vehicle-table__muted">{{ texts.nextPhase }}</span>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
+<section class="panel vlist" role="table" [attr.aria-label]="texts.vehiclesSectionAria">
+  <div class="vhead" role="row">
+    <span role="columnheader">{{ texts.colVehicle }}</span>
+    <span role="columnheader">{{ texts.colCustomer }}</span>
+    <span role="columnheader" class="r">{{ texts.colOdometer }}</span>
+    <span role="columnheader">{{ texts.colNextMaintenance }}</span>
+    <span role="columnheader">{{ texts.colStatus }}</span>
+    <span role="columnheader" class="r">{{ texts.colOrder }}</span>
+  </div>
+  @for (v of vehicles(); track v.vehicleId) {
+    <div
+      class="vrow"
+      role="row"
+      [class.is-off]="v.status === 'Inactive'"
+      [class.flash]="isFlashed(v.vehicleId)"
+      (click)="onRowClick(v.plate)"
+      (keydown.enter)="onRowClick(v.plate)"
+      tabindex="0"
+    >
+      <span class="vid" role="cell">
+        <app-plate-chip [plate]="v.plate" [link]="'/flota/' + v.plate" />
+        <span class="vmodel">
+          {{ v.brand }} {{ v.model }}
+          <small>{{ v.modelYear }}</small>
+        </span>
+      </span>
+      <span class="vcust" role="cell">{{ v.customerName }}</span>
+      <span class="vodo tabular r" role="cell">{{ formatOdometer(v.odometerKm) }}</span>
+      <span class="vnext" role="cell">
+        @if (nextOf(v); as next) {
+          <b>{{ next.routineName }}</b>
+          <span class="tabular vrem" [class]="toneOf(next.dueStatus)">{{ formatRemaining(next) }}</span>
+          <app-mini-bar
+            [percent]="v.maxConsumedPercent"
+            [status]="next.dueStatus"
+          />
+        } @else {
+          <span class="muted">{{ texts.noPlan }}</span>
+        }
+      </span>
+      <span class="vst" role="cell">
+        <app-status-pill [status]="pillStatus(v)" [trigger]="pillTrigger(v)" />
+      </span>
+      <span class="vorder-cell r" role="cell">
+        <span class="vorder">{{ texts.emptyValue }}</span>
+      </span>
+    </div>
+  }
 </section>
-

@@ -1,4 +1,5 @@
 import { DueStatus, VehicleStatus } from '../../../core/models/enums';
+import { NextMaintenanceVm } from '../../maintenance/models/maintenance.vm';
 
 export interface VehicleSummaryVm {
   readonly vehicleId: string;
@@ -22,6 +23,7 @@ export interface VehicleMaintenanceSummaryVm {
   readonly upToDateCount: number;
   readonly dueSoonCount: number;
   readonly overdueCount: number;
+  readonly nextMaintenance: NextMaintenanceVm | null;
 }
 
 export interface VehicleListItemVm {

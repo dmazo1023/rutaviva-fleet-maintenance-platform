@@ -20,17 +20,23 @@ import {
   SegmentedFilterOption,
 } from '../../../../shared/segmented-filter/segmented-filter.component';
 import { SkeletonComponent } from '../../../../shared/skeleton/skeleton.component';
-import { StatusPillComponent } from '../../../../shared/status-pill/status-pill.component';
+import { formatAlertDate } from './alerts-inbox.format';
+import { ALERTS_INBOX_TEXTS } from './alerts-inbox.texts';
 import { MAINTENANCE_TEXTS } from '../../maintenance.texts';
 import { AlertVm } from '../../models/maintenance.vm';
 import { AlertsStore } from '../../state/alerts.store';
+
+const TRIGGER_ICONS: Readonly<Record<AlertVm['triggeredBy'], readonly string[]>> = {
+  Distance: ['speed'],
+  Time: ['event'],
+  DistanceAndTime: ['speed', 'event'],
+};
 
 @Component({
   selector: 'app-alerts-inbox-page',
   imports: [
     SegmentedFilterComponent,
     PlateChipComponent,
-    StatusPillComponent,
     EmptyStateComponent,
     ErrorStateComponent,
     SkeletonComponent,
@@ -46,11 +52,18 @@ export class AlertsInboxPageComponent implements OnInit {
   readonly status: InputSignal<string | undefined> = input<string | undefined>(undefined);
 
   readonly texts: typeof MAINTENANCE_TEXTS = MAINTENANCE_TEXTS;
+  readonly alertsInboxTexts: typeof ALERTS_INBOX_TEXTS = ALERTS_INBOX_TEXTS;
   readonly labels = ENUM_LABELS;
   readonly alertsLoadable = this.alertsStore.alertsLoadable;
   readonly activeStatus = this.alertsStore.activeStatus;
   readonly filteredAlerts = this.alertsStore.filteredAlerts;
   readonly flashedAlertIds = this.alertsStore.flashedAlertIds;
+
+  readonly sortedAlerts: Signal<readonly AlertVm[]> = computed(() =>
+    [...this.filteredAlerts()].sort(
+      (a: AlertVm, b: AlertVm) => Number(b.type === 'Overdue') - Number(a.type === 'Overdue')
+    )
+  );
 
   readonly filterOptions: Signal<readonly SegmentedFilterOption[]> = computed(() => {
     const counts = this.alertsStore.countsByStatus();
@@ -59,19 +72,16 @@ export class AlertsInboxPageComponent implements OnInit {
         value: 'Active',
         label: this.texts.alertsFilterActive,
         count: counts.Active,
-        toneClass: 'is-danger',
       },
       {
         value: 'Acknowledged',
         label: this.texts.alertsFilterAcknowledged,
         count: counts.Acknowledged,
-        toneClass: 'is-warn',
       },
       {
         value: 'Resolved',
         label: this.texts.alertsFilterResolved,
         count: counts.Resolved,
-        toneClass: 'is-ok',
       },
     ];
   });
@@ -94,6 +104,26 @@ export class AlertsInboxPageComponent implements OnInit {
 
   isFlashed(alertId: string): boolean {
     return this.flashedAlertIds().has(alertId);
+  }
+
+  formatDate(raw: string): string {
+    return formatAlertDate(raw);
+  }
+
+  toneOf(alert: AlertVm): string {
+    return alert.type === 'Overdue' ? 'is-danger' : 'is-warn';
+  }
+
+  iconOf(alert: AlertVm): string {
+    return alert.type === 'Overdue' ? 'error' : 'schedule';
+  }
+
+  triggerIcons(alert: AlertVm): readonly string[] {
+    return TRIGGER_ICONS[alert.triggeredBy];
+  }
+
+  triggerLabel(alert: AlertVm): string {
+    return this.labels.alertTrigger[alert.triggeredBy];
   }
 
   getResolutionLabel(reason: AlertResolutionReason | null): string {

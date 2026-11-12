@@ -61,7 +61,8 @@ export class FleetPageComponent implements OnInit {
 
   readonly filterOptions: Signal<readonly SegmentedFilterOption[]> = computed(() => {
     const counts = this.facade.filterCounts();
-    return [
+    const active: FleetFilterKey = this.activeFilter();
+    const options: readonly SegmentedFilterOption[] = [
       { value: 'All', label: this.texts.filterAll, count: counts.All },
       {
         value: 'Overdue',
@@ -85,8 +86,13 @@ export class FleetPageComponent implements OnInit {
         value: 'Inactive',
         label: this.texts.filterInactive,
         count: counts.Inactive,
+        toneClass: 'is-neutral',
       },
     ];
+    return options.filter(
+      (option: SegmentedFilterOption) =>
+        option.value === 'All' || (option.count ?? 0) > 0 || option.value === active
+    );
   });
 
   constructor() {

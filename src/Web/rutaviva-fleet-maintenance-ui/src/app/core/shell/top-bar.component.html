@@ -10,7 +10,7 @@
   </span>
 
   <button
-    class="btn btn--ghost btn--s refresh-btn"
+    class="icon-btn refresh-btn"
     [class.is-spinning]="isRefreshing()"
     type="button"
     [disabled]="isRefreshing()"
@@ -19,8 +19,10 @@
     [attr.data-tip]="texts.refreshTooltip"
     (click)="onRefreshClick()"
   >
-    <span class="ms ms--s" aria-hidden="true">refresh</span>
-    <span class="refresh-text">{{ refreshButtonLabel() }}</span>
+    <span class="ms" aria-hidden="true">refresh</span>
+    @if (isRefreshing()) {
+      <span class="sr-only">{{ refreshButtonLabel() }}</span>
+    }
   </button>
 
   <div class="select select--icon select--cust">

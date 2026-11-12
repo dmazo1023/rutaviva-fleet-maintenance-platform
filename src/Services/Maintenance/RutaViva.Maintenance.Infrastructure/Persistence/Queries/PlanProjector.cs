@@ -40,7 +40,8 @@ internal static class PlanProjector
             statistics.UpToDateCount,
             statistics.DueSoonCount,
             statistics.OverdueCount,
-            statistics.InactiveCount);
+            statistics.InactiveCount,
+            NextMaintenanceSelector.Select(routines));
     }
 
     private static List<RoutineDetailDto> ProjectRoutines(PlanReadRow plan, IEnumerable<RoutineReadRow> rows)

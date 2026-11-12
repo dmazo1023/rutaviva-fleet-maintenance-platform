@@ -1,64 +1,81 @@
-<div class="alerts-page">
-  <header class="alerts-page__header">
-    <h1 id="h1" tabindex="-1" class="alerts-page__title">{{ texts.alertsTitle }}</h1>
-
-    <app-segmented-filter
-      [legend]="texts.alertsLegend"
-      name="alerts-status"
-      [options]="filterOptions()"
-      [selectedValue]="activeStatus()"
-      defaultValue="Active"
-      queryParamKey="status"
-      (valueChange)="onFilterChange($event)"
-    />
-  </header>
-
-  @if (alertsLoadable().status === 'loading' && alertsLoadable().data.length === 0) {
-    <app-skeleton [rows]="4" />
-  } @else if (alertsLoadable().status === 'error') {
-    <app-error-state
-      [title]="texts.alertsErrorTitle"
-      [message]="texts.alertsErrorMessage"
-      [retryLabel]="texts.retry"
-      (retryClicked)="onRetry()"
-    />
-  } @else if (filteredAlerts().length === 0) {
-    <app-empty-state icon="verified" [title]="texts.alertsEmptyTitle" tone="is-ok" />
-  } @else {
-    <div class="alerts-list">
-      @for (alert of filteredAlerts(); track alert.alertId) {
-        <article class="alert-row" [class.flash-change]="isFlashed(alert.alertId)">
-          <div class="alert-row__left">
-            <app-plate-chip [plate]="alert.plate" [link]="'/flota/' + alert.plate" />
-            <div class="alert-row__info">
-              <div class="alert-row__top">
-                <span class="alert-row__routine">{{ alert.routineName }}</span>
-                <app-status-pill [status]="alert.type" [trigger]="alert.triggeredBy" />
-              </div>
-              <span class="alert-row__meta">{{ alert.raisedAt }}</span>
-            </div>
-          </div>
-
-          <div class="alert-row__right">
-            @if (alert.status === 'Active') {
-              <button
-                type="button"
-                class="btn btn--primary alert-row__ack-btn"
-                (click)="onAcknowledge(alert)"
-              >
-                {{ texts.acknowledgeAction }}
-              </button>
-            } @else if (alert.status === 'Acknowledged') {
-              <span class="alert-row__status-note">{{ alert.acknowledgedBy }}</span>
-            } @else if (alert.status === 'Resolved' && alert.resolutionReason) {
-              <span class="alert-row__status-note">
-                {{ getResolutionLabel(alert.resolutionReason) }}
-              </span>
-            }
-          </div>
-        </article>
-      }
-    </div>
-  }
+<div class="page-head">
+  <h1 id="h1" tabindex="-1">{{ texts.alertsTitle }}</h1>
 </div>
 
+<div class="toolbar">
+  <app-segmented-filter
+    [legend]="texts.alertsLegend"
+    name="alerts-status"
+    [options]="filterOptions()"
+    [selectedValue]="activeStatus()"
+    defaultValue="Active"
+    queryParamKey="status"
+    (valueChange)="onFilterChange($event)"
+  />
+</div>
+
+@if (alertsLoadable().status === 'loading' && alertsLoadable().data.length === 0) {
+  <app-skeleton [rows]="4" />
+} @else if (alertsLoadable().status === 'error') {
+  <app-error-state
+    [title]="texts.alertsErrorTitle"
+    [message]="texts.alertsErrorMessage"
+    [retryLabel]="texts.retry"
+    (retryClicked)="onRetry()"
+  />
+} @else if (sortedAlerts().length === 0) {
+  <app-empty-state icon="notifications_off" [title]="texts.alertsEmptyTitle" tone="is-ok" />
+} @else {
+  <section class="panel simple">
+    <ul class="rows">
+      @for (alert of sortedAlerts(); track alert.alertId) {
+        <li class="row" [class.flash-change]="isFlashed(alert.alertId)">
+          <span class="rt-ico" [class]="toneOf(alert)">
+            <span class="ms" aria-hidden="true">{{ iconOf(alert) }}</span>
+          </span>
+          <span class="alert-main">
+            <span class="alert-title">
+              <app-plate-chip [plate]="alert.plate" [link]="'/flota/' + alert.plate" />
+              <span class="t">{{ alert.routineName }}</span>
+              <span class="trig muted">
+                @for (ico of triggerIcons(alert); track ico) {
+                  <span class="ms ms--s" aria-hidden="true">{{ ico }}</span>
+                }
+                <span class="sr-only">{{ triggerLabel(alert) }}</span>
+              </span>
+            </span>
+            <span class="d-sub">
+              <span>
+                <span class="ms ms--s" aria-hidden="true">event</span>
+                <span class="sr-only">{{ alertsInboxTexts.dateLabel }}</span>
+                {{ formatDate(alert.raisedAt) }}
+              </span>
+              @if (alert.status === 'Acknowledged') {
+                <span>
+                  <span class="ms ms--s" aria-hidden="true">person</span>
+                  {{ alert.acknowledgedBy }}
+                </span>
+              } @else if (alert.status === 'Resolved' && alert.resolutionReason) {
+                <span>
+                  <span class="ms ms--s" aria-hidden="true">done_all</span>
+                  {{ getResolutionLabel(alert.resolutionReason) }}
+                </span>
+              }
+            </span>
+          </span>
+          @if (alert.status === 'Active') {
+            <button
+              type="button"
+              class="btn btn--ghost btn--s alert-row__ack-btn"
+              [attr.aria-label]="alertsInboxTexts.acknowledgeAria + alert.plate"
+              (click)="onAcknowledge(alert)"
+            >
+              <span class="ms ms--s" aria-hidden="true">done</span>
+              {{ texts.acknowledgeAction }}
+            </button>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+}

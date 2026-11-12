@@ -1,5 +1,5 @@
 export const SERVICE_ORDERS_TEXTS = {
-  title: 'Órdenes de servicio',
+  title: 'Órdenes',
   comingSoonTitle: 'Próxima fase',
   comingSoonMessage:
     'La gestión de órdenes de servicio estará disponible en una próxima fase. Por ahora, registra los servicios realizados directamente desde la rutina del plan de mantenimiento.',

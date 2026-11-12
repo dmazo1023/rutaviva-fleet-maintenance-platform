@@ -77,7 +77,7 @@ describe('FleetPageComponent', () => {
           maxConsumedPercent: 92,
           upToDateCount: 1,
           dueSoonCount: 1,
-          overdueCount: 0,
+          overdueCount: 0, nextMaintenance: null,
         },
       },
     ]);

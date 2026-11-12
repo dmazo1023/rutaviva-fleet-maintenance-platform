@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { SessionStore } from '../context/session.store';
+import { ShellCountersService } from './shell-counters.service';
 import { SHELL_TEXTS } from './shell.texts';
 
 export interface ShellNavItem {
@@ -18,9 +19,14 @@ export interface ShellNavItem {
   styleUrl: './shell-rail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ShellRailComponent {
+export class ShellRailComponent implements OnInit {
   protected readonly sessionStore: SessionStore = inject(SessionStore);
+  private readonly counters: ShellCountersService = inject(ShellCountersService);
   protected readonly texts = SHELL_TEXTS;
+
+  ngOnInit(): void {
+    this.counters.loadActiveAlerts();
+  }
 
   protected readonly navItems = computed<readonly ShellNavItem[]>(() => {
     const alertsCount: number = this.sessionStore.activeAlertsCount();

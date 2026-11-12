@@ -42,6 +42,7 @@ function toMaintenanceSummary(plan: MaintenancePlanSummaryVm): VehicleMaintenanc
     upToDateCount: plan.upToDateCount,
     dueSoonCount: plan.dueSoonCount,
     overdueCount: plan.overdueCount,
+    nextMaintenance: plan.nextMaintenance,
   };
 }
 

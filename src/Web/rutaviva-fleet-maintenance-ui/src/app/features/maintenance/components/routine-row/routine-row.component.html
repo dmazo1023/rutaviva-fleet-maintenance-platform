@@ -1,88 +1,100 @@
-<article
-  class="routine-row"
-  [class.routine-row--paused]="!isActive()"
-  [class.flash-change]="flashed()"
->
-  <div class="routine-row__header">
-    <div class="routine-row__title-group">
-      <span class="material-symbols-outlined routine-row__icon" aria-hidden="true">
-        {{ routine().icon }}
-      </span>
-      <div>
-        <div class="routine-row__title-line">
-          <h3 class="routine-row__name">{{ routine().name }}</h3>
-          <code class="routine-row__code">{{ routine().typeCode }}</code>
-          @if (isActive()) {
-            <app-status-pill
-              [status]="routine().dueStatus"
-              [trigger]="routine().triggeredBy"
-            />
-          } @else {
-            <app-status-pill [status]="routine().state" />
-          }
-        </div>
-        <div class="routine-row__meta">
-          <span class="routine-row__threshold">{{ thresholdLabel() }}</span>
-        </div>
-      </div>
+<div class="rt" [class.is-off]="isOff()" [class.flash-change]="flashed()">
+  <span class="rt-ico" [class]="iconTone()">
+    <span class="ms" aria-hidden="true">{{ routine().icon }}</span>
+  </span>
+
+  <div class="rt-main">
+    <div class="rt-title">
+      <h3>{{ routine().name }}</h3>
+      @if (isOff()) {
+        <app-status-pill status="Inactive" />
+      } @else {
+        <app-status-pill [status]="routine().dueStatus" [trigger]="pillTrigger()" />
+      }
+      @if (hasOwnParameters()) {
+        <span
+          class="rt-ovr"
+          role="img"
+          [attr.aria-label]="texts.customParamsTooltip"
+          [attr.title]="texts.customParamsTooltip"
+        >
+          <span class="ms ms--s" aria-hidden="true">tune</span>
+        </span>
+      }
     </div>
 
-    <div class="routine-row__actions">
+    @for (track of routine().tracks; track track.kind) {
+      <app-routine-track [track]="track" [inactive]="isOff()" />
+    }
+
+    <div class="rt-foot">
+      @if (nextKmText() || nextDateText()) {
+        <span class="due tabular" [attr.aria-label]="texts.nextMaintenanceAria">
+          <span class="ms ms--s" aria-hidden="true">flag</span>
+          @if (nextKmText(); as km) {
+            <span>{{ km }}</span>
+          }
+          @if (nextKmText() && nextDateText()) {
+            <span class="muted" aria-hidden="true">/</span>
+          }
+          @if (nextDateText(); as date) {
+            <span>{{ date }}</span>
+          }
+        </span>
+      }
+      <span class="grow"></span>
+
       @if (routine().openServiceOrderId) {
         <button
           type="button"
-          class="btn btn--secondary routine-row__order-link"
+          class="btn btn--ghost btn--s routine-row__order-link"
           (click)="onOpenOrder()"
         >
-          <span>{{ routine().openServiceOrderNumber }}</span>
-          @if (routine().openServiceOrderStatus) {
-            <app-status-pill [status]="routine().openServiceOrderStatus!" [small]="true" />
+          <span class="mono">{{ routine().openServiceOrderNumber }}</span>
+          @if (routine().openServiceOrderStatus; as orderStatus) {
+            <app-status-pill [status]="orderStatus" [small]="true" />
           }
         </button>
       } @else if (canShowCreateOrder()) {
-        <button
-          type="button"
-          class="btn btn--primary routine-row__create-btn"
-          disabled
-          [attr.title]="texts.createOrderNextPhaseHint"
-        >
-          {{ texts.createOrderNextPhase }}
-        </button>
+        <span class="routine-row__create-btn" [attr.title]="texts.createOrderNextPhaseHint">
+          <span class="ms ms--s" aria-hidden="true">add</span>
+          <span>{{ texts.createOrder }}</span>
+          <span class="routine-row__soon">{{ texts.createOrderNextPhase }}</span>
+        </span>
       }
 
       @if (canRegisterService()) {
         <button
           type="button"
-          class="btn btn--secondary routine-row__service-btn"
+          class="btn btn--quiet btn--s routine-row__service-btn"
           [attr.aria-label]="texts.registerServiceAriaPrefix + routine().name"
           (click)="onRegisterService()"
         >
+          <span class="ms ms--s" aria-hidden="true">task_alt</span>
           {{ texts.registerServiceAction }}
         </button>
-      }
-
-      @if (canManage()) {
-        <button
-          type="button"
-          class="btn btn--ghost routine-row__params-btn"
-          [attr.aria-label]="texts.adjustPrefix + routine().name"
-          (click)="onEditParameters()"
-        >
-          {{ texts.adjustTooltip }}
-        </button>
-        <app-switch
-          [checked]="isActive()"
-          [disabled]="!vehicleActive()"
-          [ariaLabel]="routine().name + texts.activeSuffix"
-          (toggled)="onSwitchToggle()"
-        />
       }
     </div>
   </div>
 
-  <div class="routine-row__tracks">
-    @for (track of routine().tracks; track track.kind) {
-      <app-routine-track [track]="track" [inactive]="!isActive()" />
-    }
-  </div>
-</article>
+  @if (canManage()) {
+    <div class="rt-ctl">
+      <button
+        type="button"
+        class="icon-btn routine-row__params-btn"
+        data-tip-pos="left"
+        [attr.data-tip]="texts.adjustTooltip"
+        [attr.aria-label]="texts.adjustPrefix + routine().name"
+        (click)="onEditParameters()"
+      >
+        <span class="ms" aria-hidden="true">tune</span>
+      </button>
+      <app-switch
+        [checked]="isActive()"
+        [disabled]="!vehicleActive()"
+        [ariaLabel]="routine().name + texts.activeSuffix"
+        (toggled)="onSwitchToggle()"
+      />
+    </div>
+  }
+</div>

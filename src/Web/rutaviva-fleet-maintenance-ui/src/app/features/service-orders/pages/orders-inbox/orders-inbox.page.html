@@ -1,7 +1,9 @@
 <div class="orders-page">
-  <header class="orders-page__header">
-    <h1 id="h1" tabindex="-1" class="orders-page__title">{{ texts.title }}</h1>
+  <div class="page-head">
+    <h1 id="h1" tabindex="-1">{{ texts.title }}</h1>
+  </div>
 
+  <div class="toolbar">
     <app-segmented-filter
       [legend]="texts.statusLegend"
       name="orders-status"
@@ -11,7 +13,7 @@
       queryParamKey="statusGroup"
       (valueChange)="onFilterChange($event)"
     />
-  </header>
+  </div>
 
   @if (listLoadable().status === 'loading' && listLoadable().data.length === 0) {
     <app-skeleton [rows]="4" />

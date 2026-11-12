@@ -11,7 +11,6 @@ import {
 import { SessionStore } from '../../../../core/context/session.store';
 import { ToastStore } from '../../../../core/feedback/toast.store';
 import { ViewRefreshService } from '../../../../core/shell/view-refresh.service';
-import { EmptyStateComponent } from '../../../../shared/empty-state/empty-state.component';
 import { APPROVAL_POLICY_FEATURE_ENABLED } from '../../administration.feature';
 import { ADMINISTRATION_TEXTS } from '../../administration.texts';
 import { AdministrationApi, UpdateRoutineTypeRequest } from '../../data/administration.api';
@@ -54,9 +53,15 @@ function toDrafts(types: readonly RoutineTypeVm[]): Readonly<Record<string, Rout
   return Object.fromEntries(types.map((item: RoutineTypeVm) => [item.id, toDraft(item)]));
 }
 
+const ICON_BY_TYPE_CODE: Readonly<Record<string, string>> = {
+  OIL_CHANGE: 'oil_barrel',
+  BRAKES: 'album',
+  TIRES: 'tire_repair',
+};
+const DEFAULT_TYPE_ICON = 'build';
+
 @Component({
   selector: 'app-parameters-page',
-  imports: [EmptyStateComponent],
   templateUrl: './parameters.page.html',
   styleUrl: './parameters.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -92,6 +97,10 @@ export class ParametersPageComponent implements OnInit {
   loadData(): void {
     this.loadRoutineTypes();
     this.loadPolicy();
+  }
+
+  iconOf(code: string): string {
+    return ICON_BY_TYPE_CODE[code] ?? DEFAULT_TYPE_ICON;
   }
 
   formatCop(amount: number): string {

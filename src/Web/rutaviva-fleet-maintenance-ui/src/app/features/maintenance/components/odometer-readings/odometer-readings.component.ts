@@ -2,13 +2,12 @@ import { ChangeDetectionStrategy, Component, input, InputSignal } from '@angular
 import { ENUM_LABELS } from '../../../../core/models/enum-labels';
 import { OdometerReadingIgnoredReason } from '../../../../core/models/enums';
 import { EmptyStateComponent } from '../../../../shared/empty-state/empty-state.component';
-import { StatusPillComponent } from '../../../../shared/status-pill/status-pill.component';
 import { MAINTENANCE_TEXTS } from '../../maintenance.texts';
 import { OdometerReadingVm } from '../../models/maintenance.vm';
 
 @Component({
   selector: 'app-odometer-readings',
-  imports: [StatusPillComponent, EmptyStateComponent],
+  imports: [EmptyStateComponent],
   templateUrl: './odometer-readings.component.html',
   styleUrl: './odometer-readings.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,40 +1,23 @@
 @if (readings().length === 0) {
   <app-empty-state icon="speed" [title]="texts.noReadings" />
 } @else {
-  <div class="readings-table-wrap">
-    <table class="readings-table">
-      <tbody>
-        @for (reading of readings(); track reading.readAt + '-' + reading.kilometers) {
-          <tr
-            class="readings-table__row"
-            [class.readings-table__row--ignored]="isIgnored(reading)"
-          >
-            <td class="readings-table__date">{{ reading.readAt }}</td>
-            <td
-              class="readings-table__num"
-              [class.readings-table__km--ignored]="isIgnored(reading)"
-            >
-              {{ formatKm(reading.kilometers) }}
-            </td>
-            <td>
-              <app-status-pill
-                [status]="reading.outcome"
-                [customLabel]="getOutcomeLabel(reading)"
-                [customTone]="isIgnored(reading) ? 'is-neutral' : 'is-ok'"
-                [customIcon]="isIgnored(reading) ? 'block' : 'check_circle'"
-                [small]="true"
-              />
-            </td>
-            <td class="readings-table__reason">
-              @if (reading.ignoredReason) {
-                <span>{{ getReasonLabel(reading.ignoredReason) }}</span>
-              } @else {
-                <span>—</span>
-              }
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+  <ul class="rows">
+    @for (reading of readings(); track reading.readAt + '-' + reading.kilometers) {
+      <li class="row" [class.rd-ignored]="isIgnored(reading)">
+        <span class="rt-ico" [class]="isIgnored(reading) ? 'is-neutral' : 'is-brand'">
+          <span class="ms" aria-hidden="true">{{ isIgnored(reading) ? 'block' : 'speed' }}</span>
+        </span>
+        <span>
+          <span class="t tabular">{{ formatKm(reading.kilometers) }}</span>
+          @if (isIgnored(reading)) {
+            <span class="sr-only"> {{ getOutcomeLabel(reading) }}.</span>
+          }
+          @if (reading.ignoredReason) {
+            <span class="s"> {{ getReasonLabel(reading.ignoredReason) }}</span>
+          }
+        </span>
+        <span class="s tabular">{{ reading.readAt }}</span>
+      </li>
+    }
+  </ul>
 }
