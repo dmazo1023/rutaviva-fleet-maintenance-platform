@@ -13,7 +13,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { finalize, Observable } from 'rxjs';
 import { SessionStore } from '../../../../core/context/session.store';
-import { ServiceOrderAction } from '../../../../core/models/enums';
+import { ServiceOrderAction, ServiceOrderStatus } from '../../../../core/models/enums';
 import { ViewRefreshService } from '../../../../core/shell/view-refresh.service';
 import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
 import { PlateChipComponent } from '../../../../shared/plate-chip/plate-chip.component';
@@ -27,7 +27,7 @@ import {
   OrderFormDialogComponent,
   OrderFormSubmitEvent,
 } from '../../dialogs/order-form.dialog';
-import { ServiceOrderDetailVm } from '../../models/service-orders.vm';
+import { ServiceOrderActionVm, ServiceOrderDetailVm } from '../../models/service-orders.vm';
 import { ServiceOrdersFacade } from '../../service-orders.facade';
 import { SERVICE_ORDERS_TEXTS } from '../../service-orders.texts';
 
@@ -42,6 +42,38 @@ const DIRECT_ACTIONS: ReadonlySet<ServiceOrderAction> = new Set<ServiceOrderActi
 
 function isDirectAction(action: ServiceOrderAction): action is DirectAction {
   return DIRECT_ACTIONS.has(action);
+}
+
+interface NextStepText {
+  readonly text: string;
+  readonly withWorkshop: boolean;
+}
+
+const NEXT_STEP_BY_STATUS: Readonly<Partial<Record<ServiceOrderStatus, NextStepText>>> = {
+  Created: { text: SERVICE_ORDERS_TEXTS.nextStepWaitingQuote, withWorkshop: true },
+  PendingApproval: { text: SERVICE_ORDERS_TEXTS.nextStepWaitingApproval, withWorkshop: false },
+  Approved: { text: SERVICE_ORDERS_TEXTS.nextStepWaitingStart, withWorkshop: true },
+  InProgress: { text: SERVICE_ORDERS_TEXTS.nextStepWaitingCompletion, withWorkshop: true },
+};
+
+const NON_PROGRESS_ACTIONS: ReadonlySet<ServiceOrderAction> = new Set<ServiceOrderAction>([
+  'Cancel',
+]);
+
+function hasProgressAction(order: ServiceOrderDetailVm): boolean {
+  return order.availableActions.some(
+    (item: ServiceOrderActionVm) => item.enabled && !NON_PROGRESS_ACTIONS.has(item.action)
+  );
+}
+
+export function nextStepNoticeOf(order: ServiceOrderDetailVm | null): string | null {
+  const step: NextStepText | undefined = order ? NEXT_STEP_BY_STATUS[order.status] : undefined;
+  if (!order || !step || hasProgressAction(order)) {
+    return null;
+  }
+  return step.withWorkshop
+    ? step.text + SERVICE_ORDERS_TEXTS.nextStepSeparator + order.workshopName
+    : step.text;
 }
 
 @Component({
@@ -71,6 +103,9 @@ export class OrderDetailPageComponent {
 
   readonly texts: typeof SERVICE_ORDERS_TEXTS = SERVICE_ORDERS_TEXTS;
   readonly detailLoadable = this.facade.detailLoadable;
+  readonly nextStepNotice: Signal<string | null> = computed(() =>
+    nextStepNoticeOf(this.detailLoadable().data)
+  );
 
   readonly dialogAction: WritableSignal<ServiceOrderAction | null> =
     signal<ServiceOrderAction | null>(null);

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Params, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { ApiClient } from '../api/api-client';
 import { ApiRoutes } from '../api/api-routes';
@@ -9,6 +10,19 @@ import { PROFILE_VALUES, Profile } from '../models/enums';
 import { NotificationsService, RealtimeConnectionState } from '../realtime/notifications.service';
 import { SHELL_TEXTS } from './shell.texts';
 import { ViewRefreshService } from './view-refresh.service';
+
+interface ProfileLanding {
+  readonly path: readonly string[];
+  readonly queryParams: Params;
+}
+
+const PROFILE_LANDINGS: Readonly<Record<Profile, ProfileLanding>> = {
+  Operator: { path: ['/flota'], queryParams: {} },
+  Approver: { path: ['/ordenes'], queryParams: { statusGroup: 'PendingApproval' } },
+  Workshop: { path: ['/ordenes'], queryParams: { statusGroup: 'Open' } },
+};
+
+const WORKING_AS_ICON = 'badge';
 
 export interface ProfileOption {
   readonly value: Profile;
@@ -27,6 +41,7 @@ export class TopBarComponent {
   private readonly apiClient: ApiClient = inject(ApiClient);
   private readonly toastStore: ToastStore = inject(ToastStore);
   private readonly viewRefresh: ViewRefreshService = inject(ViewRefreshService);
+  private readonly router: Router = inject(Router);
 
   protected readonly texts = SHELL_TEXTS;
   protected readonly isRefreshing = signal<boolean>(false);
@@ -64,14 +79,36 @@ export class TopBarComponent {
 
   protected onProfileChange(event: Event): void {
     const selectEl: HTMLSelectElement = event.target as HTMLSelectElement;
-    this.sessionStore.setProfile(selectEl.value as Profile);
+    const profile: Profile = selectEl.value as Profile;
+    this.sessionStore.setProfile(profile);
     this.viewRefresh.requestRefresh();
+    this.announceWorkingAs();
+    this.goToProfileLanding(profile);
   }
 
   protected onActorChange(event: Event): void {
     const selectEl: HTMLSelectElement = event.target as HTMLSelectElement;
     this.sessionStore.setActor(selectEl.value || null);
     this.viewRefresh.requestRefresh();
+    this.announceWorkingAs();
+  }
+
+  private goToProfileLanding(profile: Profile): void {
+    const landing: ProfileLanding = PROFILE_LANDINGS[profile];
+    void this.router.navigate(landing.path, { queryParams: landing.queryParams });
+  }
+
+  private announceWorkingAs(): void {
+    this.toastStore.show({ message: this.workingAsMessage(), icon: WORKING_AS_ICON });
+  }
+
+  private workingAsMessage(): string {
+    const profile: Profile = this.sessionStore.profile();
+    const base: string = this.texts.workingAsPrefix + ENUM_LABELS.profile[profile];
+    const hasNamedActor: boolean = profile !== 'Operator' && this.sessionStore.actorId() !== null;
+    return hasNamedActor
+      ? base + this.texts.workingAsSeparator + this.sessionStore.currentActorName()
+      : base;
   }
 
   protected onRefreshClick(): void {

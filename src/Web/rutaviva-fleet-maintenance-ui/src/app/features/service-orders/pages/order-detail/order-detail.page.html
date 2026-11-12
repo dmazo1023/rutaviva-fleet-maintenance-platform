@@ -50,6 +50,13 @@
           [isWorkshop]="isWorkshop()"
         />
 
+        @if (nextStepNotice(); as notice) {
+          <p class="order-detail__next-step" role="status">
+            <span class="ms ms--s" aria-hidden="true">hourglass_top</span>
+            <span>{{ notice }}</span>
+          </p>
+        }
+
         <app-order-actions
           [availableActions]="order.availableActions"
           (actionTriggered)="onActionTriggered(order, $event)"

@@ -5,7 +5,7 @@ import { SessionStore } from '../../../../core/context/session.store';
 import { ServiceOrderDetailVm } from '../../models/service-orders.vm';
 import { ServiceOrdersFacade } from '../../service-orders.facade';
 import { ServiceOrdersStore } from '../../state/service-orders.store';
-import { OrderDetailPageComponent } from './order-detail.page';
+import { nextStepNoticeOf, OrderDetailPageComponent } from './order-detail.page';
 
 describe('OrderDetailPageComponent', () => {
   let store: ServiceOrdersStore;
@@ -136,5 +136,58 @@ describe('OrderDetailPageComponent', () => {
     expect(host.querySelector('.order-actions__cancel-btn.btn--danger')).not.toBeNull();
     expect(host.querySelector('.stepper-cancelled-banner')).toBeNull();
   });
-});
 
+  it('should tell who goes next when the profile has no progress actions', () => {
+    const order: ServiceOrderDetailVm = { ...baseOrder, statusBeforeHold: null };
+
+    expect(nextStepNoticeOf({ ...order, status: 'Created' })).toBe(
+      'Esperando cotización del taller · Taller Norte'
+    );
+    expect(nextStepNoticeOf({ ...order, status: 'PendingApproval' })).toBe(
+      'Esperando aprobación del cliente'
+    );
+    expect(nextStepNoticeOf({ ...order, status: 'Approved' })).toBe(
+      'Esperando que el taller inicie el servicio · Taller Norte'
+    );
+    expect(nextStepNoticeOf({ ...order, status: 'InProgress' })).toBe(
+      'Esperando que el taller complete el servicio · Taller Norte'
+    );
+    expect(nextStepNoticeOf({ ...order, status: 'Completed' })).toBeNull();
+    expect(nextStepNoticeOf({ ...order, status: 'Cancelled' })).toBeNull();
+    expect(
+      nextStepNoticeOf({
+        ...order,
+        status: 'Created',
+        availableActions: [{ action: 'Quote', enabled: true, blockedReason: null }],
+      })
+    ).toBeNull();
+    expect(
+      nextStepNoticeOf({
+        ...order,
+        status: 'Approved',
+        availableActions: [{ action: 'Cancel', enabled: true, blockedReason: null }],
+      })
+    ).toBe('Esperando que el taller inicie el servicio · Taller Norte');
+  });
+
+  it('should render the next-step notice next to the Operator cancel button', () => {
+    sessionStore.setProfile('Operator');
+    store.setDetailReady({
+      ...baseOrder,
+      status: 'PendingApproval',
+      statusBeforeHold: null,
+      availableActions: [{ action: 'Cancel', enabled: true, blockedReason: null }],
+    });
+
+    const fixture: ComponentFixture<OrderDetailPageComponent> =
+      TestBed.createComponent(OrderDetailPageComponent);
+    fixture.componentRef.setInput('id', 'OS-2026-001');
+    fixture.detectChanges();
+
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const notice: HTMLElement | null = host.querySelector('.order-detail__next-step');
+    expect(notice?.getAttribute('role')).toBe('status');
+    expect(notice?.textContent).toContain('Esperando aprobación del cliente');
+    expect(host.querySelector('.order-actions__cancel-btn')).not.toBeNull();
+  });
+});

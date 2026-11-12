@@ -1,6 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
+import { ToastStore } from '../feedback/toast.store';
 import { BROWSER_STORAGE } from '../context/session.store';
 import { HUB_CONNECTION_FACTORY, NotificationsService } from '../realtime/notifications.service';
 import { TopBarComponent } from './top-bar.component';
@@ -18,6 +20,7 @@ describe('TopBarComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         { provide: BROWSER_STORAGE, useValue: null },
         { provide: HUB_CONNECTION_FACTORY, useValue: () => null },
       ],
@@ -47,6 +50,45 @@ describe('TopBarComponent', () => {
 
     expect(statusEl?.textContent?.trim()).toBe('Reconectando…');
     expect(statusEl?.classList.contains('is-off')).toBe(true);
+  });
+
+  function changeProfile(profile: string): void {
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const select: HTMLSelectElement | null = host.querySelector('select[aria-label="Perfil"]');
+    if (select) {
+      select.value = profile;
+      select.dispatchEvent(new Event('change'));
+    }
+  }
+
+  it('should navigate to the open orders inbox and announce the profile when switching to Workshop', () => {
+    const router: Router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const toastStore: ToastStore = TestBed.inject(ToastStore);
+    fixture.detectChanges();
+
+    changeProfile('Workshop');
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/ordenes'], {
+      queryParams: { statusGroup: 'Open' },
+    });
+    expect(toastStore.toasts()[0]?.message).toContain('Ahora trabajas como Taller');
+  });
+
+  it('should navigate approvers to pending approvals and operators to the fleet', () => {
+    const router: Router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const toastStore: ToastStore = TestBed.inject(ToastStore);
+    fixture.detectChanges();
+
+    changeProfile('Approver');
+    expect(navigateSpy).toHaveBeenLastCalledWith(['/ordenes'], {
+      queryParams: { statusGroup: 'PendingApproval' },
+    });
+
+    changeProfile('Operator');
+    expect(navigateSpy).toHaveBeenLastCalledWith(['/flota'], { queryParams: {} });
+    expect(toastStore.toasts().some((t) => t.message === 'Ahora trabajas como Operador')).toBe(true);
   });
 
   it('should display "Sin tiempo real" when realtime is unavailable', () => {

@@ -58,6 +58,11 @@ export const SERVICE_ORDERS_TEXTS = {
   approverRequiredMessage:
     'Elige el aprobador en la barra superior para aprobar o rechazar la orden',
   automaticOriginBadge: 'Automática',
+  nextStepSeparator: ' · ',
+  nextStepWaitingQuote: 'Esperando cotización del taller',
+  nextStepWaitingApproval: 'Esperando aprobación del cliente',
+  nextStepWaitingStart: 'Esperando que el taller inicie el servicio',
+  nextStepWaitingCompletion: 'Esperando que el taller complete el servicio',
   highPriorityToastPrefix: 'Aprobación prioritaria: ',
   viewOrderAction: 'Ver orden',
   validationPositiveAmount: 'Ingresa un valor en pesos mayor que 0.',

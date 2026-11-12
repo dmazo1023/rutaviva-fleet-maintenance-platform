@@ -1,5 +1,7 @@
 export const SHELL_TEXTS = {
   skipToContent: 'Saltar al contenido',
+  workingAsPrefix: 'Ahora trabajas como ',
+  workingAsSeparator: ' · ',
   brandHomeAria: 'RutaViva, inicio',
   navAriaLabel: 'Principal',
   wordmarkPrefix: 'ruta',
