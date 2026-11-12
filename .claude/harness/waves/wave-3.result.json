@@ -1,131 +1,42 @@
 {
   "wave": "3",
   "verified": [
-    "4.1",
-    "4.2",
-    "5.1",
-    "6.8"
+    "3.3",
+    "4.3",
+    "5.2",
+    "6.4",
+    "6.3"
   ],
   "escalated": [],
   "unaccounted": [],
   "handoff": {
-    "exports": {
-      "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/MaintenancePlan.cs": "sealed MaintenancePlan : AggregateRoot<VehicleId>; Plate, CustomerId, Status, Odometer, LastTimeEvaluationDate, IReadOnlyCollection<MaintenanceRoutine> Routines, CanBeEvaluated; static Create(VehicleId, LicensePlate, CustomerId, MaintenancePlanStatus, Odometer initial, DateOnly registeredOn); Result<RoutineId> RegisterRoutine(RoutineRegistration, RoutineParameterCatalog, DateOnly today); OdometerReadingResult RecordOdometerReading(OdometerReading, RoutineParameterCatalog); ReevaluationOutcome Reevaluate(DateOnly asOfDate, RoutineParameterCatalog)",
-      "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/MaintenanceRoutine.cs": "sealed MaintenanceRoutine : Entity<RoutineId>; RoutineTypeId, RoutineTypeCode, Name, Overrides, State, DueStatus, Cycle, DueSoonNotified, AlertTrigger? LastTrigger, IsActive; internal ApplyAssessment(RoutineAssessment) -> RoutineTransition; internal ResolveParameters(RoutineTypeParameters) -> EffectiveRoutineParameters; internal static Create(...)",
-      "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/RoutineRegistration.cs": "sealed record RoutineRegistration {RoutineTypeId RoutineTypeId, long? LastServiceKm, DateOnly? LastServiceDate, RoutineOverrides Overrides, HasNoLastService}; static Create(RoutineTypeId, ServiceRecord?, RoutineOverrides); static Create(RoutineTypeId, long? km, DateOnly? date, RoutineOverrides)",
-      "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/OdometerReadingResult.cs": "sealed record OdometerReadingResult {OdometerReadingOutcome Outcome, OdometerReadingIgnoredReason? IgnoredReason, ReevaluationOutcome Evaluation, bool IsAccepted}; static Accepted(ReevaluationOutcome); static Ignored(OdometerReadingIgnoredReason)",
-      "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ReevaluationOutcome.cs": "sealed record ReevaluationOutcome(int NewDueSoon, int NewOverdue); static readonly None",
-      "Abstractions/*.cs (ns RutaViva.Maintenance.Application.Abstractions)": "IMaintenancePlanRepository{GetAsync(VehicleId,ct);FindVehicleIdByPlateAsync(LicensePlate,ct);GetActivePlanIdsPageAsync(VehicleId? after,int,ct);GetActivePlanIdsWithRoutineTypeAsync(RoutineTypeId,ct);GetByPlatesAsync(IReadOnlyCollection<LicensePlate>,ct);Add(MaintenancePlan)}; IRoutineTypeRepository{GetAsync;GetCatalogAsync}; IAlertRepository{GetAsync;GetOpenByRoutineAsync(RoutineId,AlertType?,ct);Add}; IOdometerReadingLog{Append(OdometerReadingLogEntry)}; sealed record OdometerReadingLogEntry(VehicleId,long Kilometers,DateTimeOffset ReadAt,DateTimeOffset ReceivedAt,OdometerReadingOutcome,OdometerReadingIgnoredReason?); IUnitOfWorkScope:IUnitOfWork,IAsyncDisposable{Plans,RoutineTypes,Alerts}; IUnitOfWorkScopeFactory{Create()}; sealed record PagedResult<T>(IReadOnlyList<T> Items,int Page,int PageSize,int TotalCount); sealed record AlertSearchCriteria(AlertStatus?,VehicleId?,CustomerId?,int Page,int PageSize)",
-      "Commands/queries (ns RutaViva.Maintenance.Application.<Feature>)": "IngestTelemetryReadingCommand(string Plate,long OdometerKm,DateTimeOffset ReadAt):ICommand<TelemetryReadingOutcome>; RecordOdometerReadingCommand(VehicleId,long Kilometers,DateTimeOffset ReadAt):ICommand<TelemetryReadingOutcome>; ReevaluateMaintenancePlansCommand(DateOnly AsOfDate,VehicleId?):ICommand<ReevaluationSummary>; UpdateRoutineTypeParametersCommand(RoutineTypeId,int? IntervalKm,int? IntervalMonths,decimal DueSoonPercent,string UpdatedBy):ICommand<RoutineTypeId>; Bulk.RegisterRoutinesBulkCommand(IReadOnlyList<RoutineBulkRow> Rows,bool DryRun):ICommand<IReadOnlyList<BulkRowResult>>; UpdateRoutineParametersCommand(VehicleId,RoutineId,int?,int?,decimal? DueSoonPercent,string UpdatedBy):ICommand<RoutineId>; ChangeRoutineStateCommand(VehicleId,RoutineId,RoutineState,string UpdatedBy):ICommand<RoutineId>; CreateMaintenancePlanCommand(VehicleId,string Plate,CustomerId,MaintenancePlanStatus Status,long OdometerKm,DateTimeOffset RegisteredAt):ICommand<VehicleId>; ChangePlanStatusCommand(VehicleId,MaintenancePlanStatus TargetStatus):ICommand<VehicleId>; RestartRoutineCommand(VehicleId,RoutineId,long ServicedKm,DateTimeOffset ServicedAt,Guid ServiceOrderId):ICommand<RoutineId>; AcknowledgeAlertCommand(AlertId,string AcknowledgedBy):ICommand<AlertId>",
-      "Queries and DTOs": "GetMaintenancePlanQuery(VehicleId):IQuery<MaintenancePlanDetailDto>; GetMaintenancePlanSummariesQuery(CustomerId?):IQuery<IReadOnlyList<MaintenancePlanSummaryDto>>; GetOdometerReadingsQuery(VehicleId,int Limit):IQuery<IReadOnlyList<OdometerReadingDto>>; SearchAlertsQuery(AlertStatus?,VehicleId?,CustomerId?,int Page,int PageSize):IQuery<PagedResult<AlertDto>>; GetRoutineTypesQuery:IQuery<IReadOnlyList<RoutineTypeDto>>; TelemetryReadingOutcome(OdometerReadingOutcome Outcome,OdometerReadingIgnoredReason? IgnoredReason); ReevaluationSummary(int EvaluatedPlans,int DueSoon,int Overdue,int OrdersRequested); OdometerReadingDto(long Kilometers,DateTimeOffset ReadAt,DateTimeOffset ReceivedAt,OdometerReadingOutcome,OdometerReadingIgnoredReason?); RoutineTypeDto(RoutineTypeId Id,string Code,string Name,int? DefaultIntervalKm,int? DefaultIntervalMonths,decimal DueSoonPercent,RoutineTypeStatus,string UpdatedBy,DateTimeOffset UpdatedAt)",
-      "Plan/Routine/Alert DTOs": "MaintenancePlanSummaryDto(VehicleId,string Plate,MaintenancePlanStatus PlanStatus,long OdometerKm,RoutineDueStatus? WorstDueStatus,decimal MaxConsumedPercent,int UpToDateCount,int DueSoonCount,int OverdueCount,int InactiveCount); MaintenancePlanDetailDto(same 10 fields, IReadOnlyList<RoutineDetailDto> Routines); RoutineDetailDto(RoutineId,string RoutineTypeCode,string Name,RoutineState,RoutineDueStatus,AlertTrigger? TriggeredBy,int CycleNumber,long CycleStartKm,DateOnly CycleStartDate,int? IntervalKm,ParameterSource IntervalKmSource,int? IntervalMonths,ParameterSource IntervalMonthsSource,decimal DueSoonPercent,ParameterSource DueSoonPercentSource,long? NextDueKm,DateOnly? NextDueDate,decimal ConsumedPercent,RoutineTrackDto? DistanceTrack,RoutineTrackDto? TimeTrack); RoutineTrackDto(string Kind,decimal ConsumedPercent,decimal DueSoonPercent,long Remaining,RoutineDueStatus Status){const DistanceKind=\"km\";const TimeKind=\"time\"}; AlertDto(AlertId,VehicleId,string Plate,CustomerId,RoutineId,string RoutineName,int CycleNumber,AlertType Type,AlertTrigger TriggeredBy,AlertStatus,DateTimeOffset RaisedAt,DateTimeOffset? AcknowledgedAt,string? AcknowledgedBy,DateTimeOffset? ResolvedAt,AlertResolutionReason? ResolutionReason)",
-      "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/*Mapper.cs": "ns RutaViva.Maintenance.Application.IntegrationEvents.Outbound; public sealed class {RoutineRegistered|RoutineStateChanged|RoutineParametersChanged|RoutineBecameDueSoon|RoutineBecameOverdue|RoutineDueStatusReverted|RoutineRestarted|MaintenancePlanStatusChanged|AlertRaised|AlertStatusChanged}Mapper : IIntegrationEventMapper<TDomainEvent> { IReadOnlyCollection<IIntegrationEvent> Map(TDomainEvent) }; internal static class RoutineSnapshotMapper { RoutineSnapshot Map(RoutineStatusSnapshot) }"
-    },
-    "decisions": [
-      "RoutineRegistration carries RoutineTypeId only: RoutineParameterCatalog has no code->id lookup. Application must resolve the id; ForCode is not possible.",
-      "Odometer reading evaluates with LastTimeEvaluationDate without advancing it (D-04 and odometer-ingestion spec), not with the Bogota date of the reading as the task text says.",
-      "Domain events carry OccurredAt without a clock: reading.ReadAt for readings, Bogota start of the effective date for register and reevaluate.",
-      "PagedResult<T> did not exist in BuildingBlocks; created in Application/Abstractions (ns ...Application.Abstractions) with Items, Page, PageSize, TotalCount.",
-      "Commands without a natural value return the aggregate id (VehicleId/RoutineId/AlertId/RoutineTypeId); no Unit type exists. Plate in commands and DTOs is a plain string.",
-      "OdometerReadingLogEntry is an Application record (VehicleId, Kilometers, ReadAt, ReceivedAt, Outcome, IgnoredReason) per ADR-0025; Infrastructure should map it to its own persistence class.",
-      "RoutineSnapshot.EffectiveDueSoonPercent (int in V1) is mapped from the decimal snapshot value with Math.Round AwayFromZero.",
-      "MaintenanceRoutineRestartedV1.ServicedAt is built from ServiceRecord.Date at 00:00 UTC (DateTimeOffset), since the domain keeps a DateOnly.",
-      "The mappers are public sealed classes with a parameterless constructor; the DI registration (scan or manual) is up to whoever owns the DependencyInjection file."
-    ]
+    "exports": {},
+    "decisions": []
   },
   "implemented": [
     {
-      "agent": "P",
-      "status": "blocked",
-      "notes": "4.1 and 4.2 are implemented and tested, but nothing was compiled or run. RoutineRegistered snapshot is UpToDate (pre-evaluation); transition events carry the post-transition snapshot. Tests deactivate a routine by reflection because ChangeRoutineState (4.3) does not exist yet. Test helpers (SampleCatalog, SampleFleet, MaintenancePlanBuilder) are internal.",
-      "files": [
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/MaintenancePlan.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/MaintenanceRoutine.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/RoutineAssessor.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/RoutineRegistration.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/ReevaluationOutcome.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Domain/Plans/OdometerReadingResult.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Plans/SampleCatalog.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Plans/MaintenancePlanBuilder.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Plans/SampleFleet.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Plans/RegisterRoutineTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/Plans/EvaluationScenariosTests.cs"
-      ]
+      "agent": "CI",
+      "status": "complete",
+      "notes": "",
+      "files": []
     },
     {
-      "agent": "C",
+      "agent": "WI",
       "status": "complete",
-      "notes": "Only contracts, no handlers. Not built or tested (gate does it). RoutineTrackDto declares public const Kind values km/time. RoutineDetailDto.TriggeredBy uses AlertTrigger (covers DistanceAndTime). Plan detail DTO repeats the summary fields before Routines.",
-      "files": [
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Abstractions/IMaintenancePlanRepository.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Abstractions/IRoutineTypeRepository.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Abstractions/IAlertRepository.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Abstractions/IOdometerReadingLog.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Abstractions/OdometerReadingLogEntry.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Abstractions/IOdometerReadingQueries.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Abstractions/IMaintenancePlanQueries.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Abstractions/IAlertQueries.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Abstractions/AlertSearchCriteria.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Abstractions/PagedResult.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Abstractions/IRoutineTypeQueries.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Abstractions/IUnitOfWorkScopeFactory.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Abstractions/IUnitOfWorkScope.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Telemetry/TelemetryReadingOutcome.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Telemetry/IngestTelemetryReadingCommand.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Telemetry/RecordOdometerReadingCommand.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Telemetry/GetOdometerReadingsQuery.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Telemetry/OdometerReadingDto.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Evaluations/ReevaluationSummary.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Evaluations/ReevaluateMaintenancePlansCommand.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/RoutineTypes/RoutineTypeDto.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/RoutineTypes/UpdateRoutineTypeParametersCommand.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/RoutineTypes/GetRoutineTypesQuery.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Routines/RoutineTrackDto.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Routines/RoutineDetailDto.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Routines/UpdateRoutineParametersCommand.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Routines/ChangeRoutineStateCommand.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Routines/Bulk/RegisterRoutinesBulkCommand.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Plans/MaintenancePlanSummaryDto.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Plans/MaintenancePlanDetailDto.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Plans/GetMaintenancePlanQuery.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Plans/GetMaintenancePlanSummariesQuery.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Plans/CreateMaintenancePlanCommand.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Plans/ChangePlanStatusCommand.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Plans/RestartRoutineCommand.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Alerts/AlertDto.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Alerts/AcknowledgeAlertCommand.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/Alerts/SearchAlertsQuery.cs"
-      ]
+      "notes": "",
+      "files": []
     },
     {
-      "agent": "O",
+      "agent": "FI",
       "status": "complete",
-      "notes": "RoutineTypeParametersChanged has no V1 contract and is not mapped, per D-05. Nothing was compiled or run. The tests cover type, stream, full snapshot copy, trigger, reason and rounding for each mapper. The helpers OutboundEventFactory and RoutineSnapshotAssertions are internal and live in the tests folder.",
-      "files": [
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/RoutineSnapshotMapper.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/RoutineRegisteredMapper.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/RoutineStateChangedMapper.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/RoutineParametersChangedMapper.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/RoutineBecameDueSoonMapper.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/RoutineBecameOverdueMapper.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/RoutineDueStatusRevertedMapper.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/RoutineRestartedMapper.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/MaintenancePlanStatusChangedMapper.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/AlertRaisedMapper.cs",
-        "src/Services/Maintenance/RutaViva.Maintenance.Application/IntegrationEvents/Outbound/AlertStatusChangedMapper.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/OutboundEventFactory.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/RoutineSnapshotAssertions.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/RoutineRegisteredMapperTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/RoutineStateChangedMapperTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/RoutineParametersChangedMapperTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/RoutineBecameDueSoonMapperTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/RoutineBecameOverdueMapperTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/RoutineDueStatusRevertedMapperTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/RoutineRestartedMapperTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/MaintenancePlanStatusChangedMapperTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/AlertRaisedMapperTests.cs",
-        "tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/IntegrationEvents/Outbound/AlertStatusChangedMapperTests.cs"
-      ]
+      "notes": "",
+      "files": []
+    },
+    {
+      "agent": "FQ",
+      "status": "complete",
+      "notes": "",
+      "files": []
     }
   ],
   "history": [
@@ -140,19 +51,23 @@
       "round": 0,
       "verdict": [
         {
-          "taskId": "4.1",
+          "taskId": "3.3",
           "passed": true
         },
         {
-          "taskId": "4.2",
+          "taskId": "4.3",
           "passed": true
         },
         {
-          "taskId": "5.1",
+          "taskId": "5.2",
           "passed": true
         },
         {
-          "taskId": "6.8",
+          "taskId": "6.4",
+          "passed": true
+        },
+        {
+          "taskId": "6.3",
           "passed": true
         }
       ]
