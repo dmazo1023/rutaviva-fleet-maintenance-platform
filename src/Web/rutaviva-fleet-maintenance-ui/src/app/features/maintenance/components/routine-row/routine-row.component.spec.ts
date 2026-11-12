@@ -118,6 +118,19 @@ describe('RoutineRowComponent', () => {
     expect(registered?.routineId).toBe('RT-RVA101-OIL');
   });
 
+  it('should show the open-order notice when the parent flags a conflict', () => {
+    const fixture: ComponentFixture<RoutineRowComponent> =
+      TestBed.createComponent(RoutineRowComponent);
+    fixture.componentRef.setInput('routine', { ...baseRoutine, dueStatus: 'Overdue' });
+    fixture.componentRef.setInput('showOpenOrderNotice', true);
+    fixture.detectChanges();
+
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('.routine-row__notice')?.textContent).toContain(
+      'Esta rutina ya tiene una orden abierta'
+    );
+  });
+
   it('should hide the create-order button when the routine is UpToDate', () => {
     const fixture: ComponentFixture<RoutineRowComponent> =
       TestBed.createComponent(RoutineRowComponent);

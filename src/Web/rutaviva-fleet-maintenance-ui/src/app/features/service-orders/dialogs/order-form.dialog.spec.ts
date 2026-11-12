@@ -70,5 +70,23 @@ describe('OrderFormDialogComponent', () => {
     expect(host.textContent).toContain('Rechazar cotización');
     expect(host.textContent).toContain('cotización rechazada');
   });
+
+  it('should render ConfirmImpactDialog for the Cancel action and emit on confirm', () => {
+    const fixture: ComponentFixture<OrderFormDialogComponent> =
+      TestBed.createComponent(OrderFormDialogComponent);
+    fixture.componentRef.setInput('open', true);
+    fixture.componentRef.setInput('action', 'Cancel');
+    fixture.detectChanges();
+
+    let result: OrderFormSubmitEvent | undefined;
+    fixture.componentInstance.submitted.subscribe((ev: OrderFormSubmitEvent) => {
+      result = ev;
+    });
+
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Cancelar orden');
+    fixture.componentInstance.onImpactConfirmed();
+    expect(result).toEqual({ action: 'Cancel' });
+  });
 });
 

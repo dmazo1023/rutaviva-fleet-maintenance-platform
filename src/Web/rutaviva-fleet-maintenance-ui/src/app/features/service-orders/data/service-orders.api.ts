@@ -68,6 +68,13 @@ export class ServiceOrdersApi {
     );
   }
 
+  cancel(id: string, body: { readonly cancelledBy: string }): Observable<ServiceOrderDetailVm> {
+    return this.apiClient.post<typeof body, ServiceOrderDetailVm>(
+      ApiRoutes.serviceOrders.cancel(id),
+      body
+    );
+  }
+
   start(id: string, body: { readonly startedBy: string }): Observable<ServiceOrderDetailVm> {
     return this.apiClient.post<typeof body, ServiceOrderDetailVm>(
       ApiRoutes.serviceOrders.start(id),

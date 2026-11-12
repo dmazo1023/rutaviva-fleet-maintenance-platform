@@ -105,5 +105,33 @@ describe('OrderDetailPageComponent', () => {
     fixture.detectChanges();
     expect(host.textContent).toContain('Esperando cotización del taller');
   });
+
+  it('should show the cancelled banner and the danger cancel action for an Operator', () => {
+    sessionStore.setProfile('Operator');
+    store.setDetailReady({
+      ...baseOrder,
+      status: 'Cancelled',
+      statusBeforeHold: null,
+      availableActions: [],
+    });
+
+    const fixture: ComponentFixture<OrderDetailPageComponent> =
+      TestBed.createComponent(OrderDetailPageComponent);
+    fixture.componentRef.setInput('id', 'OS-2026-001');
+    fixture.detectChanges();
+
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('.stepper-cancelled-banner')?.textContent).toContain('Orden cancelada');
+
+    store.setDetailReady({
+      ...baseOrder,
+      status: 'Approved',
+      statusBeforeHold: null,
+      availableActions: [{ action: 'Cancel', enabled: true, blockedReason: null }],
+    });
+    fixture.detectChanges();
+    expect(host.querySelector('.order-actions__cancel-btn.btn--danger')).not.toBeNull();
+    expect(host.querySelector('.stepper-cancelled-banner')).toBeNull();
+  });
 });
 

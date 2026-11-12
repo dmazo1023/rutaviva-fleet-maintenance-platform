@@ -75,6 +75,31 @@ public sealed class ServiceOrderTests
         order.DomainEvents.Should().BeEmpty();
     }
 
+    [Fact]
+    public void Cancel_Should_CancelOrder_When_OrderIsApproved()
+    {
+        ServiceOrder order = CreateOrder();
+        order.Quote(LowAmount, Policy(), Workshop);
+
+        Result cancelled = order.Cancel(Operator);
+
+        cancelled.IsSuccess.Should().BeTrue();
+        order.Status.Should().Be(ServiceOrderStatus.Cancelled);
+    }
+
+    [Fact]
+    public void Cancel_Should_Fail_When_OrderIsInProgress()
+    {
+        ServiceOrder order = CreateOrder();
+        order.Quote(LowAmount, Policy(), Workshop);
+        order.Start(Workshop);
+
+        Result cancelled = order.Cancel(Operator);
+
+        cancelled.IsFailure.Should().BeTrue();
+        cancelled.Error.Should().Be(ServiceOrderErrors.InvalidTransition);
+    }
+
     private static QuoteApprovalPolicy Policy() => QuoteApprovalPolicy.Create(Threshold).Value;
 
     private static ServiceOrder CreateOrder()

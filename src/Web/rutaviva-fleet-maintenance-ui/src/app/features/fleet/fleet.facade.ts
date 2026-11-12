@@ -1,6 +1,7 @@
 import { DestroyRef, inject, Injectable, Signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin, Observable, tap } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { catchError, forkJoin, map, Observable, of, tap, throwError } from 'rxjs';
 import { SessionStore } from '../../core/context/session.store';
 import { ToastStore } from '../../core/feedback/toast.store';
 import { RoutineState, VehicleStatus } from '../../core/models/enums';
@@ -35,6 +36,26 @@ import {
   VehicleSummaryVm,
 } from './models/fleet.vm';
 import { FleetFilterKey, FleetStore } from './state/fleet.store';
+
+const HTTP_CONFLICT = 409;
+const OPEN_ORDER_EXISTS_CODE = 'ServiceOrder.OpenOrderExists';
+const STATUSES_REPORTED_BY_INTERCEPTOR: ReadonlySet<number> = new Set<number>([400, 409, 422]);
+
+export type CreateServiceOrderOutcome =
+  | { readonly kind: 'created'; readonly orderId: string }
+  | { readonly kind: 'openOrderExists' };
+
+function isOpenOrderConflict(error: unknown): boolean {
+  return (
+    error instanceof HttpErrorResponse &&
+    error.status === HTTP_CONFLICT &&
+    (error.error as { readonly code?: string } | null)?.code === OPEN_ORDER_EXISTS_CODE
+  );
+}
+
+function isReportedByInterceptor(error: unknown): boolean {
+  return error instanceof HttpErrorResponse && STATUSES_REPORTED_BY_INTERCEPTOR.has(error.status);
+}
 
 function toMaintenanceSummary(plan: MaintenancePlanSummaryVm): VehicleMaintenanceSummaryVm {
   return {
@@ -209,7 +230,10 @@ export class FleetFacade {
     );
   }
 
-  createServiceOrder(vehicle: VehicleDetailVm, routine: RoutineVm): Observable<string> {
+  createServiceOrder(
+    vehicle: VehicleDetailVm,
+    routine: RoutineVm
+  ): Observable<CreateServiceOrderOutcome> {
     return this.maintenanceApi
       .createServiceOrder({
         vehicleId: vehicle.vehicleId,
@@ -222,7 +246,24 @@ export class FleetFacade {
         routineTypeCode: routine.typeCode,
         createdBy: this.sessionStore.currentActorName(),
       })
-      .pipe(tap({ error: () => this.showOperationError() }));
+      .pipe(
+        map((orderId: string): CreateServiceOrderOutcome => ({ kind: 'created', orderId })),
+        catchError((error: unknown) => this.onCreateOrderFailed(vehicle.vehicleId, error))
+      );
+  }
+
+  private onCreateOrderFailed(
+    vehicleId: string,
+    error: unknown
+  ): Observable<CreateServiceOrderOutcome> {
+    if (isOpenOrderConflict(error)) {
+      this.loadVehicleOrders(vehicleId);
+      return of({ kind: 'openOrderExists' });
+    }
+    if (!isReportedByInterceptor(error)) {
+      this.showOperationError();
+    }
+    return throwError(() => error);
   }
 
   private onVehicleLoaded(vehicle: VehicleDetailVm | null): void {
@@ -289,6 +330,10 @@ export class FleetFacade {
       error: () => this.planStore.setReadingsError(FLEET_TEXTS.errorMessage),
     });
 
+    this.loadVehicleOrders(vehicleId);
+  }
+
+  private loadVehicleOrders(vehicleId: string): void {
     this.planStore.setOrdersLoading();
     this.maintenanceApi.getVehicleOrders(vehicleId).subscribe({
       next: (orders: readonly PlanOrderSummaryVm[]) => this.planStore.setOrdersReady(orders),

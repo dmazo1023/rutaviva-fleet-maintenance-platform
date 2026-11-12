@@ -238,6 +238,11 @@ namespace RutaViva.ServiceOrders.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ServiceOrderId");
 
+                            b1.HasIndex("RoutineId")
+                                .IsUnique()
+                                .HasDatabaseName("UX_ServiceOrders_OpenRoutine")
+                                .HasFilter("[Status] IN ('Created', 'Quoted', 'PendingApproval', 'Approved', 'InProgress')");
+
                             b1.HasIndex("VehicleId")
                                 .HasDatabaseName("IX_ServiceOrders_VehicleId");
 

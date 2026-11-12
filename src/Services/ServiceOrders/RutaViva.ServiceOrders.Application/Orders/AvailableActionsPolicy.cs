@@ -8,6 +8,9 @@ public static class AvailableActionsPolicy
         new Dictionary<(ServiceOrderStatus Status, ServiceOrderActor Actor), ServiceOrderAction[]>
         {
             [(ServiceOrderStatus.Created, ServiceOrderActor.Workshop)] = [ServiceOrderAction.Quote],
+            [(ServiceOrderStatus.Created, ServiceOrderActor.Operator)] = [ServiceOrderAction.Cancel],
+            [(ServiceOrderStatus.PendingApproval, ServiceOrderActor.Operator)] = [ServiceOrderAction.Cancel],
+            [(ServiceOrderStatus.Approved, ServiceOrderActor.Operator)] = [ServiceOrderAction.Cancel],
             [(ServiceOrderStatus.PendingApproval, ServiceOrderActor.Approver)] = [ServiceOrderAction.Approve, ServiceOrderAction.Reject],
             [(ServiceOrderStatus.Approved, ServiceOrderActor.Workshop)] = [ServiceOrderAction.Start],
             [(ServiceOrderStatus.InProgress, ServiceOrderActor.Workshop)] = [ServiceOrderAction.Complete]

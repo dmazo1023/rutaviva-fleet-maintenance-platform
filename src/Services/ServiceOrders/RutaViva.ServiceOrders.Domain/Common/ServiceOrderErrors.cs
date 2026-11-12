@@ -12,6 +12,7 @@ public static class ServiceOrderErrors
     private const string ReferenceRequiredCode = "ServiceOrder.ReferenceRequired";
     private const string TextRequiredCode = "ServiceOrder.TextRequired";
     private const string TextTooLongCode = "ServiceOrder.TextTooLong";
+    private const string OpenOrderExistsCode = "ServiceOrder.OpenOrderExists";
     private const string ThresholdInvalidCode = "ServiceOrder.ApprovalThresholdInvalid";
 
     private const string NotFoundMessage = "The service order was not found.";
@@ -22,6 +23,7 @@ public static class ServiceOrderErrors
     private const string ReferenceRequiredMessage = "The vehicle, routine, customer and workshop identifiers are required.";
     private const string TextRequiredMessage = "The plate, routine, workshop and actor names are required.";
     private const string TextTooLongMessage = "A text value exceeds the maximum length.";
+    private const string OpenOrderExistsMessage = "The routine already has an open service order.";
     private const string ThresholdInvalidMessage = "The auto approval threshold cannot be negative.";
 
     public static readonly Error NotFound = new(NotFoundCode, NotFoundMessage, ErrorType.NotFound);
@@ -39,6 +41,8 @@ public static class ServiceOrderErrors
     public static readonly Error TextRequired = new(TextRequiredCode, TextRequiredMessage, ErrorType.Validation);
 
     public static readonly Error TextTooLong = new(TextTooLongCode, TextTooLongMessage, ErrorType.Validation);
+
+    public static readonly Error OpenOrderExists = new(OpenOrderExistsCode, OpenOrderExistsMessage, ErrorType.Conflict);
 
     public static readonly Error ThresholdInvalid = new(ThresholdInvalidCode, ThresholdInvalidMessage, ErrorType.Validation);
 }

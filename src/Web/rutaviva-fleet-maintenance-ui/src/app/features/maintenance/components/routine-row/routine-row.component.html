@@ -44,6 +44,13 @@
       }
       <span class="grow"></span>
 
+      @if (showOpenOrderNotice()) {
+        <span class="routine-row__notice" role="status">
+          <span class="ms ms--s" aria-hidden="true">info</span>
+          {{ texts.openOrderExistsNotice }}
+        </span>
+      }
+
       @if (routine().openServiceOrderId) {
         <button
           type="button"

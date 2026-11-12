@@ -18,6 +18,7 @@ public sealed class ServiceOrderEndpoints : IEndpointModule
     private const string RejectRoute = OrderRoute + "/reject";
     private const string StartRoute = OrderRoute + "/start";
     private const string CompleteRoute = OrderRoute + "/complete";
+    private const string CancelRoute = OrderRoute + "/cancel";
     private const string LocationFormat = OrdersRoute + "/{0}";
 
     public void MapEndpoints(IEndpointRouteBuilder app)
@@ -30,6 +31,7 @@ public sealed class ServiceOrderEndpoints : IEndpointModule
         app.MapPost(RejectRoute, RejectAsync);
         app.MapPost(StartRoute, StartAsync);
         app.MapPost(CompleteRoute, CompleteAsync);
+        app.MapPost(CancelRoute, CancelAsync);
     }
 
     private static async Task<IResult> CreateAsync(
@@ -130,6 +132,14 @@ public sealed class ServiceOrderEndpoints : IEndpointModule
         IQueryHandler<GetServiceOrderDetailQuery, ServiceOrderDetailDto> detail,
         CancellationToken cancellationToken) =>
         ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Complete, request.CompletedBy, null, request.ServicedKm), ServiceOrderActor.Workshop, handler, detail, cancellationToken);
+
+    private static Task<IResult> CancelAsync(
+        Guid id,
+        CancelServiceOrderRequest request,
+        ICommandHandler<ExecuteServiceOrderActionCommand, ServiceOrderId> handler,
+        IQueryHandler<GetServiceOrderDetailQuery, ServiceOrderDetailDto> detail,
+        CancellationToken cancellationToken) =>
+        ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Cancel, request.CancelledBy, null, null), ServiceOrderActor.Operator, handler, detail, cancellationToken);
 
     private static async Task<IResult> ExecuteAsync(
         Guid id,

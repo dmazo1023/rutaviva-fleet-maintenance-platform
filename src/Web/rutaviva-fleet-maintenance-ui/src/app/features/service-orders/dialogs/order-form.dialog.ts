@@ -52,6 +52,13 @@ export const ACTION_IMPACT: Readonly<
       { icon: 'replay', text: SERVICE_ORDERS_TEXTS.rejectImpactRoutineOpen },
     ],
   },
+  Cancel: {
+    title: SERVICE_ORDERS_TEXTS.cancelConfirmTitle,
+    items: [
+      { icon: 'block', text: SERVICE_ORDERS_TEXTS.cancelImpactOrderCancelled },
+      { icon: 'replay', text: SERVICE_ORDERS_TEXTS.cancelImpactRoutineOpen },
+    ],
+  },
 };
 
 function toInputValue(amount: number | null): string {

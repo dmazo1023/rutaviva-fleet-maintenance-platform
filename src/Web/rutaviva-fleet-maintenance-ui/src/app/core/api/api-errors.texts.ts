@@ -13,6 +13,7 @@ export const API_ERROR_MESSAGES: Readonly<Record<string, string>> = {
   'Customer.ApproverNotFound': 'No se encontró el aprobador.',
   'Customer.Inactive': 'El cliente está inactivo.',
   'Customer.NotFound': 'No se encontró el cliente.',
+  'ServiceOrder.OpenOrderExists': 'Esta rutina ya tiene una orden de servicio abierta.',
   'Customer.TaxIdAlreadyRegistered': 'El NIT del cliente ya está registrado.',
   'DueSoonThreshold.OutOfRange': 'El porcentaje de aviso está fuera del rango permitido.',
   'MaintenanceInterval.Empty': 'Debes definir un intervalo por kilómetros o por meses.',

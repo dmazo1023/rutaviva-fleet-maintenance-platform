@@ -162,6 +162,7 @@
                       (toggleState)="onToggleRoutine($event)"
                       (editParams)="onOpenRoutineParams($event)"
                       (registerService)="onRegisterService($event)"
+                      [showOpenOrderNotice]="openOrderNoticeRoutineId() === routine.routineId"
                       (createOrder)="onCreateOrder($event)"
                       (openOrder)="openServiceOrder($event)"
                     />

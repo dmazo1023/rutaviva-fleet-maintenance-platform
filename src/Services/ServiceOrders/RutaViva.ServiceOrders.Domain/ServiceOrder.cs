@@ -101,6 +101,8 @@ public sealed class ServiceOrder : AggregateRoot<ServiceOrderId>
 
     public Result Start(string? startedBy) => MoveTo(ServiceOrderStatus.InProgress, startedBy);
 
+    public Result Cancel(string? cancelledBy) => MoveTo(ServiceOrderStatus.Cancelled, cancelledBy);
+
     public Result Complete(long servicedKm, string? completedBy)
     {
         if (servicedKm < 0)

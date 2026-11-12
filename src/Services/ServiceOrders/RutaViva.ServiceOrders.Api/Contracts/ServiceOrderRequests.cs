@@ -19,4 +19,6 @@ public sealed record RejectServiceOrderRequest(string? RejectedBy);
 
 public sealed record StartServiceOrderRequest(string? StartedBy);
 
+public sealed record CancelServiceOrderRequest(string? CancelledBy);
+
 public sealed record CompleteServiceOrderRequest(string? CompletedBy, long? ServicedKm);

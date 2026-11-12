@@ -5,7 +5,14 @@
   </div>
 }
 
-<ol class="order-stepper">
+@if (isCancelled()) {
+  <div class="stepper-paused-banner stepper-cancelled-banner" role="status">
+    <span class="ms" aria-hidden="true">cancel</span>
+    <span>{{ texts.cancelledBannerText }}</span>
+  </div>
+}
+
+<ol class="order-stepper" [class.is-cancelled]="isCancelled()">
   @for (step of steps(); track step.key; let idx = $index) {
     <li
       class="order-stepper__step"

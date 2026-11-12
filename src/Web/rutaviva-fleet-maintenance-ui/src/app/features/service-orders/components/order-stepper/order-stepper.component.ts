@@ -33,6 +33,8 @@ export class OrderStepperComponent {
 
   readonly isPaused: Signal<boolean> = computed(() => this.status() === 'OnHold');
 
+  readonly isCancelled: Signal<boolean> = computed(() => this.status() === 'Cancelled');
+
   readonly pausedBannerText: Signal<string> = computed(() => {
     const prev: ServiceOrderStatus | null = this.statusBeforeHold();
     const prevLabel: string = prev ? this.labels.serviceOrderStatus[prev] : '';

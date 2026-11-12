@@ -149,6 +149,7 @@ export class OrderDetailPageComponent {
       Quote: () => this.facade.quote(orderId, event.amount ?? 0),
       Complete: () => this.facade.complete(orderId, event.amount ?? 0),
       Reject: () => this.facade.reject(orderId),
+      Cancel: () => this.facade.cancel(orderId),
     };
     return mutations[event.action]?.() ?? null;
   }
