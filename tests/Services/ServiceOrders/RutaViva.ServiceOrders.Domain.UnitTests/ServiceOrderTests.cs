@@ -14,6 +14,8 @@ public sealed class ServiceOrderTests
     private const decimal HighAmount = 1_500_000m;
     private const long ServicedKm = 45_200;
 
+    private static readonly Guid CustomerId = Guid.CreateVersion7();
+
     [Fact]
     public void Quote_Should_AutoApprove_When_AmountIsWithinThreshold()
     {
@@ -33,7 +35,7 @@ public sealed class ServiceOrderTests
 
         order.Quote(HighAmount, Policy(), Workshop).IsSuccess.Should().BeTrue();
         order.Status.Should().Be(ServiceOrderStatus.PendingApproval);
-        order.Approve(Approver).IsSuccess.Should().BeTrue();
+        order.Approve(OwnerApprover()).IsSuccess.Should().BeTrue();
         order.Start(Workshop).IsSuccess.Should().BeTrue();
         Result completed = order.Complete(ServicedKm, Workshop);
 
@@ -57,7 +59,7 @@ public sealed class ServiceOrderTests
         ServiceOrder order = CreateOrder();
         order.Quote(HighAmount, Policy(), Workshop);
 
-        Result rejected = order.Reject(Approver);
+        Result rejected = order.Reject(OwnerApprover());
 
         rejected.IsSuccess.Should().BeTrue();
         order.Status.Should().Be(ServiceOrderStatus.Cancelled);
@@ -100,6 +102,22 @@ public sealed class ServiceOrderTests
         cancelled.Error.Should().Be(ServiceOrderErrors.InvalidTransition);
     }
 
+    [Fact]
+    public void Approve_Should_Fail_When_ApproverBelongsToAnotherCustomer()
+    {
+        ServiceOrder order = CreateOrder();
+        order.Quote(HighAmount, Policy(), Workshop);
+        ServiceOrderApprover stranger = new(Guid.CreateVersion7(), Guid.CreateVersion7(), Approver, true);
+
+        Result approved = order.Approve(stranger);
+
+        approved.IsFailure.Should().BeTrue();
+        approved.Error.Should().Be(ServiceOrderErrors.ApproverNotAuthorized);
+        order.Status.Should().Be(ServiceOrderStatus.PendingApproval);
+    }
+
+    private static ServiceOrderApprover OwnerApprover() => new(Guid.CreateVersion7(), CustomerId, Approver, true);
+
     private static QuoteApprovalPolicy Policy() => QuoteApprovalPolicy.Create(Threshold).Value;
 
     private static ServiceOrder CreateOrder()
@@ -107,12 +125,13 @@ public sealed class ServiceOrderTests
         ServiceOrderReference reference = new(
             Guid.CreateVersion7(),
             "RVA104",
-            Guid.CreateVersion7(),
+            CustomerId,
             Guid.CreateVersion7(),
             Workshop,
             Guid.CreateVersion7(),
             "Frenos",
-            "BRAKES");
-        return ServiceOrder.Create(reference, Operator).Value;
+            "BRAKES",
+            null);
+        return ServiceOrder.Create(reference, ServiceOrderOrigin.Manual, Operator).Value;
     }
 }

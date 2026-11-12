@@ -14,6 +14,8 @@ public sealed class ServiceOrdersApiFactory : WebApplicationFactory<Program>
     private const string ConnectionStringSetting = "ConnectionStrings:RutaViva";
     private const string HubUrlSetting = "EventBus:HubUrl";
     private const string LocalHubUrl = "http://localhost:1";
+    private const string AutomaticOrdersSinceSetting = "ServiceOrders:AutomaticOrdersSince";
+    private const string AutomaticOrdersSince = "2026-01-01T00:00:00Z";
 
     private readonly string _connectionString;
 
@@ -32,6 +34,7 @@ public sealed class ServiceOrdersApiFactory : WebApplicationFactory<Program>
     {
         builder.UseSetting(ConnectionStringSetting, _connectionString);
         builder.UseSetting(HubUrlSetting, LocalHubUrl);
+        builder.UseSetting(AutomaticOrdersSinceSetting, AutomaticOrdersSince);
         builder.ConfigureTestServices(RemoveHostedServices);
     }
 

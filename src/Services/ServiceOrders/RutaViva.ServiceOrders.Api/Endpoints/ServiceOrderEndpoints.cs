@@ -40,16 +40,8 @@ public sealed class ServiceOrderEndpoints : IEndpointModule
         IQueryHandler<GetServiceOrderDetailQuery, ServiceOrderDetailDto> detail,
         CancellationToken cancellationToken)
     {
-        ServiceOrderReference reference = new(
-            request.VehicleId,
-            request.Plate ?? string.Empty,
-            request.CustomerId,
-            request.WorkshopId,
-            request.WorkshopName ?? string.Empty,
-            request.RoutineId,
-            request.RoutineName ?? string.Empty,
-            request.RoutineTypeCode ?? string.Empty);
-        Result<ServiceOrderId> created = await handler.HandleAsync(new CreateServiceOrderCommand(reference, request.CreatedBy), cancellationToken);
+        CreateServiceOrderCommand command = new(request.VehicleId, request.RoutineId, ServiceOrderOrigin.Manual, request.CreatedBy);
+        Result<ServiceOrderId> created = await handler.HandleAsync(command, cancellationToken);
         if (created.IsFailure)
         {
             return created.ToHttpResult();
@@ -99,7 +91,7 @@ public sealed class ServiceOrderEndpoints : IEndpointModule
         ICommandHandler<ExecuteServiceOrderActionCommand, ServiceOrderId> handler,
         IQueryHandler<GetServiceOrderDetailQuery, ServiceOrderDetailDto> detail,
         CancellationToken cancellationToken) =>
-        ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Quote, request.QuotedBy, request.Amount, null), ServiceOrderActor.Workshop, handler, detail, cancellationToken);
+        ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Quote, request.QuotedBy, request.Amount, null, null), ServiceOrderActor.Workshop, handler, detail, cancellationToken);
 
     private static Task<IResult> ApproveAsync(
         Guid id,
@@ -107,7 +99,7 @@ public sealed class ServiceOrderEndpoints : IEndpointModule
         ICommandHandler<ExecuteServiceOrderActionCommand, ServiceOrderId> handler,
         IQueryHandler<GetServiceOrderDetailQuery, ServiceOrderDetailDto> detail,
         CancellationToken cancellationToken) =>
-        ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Approve, request.ApprovedBy, null, null), ServiceOrderActor.Approver, handler, detail, cancellationToken);
+        ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Approve, request.ApprovedBy, null, null, request.ApproverId), ServiceOrderActor.Approver, handler, detail, cancellationToken);
 
     private static Task<IResult> RejectAsync(
         Guid id,
@@ -115,7 +107,7 @@ public sealed class ServiceOrderEndpoints : IEndpointModule
         ICommandHandler<ExecuteServiceOrderActionCommand, ServiceOrderId> handler,
         IQueryHandler<GetServiceOrderDetailQuery, ServiceOrderDetailDto> detail,
         CancellationToken cancellationToken) =>
-        ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Reject, request.RejectedBy, null, null), ServiceOrderActor.Approver, handler, detail, cancellationToken);
+        ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Reject, request.RejectedBy, null, null, request.ApproverId), ServiceOrderActor.Approver, handler, detail, cancellationToken);
 
     private static Task<IResult> StartAsync(
         Guid id,
@@ -123,7 +115,7 @@ public sealed class ServiceOrderEndpoints : IEndpointModule
         ICommandHandler<ExecuteServiceOrderActionCommand, ServiceOrderId> handler,
         IQueryHandler<GetServiceOrderDetailQuery, ServiceOrderDetailDto> detail,
         CancellationToken cancellationToken) =>
-        ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Start, request.StartedBy, null, null), ServiceOrderActor.Workshop, handler, detail, cancellationToken);
+        ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Start, request.StartedBy, null, null, null), ServiceOrderActor.Workshop, handler, detail, cancellationToken);
 
     private static Task<IResult> CompleteAsync(
         Guid id,
@@ -131,7 +123,7 @@ public sealed class ServiceOrderEndpoints : IEndpointModule
         ICommandHandler<ExecuteServiceOrderActionCommand, ServiceOrderId> handler,
         IQueryHandler<GetServiceOrderDetailQuery, ServiceOrderDetailDto> detail,
         CancellationToken cancellationToken) =>
-        ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Complete, request.CompletedBy, null, request.ServicedKm), ServiceOrderActor.Workshop, handler, detail, cancellationToken);
+        ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Complete, request.CompletedBy, null, request.ServicedKm, null), ServiceOrderActor.Workshop, handler, detail, cancellationToken);
 
     private static Task<IResult> CancelAsync(
         Guid id,
@@ -139,7 +131,7 @@ public sealed class ServiceOrderEndpoints : IEndpointModule
         ICommandHandler<ExecuteServiceOrderActionCommand, ServiceOrderId> handler,
         IQueryHandler<GetServiceOrderDetailQuery, ServiceOrderDetailDto> detail,
         CancellationToken cancellationToken) =>
-        ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Cancel, request.CancelledBy, null, null), ServiceOrderActor.Operator, handler, detail, cancellationToken);
+        ExecuteAsync(id, new ActionRequest(ServiceOrderAction.Cancel, request.CancelledBy, null, null, null), ServiceOrderActor.Operator, handler, detail, cancellationToken);
 
     private static async Task<IResult> ExecuteAsync(
         Guid id,
@@ -155,7 +147,7 @@ public sealed class ServiceOrderEndpoints : IEndpointModule
             return order.ToHttpResult();
         }
 
-        ExecuteServiceOrderActionCommand command = new(order.Value, request.Action, request.Actor, request.Amount, request.ServicedKm);
+        ExecuteServiceOrderActionCommand command = new(order.Value, request.Action, request.Actor, request.Amount, request.ServicedKm, request.ApproverId);
         Result<ServiceOrderId> executed = await handler.HandleAsync(command, cancellationToken);
         if (executed.IsFailure)
         {
@@ -166,5 +158,5 @@ public sealed class ServiceOrderEndpoints : IEndpointModule
         return result.ToHttpResult();
     }
 
-    private sealed record ActionRequest(ServiceOrderAction Action, string? Actor, decimal? Amount, long? ServicedKm);
+    private sealed record ActionRequest(ServiceOrderAction Action, string? Actor, decimal? Amount, long? ServicedKm, Guid? ApproverId);
 }

@@ -8,4 +8,5 @@ public sealed record ServiceOrderReference(
     string WorkshopName,
     Guid RoutineId,
     string RoutineName,
-    string RoutineTypeCode);
+    string RoutineTypeCode,
+    Guid? ResponsibleApproverId);

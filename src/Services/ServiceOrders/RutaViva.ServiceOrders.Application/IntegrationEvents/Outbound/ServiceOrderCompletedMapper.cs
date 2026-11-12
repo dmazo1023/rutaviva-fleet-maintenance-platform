@@ -8,7 +8,6 @@ namespace RutaViva.ServiceOrders.Application.IntegrationEvents.Outbound;
 
 public sealed class ServiceOrderCompletedMapper : IIntegrationEventMapper<ServiceOrderCompleted>
 {
-    private const string ManualOrigin = "Manual";
     private const string Currency = "COP";
 
     public IReadOnlyCollection<IIntegrationEvent> Map(ServiceOrderCompleted domainEvent) =>
@@ -20,14 +19,14 @@ public sealed class ServiceOrderCompletedMapper : IIntegrationEventMapper<Servic
         return new ServiceOrderSnapshot(
             domainEvent.ServiceOrderId.Value,
             domainEvent.Number,
-            ManualOrigin,
+            domainEvent.Origin.ToString(),
             reference.VehicleId,
             reference.Plate,
             reference.RoutineId,
             reference.RoutineName,
             reference.CustomerId,
             reference.WorkshopId,
-            null,
+            reference.ResponsibleApproverId,
             nameof(ServiceOrderStatus.Completed),
             null,
             null,

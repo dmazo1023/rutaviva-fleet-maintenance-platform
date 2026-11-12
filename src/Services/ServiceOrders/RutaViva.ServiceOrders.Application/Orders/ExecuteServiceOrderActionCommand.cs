@@ -8,4 +8,5 @@ public sealed record ExecuteServiceOrderActionCommand(
     ServiceOrderAction Action,
     string? Actor,
     decimal? Amount,
-    long? ServicedKm) : ICommand<ServiceOrderId>;
+    long? ServicedKm,
+    Guid? ApproverId) : ICommand<ServiceOrderId>;

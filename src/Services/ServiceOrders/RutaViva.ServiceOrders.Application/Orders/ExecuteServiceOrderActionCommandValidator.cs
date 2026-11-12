@@ -8,6 +8,7 @@ public sealed class ExecuteServiceOrderActionCommandValidator : AbstractValidato
     private const string ActorRequiredMessage = "The actor name is required.";
     private const string AmountRequiredMessage = "The quoted amount is required.";
     private const string ServicedKmRequiredMessage = "The serviced kilometers are required.";
+    private const string ApproverRequiredMessage = "The approver identifier is required.";
 
     public ExecuteServiceOrderActionCommandValidator()
     {
@@ -21,5 +22,9 @@ public sealed class ExecuteServiceOrderActionCommandValidator : AbstractValidato
             .NotNull()
             .When(command => command.Action == ServiceOrderAction.Complete)
             .WithMessage(ServicedKmRequiredMessage);
+        RuleFor(command => command.ApproverId)
+            .NotEmpty()
+            .When(command => command.Action is ServiceOrderAction.Approve or ServiceOrderAction.Reject)
+            .WithMessage(ApproverRequiredMessage);
     }
 }

@@ -9,10 +9,17 @@ using RutaViva.BuildingBlocks.Application.DependencyInjection;
 using RutaViva.BuildingBlocks.Domain.Results;
 using RutaViva.BuildingBlocks.EventBus.Client.Connection;
 using RutaViva.BuildingBlocks.EventBus.Client.Publishing;
+using RutaViva.BuildingBlocks.EventBus.Client.Subscribing;
 using RutaViva.BuildingBlocks.Infrastructure.DependencyInjection;
 using RutaViva.BuildingBlocks.Infrastructure.DomainEvents;
 using RutaViva.BuildingBlocks.Infrastructure.Time;
+using RutaViva.IntegrationContracts;
+using RutaViva.IntegrationContracts.Customers;
+using RutaViva.IntegrationContracts.Fleet;
+using RutaViva.IntegrationContracts.Maintenance;
+using RutaViva.IntegrationContracts.Workshops;
 using RutaViva.ServiceOrders.Application.Abstractions;
+using RutaViva.ServiceOrders.Application.IntegrationEvents.Inbound;
 using RutaViva.ServiceOrders.Application.Orders;
 using RutaViva.ServiceOrders.Domain;
 using RutaViva.ServiceOrders.Infrastructure.Persistence;
@@ -28,6 +35,7 @@ public static class ServiceOrdersServiceCollectionExtensions
     private const string HubUrlKey = EventBusClientOptions.SectionName + ":HubUrl";
     private const string AutoApprovalMaxAmountKey = "ServiceOrders:AutoApprovalMaxAmount";
     private const decimal DefaultAutoApprovalMaxAmount = 1_000_000m;
+    private const string AutomaticOrdersSinceKey = "ServiceOrders:AutomaticOrdersSince";
     private const string MissingConnectionStringMessage = "Connection string 'RutaViva' is not configured.";
 
     public static IServiceCollection AddServiceOrders(this IServiceCollection services, IConfiguration configuration)
@@ -63,12 +71,15 @@ public static class ServiceOrdersServiceCollectionExtensions
     {
         services.AddScoped<IServiceOrderRepository, ServiceOrderRepository>();
         services.AddScoped<IServiceOrderQueries, ServiceOrderQueries>();
+        services.AddScoped<IServiceOrderReferenceStore, ServiceOrderReferenceStore>();
     }
 
     private static void AddServiceOrdersApplication(this IServiceCollection services, IConfiguration configuration)
     {
         Assembly applicationAssembly = typeof(CreateServiceOrderCommand).Assembly;
         services.AddSingleton(ReadApprovalPolicy(configuration));
+        services.AddSingleton(ReadAutomaticOrderPolicy(configuration));
+        services.AddScoped<ServiceOrderReferenceResolver>();
         services.AddCommandHandlers(applicationAssembly);
         services.AddQueryHandlers(applicationAssembly);
         services.Scan(scan => scan
@@ -88,9 +99,28 @@ public static class ServiceOrdersServiceCollectionExtensions
         return policy.IsSuccess ? policy.Value : throw new InvalidOperationException(policy.Error.Message);
     }
 
+    private static AutomaticOrderPolicy ReadAutomaticOrderPolicy(IConfiguration configuration)
+    {
+        string? value = configuration[AutomaticOrdersSinceKey];
+        DateTimeOffset since = DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTimeOffset parsed)
+            ? parsed
+            : DateTimeOffset.MaxValue;
+        return new AutomaticOrderPolicy(since);
+    }
+
     private static void AddServiceOrdersEventBus(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOutboxRelay<ServiceOrdersDbContext>(options => options.HubUrl = ReadHubUrl(configuration));
+        Action<EventBusClientOptions> configure = options => options.HubUrl = ReadHubUrl(configuration);
+        services.AddOutboxRelay<ServiceOrdersDbContext>(configure);
+        services.AddEventBusSubscriber(ServiceName, StartPosition.Checkpoint, configure)
+            .Handle<VehicleRegisteredV1, VehicleRegisteredHandler>(Streams.FleetVehicle)
+            .Handle<VehicleStatusChangedV1, VehicleStatusChangedHandler>(Streams.FleetVehicle)
+            .Handle<VehicleResponsibleAssignedV1, VehicleResponsibleAssignedHandler>(Streams.FleetVehicle)
+            .Handle<WorkshopRegisteredV1, WorkshopRegisteredHandler>(Streams.WorkshopsWorkshop)
+            .Handle<ApproverRegisteredV1, ApproverRegisteredHandler>(Streams.CustomersCustomer)
+            .Handle<ApproverStatusChangedV1, ApproverStatusChangedHandler>(Streams.CustomersCustomer)
+            .Handle<MaintenanceRoutineRegisteredV1, MaintenanceRoutineRegisteredHandler>(Streams.MaintenanceRoutine)
+            .Handle<MaintenanceRoutineOverdueV1, MaintenanceRoutineOverdueHandler>(Streams.MaintenanceRoutine);
     }
 
     private static Uri? ReadHubUrl(IConfiguration configuration)

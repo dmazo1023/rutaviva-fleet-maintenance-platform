@@ -12,10 +12,6 @@ public sealed class ServiceOrderOpenOrderRuleTests(SqlServerTestDatabase databas
     private const string OrdersRoute = "/api/v1/service-orders";
     private const string CancelRouteFormat = "/api/v1/service-orders/{0}/cancel";
     private const string Operator = "Operador";
-    private const string Workshop = "Taller Norte";
-    private const string Plate = "TAN202";
-    private const string RoutineName = "Cambio de aceite";
-    private const string RoutineTypeCode = "OIL_CHANGE";
     private const string IdProperty = "id";
     private const string StatusProperty = "status";
     private const string CodeProperty = "code";
@@ -28,7 +24,8 @@ public sealed class ServiceOrderOpenOrderRuleTests(SqlServerTestDatabase databas
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         await using ServiceOrdersApiFactory factory = await ServiceOrdersApiFactory.CreateAsync(database, cancellationToken);
         using HttpClient client = factory.CreateClient();
-        CreateServiceOrderRequest request = NewOrder(Guid.CreateVersion7());
+        ServiceOrderTestReferences references = await ServiceOrderTestReferences.SeedAsync(database, cancellationToken);
+        CreateServiceOrderRequest request = new(references.VehicleId, references.RoutineId, Operator);
 
         using HttpResponseMessage first = await client.PostAsJsonAsync(OrdersRoute, request, cancellationToken);
         using HttpResponseMessage duplicate = await client.PostAsJsonAsync(OrdersRoute, request, cancellationToken);
@@ -46,7 +43,4 @@ public sealed class ServiceOrderOpenOrderRuleTests(SqlServerTestDatabase databas
         using HttpResponseMessage again = await client.PostAsJsonAsync(OrdersRoute, request, cancellationToken);
         again.StatusCode.Should().Be(HttpStatusCode.Created);
     }
-
-    private static CreateServiceOrderRequest NewOrder(Guid routineId) =>
-        new(Guid.CreateVersion7(), Plate, Guid.CreateVersion7(), Guid.CreateVersion7(), Workshop, routineId, RoutineName, RoutineTypeCode, Operator);
 }

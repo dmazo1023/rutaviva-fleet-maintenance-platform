@@ -21,6 +21,7 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
     private const string RoutineIdColumn = "RoutineId";
     private const string RoutineNameColumn = "RoutineName";
     private const string RoutineTypeCodeColumn = "RoutineTypeCode";
+    private const string ResponsibleApproverIdColumn = "ResponsibleApproverId";
     private const string StatusColumn = "Status";
     private const int StatusMaxLength = 30;
     private const int AmountPrecision = 18;
@@ -47,6 +48,7 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
     {
         builder.Property(order => order.Number).HasMaxLength(ServiceOrder.MaxNumberLength).IsUnicode(false).IsRequired();
         builder.Property(order => order.Status).IsRequired();
+        builder.Property(order => order.Origin).IsRequired();
         builder.Property(order => order.QuotedAmount).HasPrecision(AmountPrecision, AmountScale);
         builder.Property(order => order.AutoApprovalMaxAmount).HasPrecision(AmountPrecision, AmountScale);
         builder.Property(order => order.AutoApproved).IsRequired();
@@ -70,6 +72,7 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
         reference.Property(value => value.RoutineId).HasColumnName(RoutineIdColumn).IsRequired();
         reference.Property(value => value.RoutineName).HasColumnName(RoutineNameColumn).HasMaxLength(ServiceOrder.MaxTextLength).IsRequired();
         reference.Property(value => value.RoutineTypeCode).HasColumnName(RoutineTypeCodeColumn).HasMaxLength(ServiceOrder.MaxRoutineTypeCodeLength).IsRequired();
+        reference.Property(value => value.ResponsibleApproverId).HasColumnName(ResponsibleApproverIdColumn);
         reference.HasIndex(value => value.VehicleId).HasDatabaseName(VehicleIndexName);
         reference.HasIndex(value => value.RoutineId).IsUnique().HasFilter(OpenRoutineFilter).HasDatabaseName(OpenRoutineIndexName);
     }

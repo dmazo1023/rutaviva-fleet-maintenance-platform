@@ -13,6 +13,11 @@ public static class ServiceOrderErrors
     private const string TextRequiredCode = "ServiceOrder.TextRequired";
     private const string TextTooLongCode = "ServiceOrder.TextTooLong";
     private const string OpenOrderExistsCode = "ServiceOrder.OpenOrderExists";
+    private const string ApproverNotAuthorizedCode = "ServiceOrder.ApproverNotAuthorized";
+    private const string ApproverNotFoundCode = "ServiceOrder.ApproverNotFound";
+    private const string VehicleNotFoundCode = "ServiceOrder.VehicleNotFound";
+    private const string RoutineNotFoundCode = "ServiceOrder.RoutineNotFound";
+    private const string WorkshopNotFoundCode = "ServiceOrder.WorkshopNotFound";
     private const string ThresholdInvalidCode = "ServiceOrder.ApprovalThresholdInvalid";
 
     private const string NotFoundMessage = "The service order was not found.";
@@ -24,6 +29,11 @@ public static class ServiceOrderErrors
     private const string TextRequiredMessage = "The plate, routine, workshop and actor names are required.";
     private const string TextTooLongMessage = "A text value exceeds the maximum length.";
     private const string OpenOrderExistsMessage = "The routine already has an open service order.";
+    private const string ApproverNotAuthorizedMessage = "The approver does not belong to the vehicle owner and is not its responsible.";
+    private const string ApproverNotFoundMessage = "The approver is not known by service orders.";
+    private const string VehicleNotFoundMessage = "The vehicle is not known by service orders or is inactive.";
+    private const string RoutineNotFoundMessage = "The routine is not known by service orders or does not belong to the vehicle.";
+    private const string WorkshopNotFoundMessage = "The vehicle workshop is not known by service orders.";
     private const string ThresholdInvalidMessage = "The auto approval threshold cannot be negative.";
 
     public static readonly Error NotFound = new(NotFoundCode, NotFoundMessage, ErrorType.NotFound);
@@ -43,6 +53,16 @@ public static class ServiceOrderErrors
     public static readonly Error TextTooLong = new(TextTooLongCode, TextTooLongMessage, ErrorType.Validation);
 
     public static readonly Error OpenOrderExists = new(OpenOrderExistsCode, OpenOrderExistsMessage, ErrorType.Conflict);
+
+    public static readonly Error ApproverNotAuthorized = new(ApproverNotAuthorizedCode, ApproverNotAuthorizedMessage, ErrorType.BusinessRule);
+
+    public static readonly Error ApproverNotFound = new(ApproverNotFoundCode, ApproverNotFoundMessage, ErrorType.NotFound);
+
+    public static readonly Error VehicleNotFound = new(VehicleNotFoundCode, VehicleNotFoundMessage, ErrorType.NotFound);
+
+    public static readonly Error RoutineNotFound = new(RoutineNotFoundCode, RoutineNotFoundMessage, ErrorType.NotFound);
+
+    public static readonly Error WorkshopNotFound = new(WorkshopNotFoundCode, WorkshopNotFoundMessage, ErrorType.NotFound);
 
     public static readonly Error ThresholdInvalid = new(ThresholdInvalidCode, ThresholdInvalidMessage, ErrorType.Validation);
 }

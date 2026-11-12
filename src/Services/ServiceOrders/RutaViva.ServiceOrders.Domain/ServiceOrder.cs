@@ -30,6 +30,8 @@ public sealed class ServiceOrder : AggregateRoot<ServiceOrderId>
 
     public ServiceOrderReference Reference { get; private set; }
 
+    public ServiceOrderOrigin Origin { get; private set; }
+
     public ServiceOrderStatus Status { get; private set; }
 
     public decimal? QuotedAmount { get; private set; }
@@ -44,7 +46,7 @@ public sealed class ServiceOrder : AggregateRoot<ServiceOrderId>
 
     public IReadOnlyCollection<ServiceOrderHistoryEntry> History => _history.AsReadOnly();
 
-    public static Result<ServiceOrder> Create(ServiceOrderReference reference, string? createdBy)
+    public static Result<ServiceOrder> Create(ServiceOrderReference reference, ServiceOrderOrigin origin, string? createdBy)
     {
         Guard.NotNull(reference);
         Result validReference = Validate(reference);
@@ -66,6 +68,7 @@ public sealed class ServiceOrder : AggregateRoot<ServiceOrderId>
             Id = id,
             Number = NumberOf(id),
             Reference = reference,
+            Origin = origin,
             Status = ServiceOrderStatus.Created,
             CreatedAt = now,
             UpdatedAt = now
@@ -95,9 +98,9 @@ public sealed class ServiceOrder : AggregateRoot<ServiceOrderId>
         return MoveTo(next, quotedBy);
     }
 
-    public Result Approve(string? approvedBy) => MoveFrom(ServiceOrderStatus.PendingApproval, ServiceOrderStatus.Approved, approvedBy);
+    public Result Approve(ServiceOrderApprover approver) => Decide(approver, ServiceOrderStatus.Approved);
 
-    public Result Reject(string? rejectedBy) => MoveFrom(ServiceOrderStatus.PendingApproval, ServiceOrderStatus.Cancelled, rejectedBy);
+    public Result Reject(ServiceOrderApprover approver) => Decide(approver, ServiceOrderStatus.Cancelled);
 
     public Result Start(string? startedBy) => MoveTo(ServiceOrderStatus.InProgress, startedBy);
 
@@ -116,7 +119,7 @@ public sealed class ServiceOrder : AggregateRoot<ServiceOrderId>
             return completed;
         }
 
-        Raise(new ServiceOrderCompleted(Id, Number, Reference, QuotedAmount ?? 0, AutoApproved, servicedKm, CreatedAt, UpdatedAt));
+        Raise(new ServiceOrderCompleted(Id, Number, Reference, Origin, QuotedAmount ?? 0, AutoApproved, servicedKm, CreatedAt, UpdatedAt));
         return Result.Success();
     }
 
@@ -159,6 +162,17 @@ public sealed class ServiceOrder : AggregateRoot<ServiceOrderId>
         }
 
         return normalized;
+    }
+
+    private Result Decide(ServiceOrderApprover approver, ServiceOrderStatus target)
+    {
+        Guard.NotNull(approver);
+        if (!ApprovalAuthorizationPolicy.CanApprove(Reference, approver))
+        {
+            return Result.Failure(ServiceOrderErrors.ApproverNotAuthorized);
+        }
+
+        return MoveFrom(ServiceOrderStatus.PendingApproval, target, approver.FullName);
     }
 
     private Result MoveFrom(ServiceOrderStatus expected, ServiceOrderStatus target, string? actor) =>

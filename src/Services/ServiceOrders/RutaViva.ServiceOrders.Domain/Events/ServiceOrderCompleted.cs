@@ -7,6 +7,7 @@ public sealed record ServiceOrderCompleted(
     ServiceOrderId ServiceOrderId,
     string Number,
     ServiceOrderReference Reference,
+    ServiceOrderOrigin Origin,
     decimal TotalAmount,
     bool AutoApproved,
     long ServicedKm,
