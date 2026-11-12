@@ -42,7 +42,13 @@
         <app-status-pill [status]="pillStatus(v)" [trigger]="pillTrigger(v)" />
       </span>
       <span class="vorder-cell r" role="cell">
-        <span class="vorder">{{ texts.emptyValue }}</span>
+        @if (orderOf(v); as order) {
+          <span class="vorder" [class.is-warn]="isPendingApproval(order)">
+            <span class="ms ms--s" aria-hidden="true">assignment</span>{{ order.number }}
+          </span>
+        } @else {
+          <span class="vorder">{{ texts.emptyValue }}</span>
+        }
       </span>
     </div>
   }

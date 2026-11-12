@@ -57,6 +57,7 @@
     <app-vehicle-list
       [vehicles]="filteredVehicles()"
       [flashedIds]="flashedIds()"
+      [openOrders]="openOrders()"
       (selectVehicle)="onSelectVehicle($event)"
     />
   }

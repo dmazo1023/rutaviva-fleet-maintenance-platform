@@ -397,6 +397,12 @@ export class MaintenanceApi {
       .pipe(map(() => undefined));
   }
 
+  getOpenOrders(customerId?: string): Observable<readonly PlanOrderSummaryVm[]> {
+    return this.apiClient.get<readonly PlanOrderSummaryVm[]>(
+      ApiRoutes.serviceOrders.list({ customerId, statusGroup: 'Open' })
+    );
+  }
+
   getVehicleOrders(vehicleId: string): Observable<readonly PlanOrderSummaryVm[]> {
     return this.apiClient.get<readonly PlanOrderSummaryVm[]>(
       ApiRoutes.serviceOrders.list({ vehicleId })

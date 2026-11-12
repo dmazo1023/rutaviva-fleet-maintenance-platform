@@ -58,6 +58,7 @@ export class FleetPageComponent implements OnInit {
   readonly searchQuery = this.facade.searchQuery;
   readonly activeFilter = this.facade.activeFilter;
   readonly flashedIds = this.facade.flashedVehicleIds;
+  readonly openOrders = this.facade.openOrdersByVehicle;
 
   readonly filterOptions: Signal<readonly SegmentedFilterOption[]> = computed(() => {
     const counts = this.facade.filterCounts();

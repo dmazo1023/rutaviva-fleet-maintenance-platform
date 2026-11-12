@@ -1,4 +1,4 @@
-import { DestroyRef, inject, Injectable, Signal } from '@angular/core';
+import { DestroyRef, inject, Injectable, Signal, signal, WritableSignal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, forkJoin, map, Observable, of, tap, throwError } from 'rxjs';
@@ -160,6 +160,12 @@ export class FleetFacade {
   readonly ordersLoadable: Signal<Loadable<readonly PlanOrderSummaryVm[]>> =
     this.planStore.ordersLoadable;
 
+  private readonly openOrdersSignal: WritableSignal<ReadonlyMap<string, PlanOrderSummaryVm>> = signal<
+    ReadonlyMap<string, PlanOrderSummaryVm>
+  >(new Map<string, PlanOrderSummaryVm>());
+  readonly openOrdersByVehicle: Signal<ReadonlyMap<string, PlanOrderSummaryVm>> =
+    this.openOrdersSignal.asReadonly();
+
   constructor() {
     this.bindRealtimeEvents();
     this.viewRefresh.refresh$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
@@ -182,6 +188,20 @@ export class FleetFacade {
         this.fleetStore.setListReady(composeVehicleListItems(vehicles, plans)),
       error: () => this.fleetStore.setListError(FLEET_TEXTS.errorMessage),
     });
+    this.loadOpenOrders(customerId);
+  }
+
+  private loadOpenOrders(customerId: string | undefined): void {
+    this.maintenanceApi
+      .getOpenOrders(customerId)
+      .pipe(catchError(() => of([] as readonly PlanOrderSummaryVm[])))
+      .subscribe((orders: readonly PlanOrderSummaryVm[]) =>
+        this.openOrdersSignal.set(
+          new Map<string, PlanOrderSummaryVm>(
+            orders.map((order: PlanOrderSummaryVm) => [order.vehicleId, order])
+          )
+        )
+      );
   }
 
   loadVehicleDetail(plate: string): void {

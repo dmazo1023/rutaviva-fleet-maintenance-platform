@@ -9,7 +9,7 @@ import {
   VehicleChangedEvent,
 } from '../../core/realtime/realtime-events';
 import { MaintenanceApi } from '../maintenance/data/maintenance.api';
-import { MaintenancePlanSummaryVm } from '../maintenance/models/maintenance.vm';
+import { MaintenancePlanSummaryVm, PlanOrderSummaryVm } from '../maintenance/models/maintenance.vm';
 import { FleetApi } from './data/fleet.api';
 import { composeVehicleListItems, FleetFacade } from './fleet.facade';
 import { VehicleListItemVm, VehicleSummaryVm } from './models/fleet.vm';
@@ -76,6 +76,20 @@ describe('FleetFacade', () => {
     buildPlan('RVA102', 'Overdue', 114, 81_400),
   ];
 
+  const sampleOpenOrder: PlanOrderSummaryVm = {
+    id: 'SO-1',
+    number: 'OS-0001',
+    vehicleId: 'RVA104',
+    plate: 'RVA104',
+    routineId: 'RT-RVA104-BRAKES',
+    routineName: 'Frenos',
+    routineTypeCode: 'BRAKES',
+    status: 'PendingApproval',
+    statusBeforeHold: null,
+    total: null,
+    appointmentAt: null,
+  };
+
   beforeEach(() => {
     routineChangedSubject = new Subject<RoutineChangedEvent>();
     odometerRecordedSubject = new Subject<OdometerReadingRecordedEvent>();
@@ -95,6 +109,7 @@ describe('FleetFacade', () => {
           provide: MaintenanceApi,
           useValue: {
             getPlanSummaries: () => of(samplePlans),
+            getOpenOrders: () => of([sampleOpenOrder]),
           },
         },
         {
@@ -120,12 +135,14 @@ describe('FleetFacade', () => {
     expect(sortedPlates).toEqual(['RVA104', 'RVA102', 'RVA101', 'RVA103', 'RVA110']);
   });
 
-  it('should load the list without calling any service-orders endpoint', () => {
+  it('should load the list and index the open service orders by vehicle', () => {
     const facade: FleetFacade = TestBed.inject(FleetFacade);
     facade.loadFleetList();
 
     expect(facade.listLoadable().status).toBe('ready');
     expect(facade.listLoadable().data.length).toBe(5);
+    expect(facade.openOrdersByVehicle().get('RVA104')?.number).toBe('OS-0001');
+    expect(facade.openOrdersByVehicle().has('RVA101')).toBe(false);
   });
 
   it('should compose the maintenance summary with worst status, max percent and counts', () => {

@@ -3,7 +3,7 @@ import { DueStatus, TriggeredBy } from '../../../../core/models/enums';
 import { MiniBarComponent } from '../../../../shared/mini-bar/mini-bar.component';
 import { PlateChipComponent } from '../../../../shared/plate-chip/plate-chip.component';
 import { StatusPillComponent } from '../../../../shared/status-pill/status-pill.component';
-import { NextMaintenanceVm } from '../../../maintenance/models/maintenance.vm';
+import { NextMaintenanceVm, PlanOrderSummaryVm } from '../../../maintenance/models/maintenance.vm';
 import { FLEET_TEXTS } from '../../fleet.texts';
 import { VehicleListItemVm } from '../../models/fleet.vm';
 import { formatRemaining, toneOfDueStatus } from '../../models/next-maintenance.format';
@@ -26,9 +26,21 @@ export class VehicleListComponent {
     new Set<string>()
   );
 
+  readonly openOrders: InputSignal<ReadonlyMap<string, PlanOrderSummaryVm>> = input<
+    ReadonlyMap<string, PlanOrderSummaryVm>
+  >(new Map<string, PlanOrderSummaryVm>());
+
   readonly selectVehicle: OutputEmitterRef<string> = output<string>();
 
   readonly texts: typeof FLEET_TEXTS = FLEET_TEXTS;
+
+  orderOf(vehicle: VehicleListItemVm): PlanOrderSummaryVm | null {
+    return this.openOrders().get(vehicle.vehicleId) ?? null;
+  }
+
+  isPendingApproval(order: PlanOrderSummaryVm): boolean {
+    return order.status === 'PendingApproval';
+  }
 
   isFlashed(vehicleId: string): boolean {
     return this.flashedIds().has(vehicleId);
