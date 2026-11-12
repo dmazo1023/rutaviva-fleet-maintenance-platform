@@ -4,7 +4,7 @@ using RutaViva.Testing.Fixtures;
 
 namespace RutaViva.ServiceOrders.IntegrationTests.Api;
 
-public sealed record ServiceOrderTestReferences(Guid VehicleId, Guid RoutineId, Guid ApproverId)
+public sealed record ServiceOrderTestReferences(Guid VehicleId, Guid RoutineId, Guid ApproverId, Guid WorkshopId)
 {
     private const string Plate = "TAN202";
     private const string WorkshopName = "Taller Norte";
@@ -17,7 +17,7 @@ public sealed record ServiceOrderTestReferences(Guid VehicleId, Guid RoutineId, 
         DateTimeOffset now = DateTimeOffset.UtcNow;
         Guid customerId = Guid.CreateVersion7();
         Guid workshopId = Guid.CreateVersion7();
-        ServiceOrderTestReferences references = new(Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7());
+        ServiceOrderTestReferences references = new(Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7(), workshopId);
         await using ServiceOrdersDbContext context = await database.CreateDbContextAsync<ServiceOrdersDbContext>(cancellationToken);
         context.VehicleReferences.Add(VehicleReference.Create(references.VehicleId, Plate, customerId, workshopId, null, true, now));
         context.WorkshopReferences.Add(WorkshopReference.Create(workshopId, WorkshopName, now));

@@ -14,6 +14,7 @@ public sealed class ServiceOrderQueries(ServiceOrdersDbContext context) : IServi
         orders = filter.CustomerId is { } customerId ? orders.Where(order => order.Reference.CustomerId == customerId) : orders;
         orders = filter.VehicleId is { } vehicleId ? orders.Where(order => order.Reference.VehicleId == vehicleId) : orders;
         orders = filter.RoutineId is { } routineId ? orders.Where(order => order.Reference.RoutineId == routineId) : orders;
+        orders = filter.WorkshopId is { } workshopId ? orders.Where(order => order.Reference.WorkshopId == workshopId) : orders;
         orders = filter.Statuses.Count > 0 ? orders.Where(order => filter.Statuses.Contains(order.Status)) : orders;
         return await orders.OrderByDescending(order => order.UpdatedAt).ToListAsync(cancellationToken);
     }

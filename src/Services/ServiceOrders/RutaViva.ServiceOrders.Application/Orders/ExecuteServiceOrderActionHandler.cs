@@ -46,9 +46,9 @@ public sealed class ExecuteServiceOrderActionHandler(
 
     private Result Execute(ServiceOrder order, ExecuteServiceOrderActionCommand command) => command.Action switch
     {
-        ServiceOrderAction.Quote => order.Quote(command.Amount ?? 0, approvalPolicy, command.Actor),
-        ServiceOrderAction.Start => order.Start(command.Actor),
-        ServiceOrderAction.Complete => order.Complete(command.ServicedKm ?? 0, command.Actor),
+        ServiceOrderAction.Quote => order.Quote(command.Amount ?? 0, approvalPolicy, command.WorkshopId ?? Guid.Empty, command.Actor),
+        ServiceOrderAction.Start => order.Start(command.WorkshopId ?? Guid.Empty, command.Actor),
+        ServiceOrderAction.Complete => order.Complete(command.ServicedKm ?? 0, command.WorkshopId ?? Guid.Empty, command.Actor),
         ServiceOrderAction.Cancel => order.Cancel(command.Actor),
         _ => Result.Failure(ServiceOrderErrors.InvalidTransition)
     };

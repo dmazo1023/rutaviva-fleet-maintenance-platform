@@ -9,4 +9,5 @@ public sealed record ExecuteServiceOrderActionCommand(
     string? Actor,
     decimal? Amount,
     long? ServicedKm,
-    Guid? ApproverId) : ICommand<ServiceOrderId>;
+    Guid? ApproverId,
+    Guid? WorkshopId) : ICommand<ServiceOrderId>;

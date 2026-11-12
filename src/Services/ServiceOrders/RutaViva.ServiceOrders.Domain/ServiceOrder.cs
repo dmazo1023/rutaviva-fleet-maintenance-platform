@@ -77,9 +77,14 @@ public sealed class ServiceOrder : AggregateRoot<ServiceOrderId>
         return order;
     }
 
-    public Result Quote(decimal amount, QuoteApprovalPolicy policy, string? quotedBy)
+    public Result Quote(decimal amount, QuoteApprovalPolicy policy, Guid workshopId, string? quotedBy)
     {
         Guard.NotNull(policy);
+        if (!IsAssignedWorkshop(workshopId))
+        {
+            return Result.Failure(ServiceOrderErrors.WorkshopNotAuthorized);
+        }
+
         if (amount <= 0)
         {
             return Result.Failure(ServiceOrderErrors.AmountInvalid);
@@ -102,12 +107,20 @@ public sealed class ServiceOrder : AggregateRoot<ServiceOrderId>
 
     public Result Reject(ServiceOrderApprover approver) => Decide(approver, ServiceOrderStatus.Cancelled);
 
-    public Result Start(string? startedBy) => MoveTo(ServiceOrderStatus.InProgress, startedBy);
+    public Result Start(Guid workshopId, string? startedBy) =>
+        IsAssignedWorkshop(workshopId)
+            ? MoveTo(ServiceOrderStatus.InProgress, startedBy)
+            : Result.Failure(ServiceOrderErrors.WorkshopNotAuthorized);
 
     public Result Cancel(string? cancelledBy) => MoveTo(ServiceOrderStatus.Cancelled, cancelledBy);
 
-    public Result Complete(long servicedKm, string? completedBy)
+    public Result Complete(long servicedKm, Guid workshopId, string? completedBy)
     {
+        if (!IsAssignedWorkshop(workshopId))
+        {
+            return Result.Failure(ServiceOrderErrors.WorkshopNotAuthorized);
+        }
+
         if (servicedKm < 0)
         {
             return Result.Failure(ServiceOrderErrors.ServicedKmInvalid);
@@ -163,6 +176,8 @@ public sealed class ServiceOrder : AggregateRoot<ServiceOrderId>
 
         return normalized;
     }
+
+    private bool IsAssignedWorkshop(Guid workshopId) => workshopId == Reference.WorkshopId;
 
     private Result Decide(ServiceOrderApprover approver, ServiceOrderStatus target)
     {

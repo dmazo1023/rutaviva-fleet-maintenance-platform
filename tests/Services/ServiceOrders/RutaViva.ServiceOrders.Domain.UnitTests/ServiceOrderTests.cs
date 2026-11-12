@@ -16,12 +16,14 @@ public sealed class ServiceOrderTests
 
     private static readonly Guid CustomerId = Guid.CreateVersion7();
 
+    private static readonly Guid WorkshopId = Guid.CreateVersion7();
+
     [Fact]
     public void Quote_Should_AutoApprove_When_AmountIsWithinThreshold()
     {
         ServiceOrder order = CreateOrder();
 
-        Result quoted = order.Quote(LowAmount, Policy(), Workshop);
+        Result quoted = order.Quote(LowAmount, Policy(), WorkshopId, Workshop);
 
         quoted.IsSuccess.Should().BeTrue();
         order.Status.Should().Be(ServiceOrderStatus.Approved);
@@ -33,11 +35,11 @@ public sealed class ServiceOrderTests
     {
         ServiceOrder order = CreateOrder();
 
-        order.Quote(HighAmount, Policy(), Workshop).IsSuccess.Should().BeTrue();
+        order.Quote(HighAmount, Policy(), WorkshopId, Workshop).IsSuccess.Should().BeTrue();
         order.Status.Should().Be(ServiceOrderStatus.PendingApproval);
         order.Approve(OwnerApprover()).IsSuccess.Should().BeTrue();
-        order.Start(Workshop).IsSuccess.Should().BeTrue();
-        Result completed = order.Complete(ServicedKm, Workshop);
+        order.Start(WorkshopId, Workshop).IsSuccess.Should().BeTrue();
+        Result completed = order.Complete(ServicedKm, WorkshopId, Workshop);
 
         completed.IsSuccess.Should().BeTrue();
         order.Status.Should().Be(ServiceOrderStatus.Completed);
@@ -57,7 +59,7 @@ public sealed class ServiceOrderTests
     public void Reject_Should_CancelOrder_When_QuoteIsPendingApproval()
     {
         ServiceOrder order = CreateOrder();
-        order.Quote(HighAmount, Policy(), Workshop);
+        order.Quote(HighAmount, Policy(), WorkshopId, Workshop);
 
         Result rejected = order.Reject(OwnerApprover());
 
@@ -70,7 +72,7 @@ public sealed class ServiceOrderTests
     {
         ServiceOrder order = CreateOrder();
 
-        Result completed = order.Complete(ServicedKm, Workshop);
+        Result completed = order.Complete(ServicedKm, WorkshopId, Workshop);
 
         completed.IsFailure.Should().BeTrue();
         completed.Error.Should().Be(ServiceOrderErrors.InvalidTransition);
@@ -81,7 +83,7 @@ public sealed class ServiceOrderTests
     public void Cancel_Should_CancelOrder_When_OrderIsApproved()
     {
         ServiceOrder order = CreateOrder();
-        order.Quote(LowAmount, Policy(), Workshop);
+        order.Quote(LowAmount, Policy(), WorkshopId, Workshop);
 
         Result cancelled = order.Cancel(Operator);
 
@@ -93,8 +95,8 @@ public sealed class ServiceOrderTests
     public void Cancel_Should_Fail_When_OrderIsInProgress()
     {
         ServiceOrder order = CreateOrder();
-        order.Quote(LowAmount, Policy(), Workshop);
-        order.Start(Workshop);
+        order.Quote(LowAmount, Policy(), WorkshopId, Workshop);
+        order.Start(WorkshopId, Workshop);
 
         Result cancelled = order.Cancel(Operator);
 
@@ -106,7 +108,7 @@ public sealed class ServiceOrderTests
     public void Approve_Should_Fail_When_ApproverBelongsToAnotherCustomer()
     {
         ServiceOrder order = CreateOrder();
-        order.Quote(HighAmount, Policy(), Workshop);
+        order.Quote(HighAmount, Policy(), WorkshopId, Workshop);
         ServiceOrderApprover stranger = new(Guid.CreateVersion7(), Guid.CreateVersion7(), Approver, true);
 
         Result approved = order.Approve(stranger);
@@ -114,6 +116,18 @@ public sealed class ServiceOrderTests
         approved.IsFailure.Should().BeTrue();
         approved.Error.Should().Be(ServiceOrderErrors.ApproverNotAuthorized);
         order.Status.Should().Be(ServiceOrderStatus.PendingApproval);
+    }
+
+    [Fact]
+    public void Quote_Should_Fail_When_WorkshopIsNotAssigned()
+    {
+        ServiceOrder order = CreateOrder();
+
+        Result quoted = order.Quote(LowAmount, Policy(), Guid.CreateVersion7(), Workshop);
+
+        quoted.IsFailure.Should().BeTrue();
+        quoted.Error.Should().Be(ServiceOrderErrors.WorkshopNotAuthorized);
+        order.Status.Should().Be(ServiceOrderStatus.Created);
     }
 
     private static ServiceOrderApprover OwnerApprover() => new(Guid.CreateVersion7(), CustomerId, Approver, true);
@@ -126,7 +140,7 @@ public sealed class ServiceOrderTests
             Guid.CreateVersion7(),
             "RVA104",
             CustomerId,
-            Guid.CreateVersion7(),
+            WorkshopId,
             Workshop,
             Guid.CreateVersion7(),
             "Frenos",

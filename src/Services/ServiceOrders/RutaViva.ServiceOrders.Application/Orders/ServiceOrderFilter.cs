@@ -6,4 +6,5 @@ public sealed record ServiceOrderFilter(
     Guid? CustomerId,
     Guid? VehicleId,
     Guid? RoutineId,
+    Guid? WorkshopId,
     IReadOnlyCollection<ServiceOrderStatus> Statuses);

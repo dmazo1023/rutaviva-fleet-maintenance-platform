@@ -9,6 +9,7 @@ public sealed class ExecuteServiceOrderActionCommandValidator : AbstractValidato
     private const string AmountRequiredMessage = "The quoted amount is required.";
     private const string ServicedKmRequiredMessage = "The serviced kilometers are required.";
     private const string ApproverRequiredMessage = "The approver identifier is required.";
+    private const string WorkshopRequiredMessage = "The workshop identifier is required.";
 
     public ExecuteServiceOrderActionCommandValidator()
     {
@@ -26,5 +27,9 @@ public sealed class ExecuteServiceOrderActionCommandValidator : AbstractValidato
             .NotEmpty()
             .When(command => command.Action is ServiceOrderAction.Approve or ServiceOrderAction.Reject)
             .WithMessage(ApproverRequiredMessage);
+        RuleFor(command => command.WorkshopId)
+            .NotEmpty()
+            .When(command => command.Action is ServiceOrderAction.Quote or ServiceOrderAction.Start or ServiceOrderAction.Complete)
+            .WithMessage(WorkshopRequiredMessage);
     }
 }

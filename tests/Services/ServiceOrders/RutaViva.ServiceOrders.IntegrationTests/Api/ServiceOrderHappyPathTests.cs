@@ -17,6 +17,7 @@ public sealed class ServiceOrderHappyPathTests(SqlServerTestDatabase database) :
     private const string ActionRouteFormat = "/api/v1/service-orders/{0}/{1}";
     private const string ApproverDetailFormat = "/api/v1/service-orders/{0}?actor=Approver";
     private const string PendingApprovalListRoute = "/api/v1/service-orders?statusGroup=PendingApproval";
+    private const string WorkshopListFormat = "/api/v1/service-orders?workshopId={0}";
     private const string Workshop = "Taller Norte";
     private const string Approver = "Aprobador";
     private const string Operator = "Operador";
@@ -44,16 +45,20 @@ public sealed class ServiceOrderHappyPathTests(SqlServerTestDatabase database) :
         created.StatusCode.Should().Be(HttpStatusCode.Created);
         string id = (await created.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty(IdProperty).GetString()!;
 
-        JsonElement quoted = await PostAsync(client, id, "quote", new QuoteServiceOrderRequest(HighAmount, Workshop), cancellationToken);
+        JsonElement quoted = await PostAsync(client, id, "quote", new QuoteServiceOrderRequest(HighAmount, Workshop, references.WorkshopId), cancellationToken);
         quoted.GetProperty(StatusProperty).GetString().Should().Be(PendingApproval);
         JsonElement pending = await client.GetFromJsonAsync<JsonElement>(PendingApprovalListRoute, cancellationToken);
         pending.EnumerateArray().Select(item => item.GetProperty(IdProperty).GetString()).Should().Contain(id);
+        JsonElement otherWorkshop = await client.GetFromJsonAsync<JsonElement>(string.Format(WorkshopListFormat, Guid.CreateVersion7()), cancellationToken);
+        otherWorkshop.GetArrayLength().Should().Be(0);
+        JsonElement ownWorkshop = await client.GetFromJsonAsync<JsonElement>(string.Format(WorkshopListFormat, references.WorkshopId), cancellationToken);
+        ownWorkshop.GetArrayLength().Should().Be(1);
         JsonElement forApprover = await client.GetFromJsonAsync<JsonElement>(string.Format(ApproverDetailFormat, id), cancellationToken);
         forApprover.GetProperty(ActionsProperty).EnumerateArray().Select(item => item.GetProperty(ActionProperty).GetString()).Should().Contain(Approve);
 
         await PostAsync(client, id, "approve", new ApproveServiceOrderRequest(Approver, references.ApproverId), cancellationToken);
-        await PostAsync(client, id, "start", new StartServiceOrderRequest(Workshop), cancellationToken);
-        JsonElement completed = await PostAsync(client, id, "complete", new CompleteServiceOrderRequest(Workshop, ServicedKm), cancellationToken);
+        await PostAsync(client, id, "start", new StartServiceOrderRequest(Workshop, references.WorkshopId), cancellationToken);
+        JsonElement completed = await PostAsync(client, id, "complete", new CompleteServiceOrderRequest(Workshop, ServicedKm, references.WorkshopId), cancellationToken);
 
         completed.GetProperty(StatusProperty).GetString().Should().Be(Completed);
         completed.GetProperty(HistoryProperty).GetArrayLength().Should().Be(CompletedHistoryEntries);
