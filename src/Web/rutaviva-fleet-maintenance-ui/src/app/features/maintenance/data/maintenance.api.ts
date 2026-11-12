@@ -19,11 +19,13 @@ import { RoutineTrackVm } from '../../../shared/models/routine-track.vm';
 import {
   AlertsPageVm,
   AlertVm,
+  CreateServiceOrderRequest,
   MaintenancePlanDetailVm,
   MaintenancePlanSummaryVm,
   NextMaintenanceKind,
   NextMaintenanceVm,
   OdometerReadingVm,
+  PlanOrderSummaryVm,
   ReevaluationSummaryVm,
   RegisterServiceRequest,
   RoutineVm,
@@ -289,6 +291,10 @@ function alertsUrl(query: AlertsQuery): string {
   return `${base}${separator}pageSize=${ALERTS_PAGE_SIZE}`;
 }
 
+interface CreatedServiceOrderDto {
+  readonly id: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -389,6 +395,21 @@ export class MaintenanceApi {
         body
       )
       .pipe(map(() => undefined));
+  }
+
+  getVehicleOrders(vehicleId: string): Observable<readonly PlanOrderSummaryVm[]> {
+    return this.apiClient.get<readonly PlanOrderSummaryVm[]>(
+      ApiRoutes.serviceOrders.list({ vehicleId })
+    );
+  }
+
+  createServiceOrder(request: CreateServiceOrderRequest): Observable<string> {
+    return this.apiClient
+      .post<CreateServiceOrderRequest, CreatedServiceOrderDto>(
+        ApiRoutes.serviceOrders.create(),
+        request
+      )
+      .pipe(map((created: CreatedServiceOrderDto) => created.id));
   }
 
   private reloadRoutine(vehicleId: string, routineId: string): Observable<RoutineVm> {

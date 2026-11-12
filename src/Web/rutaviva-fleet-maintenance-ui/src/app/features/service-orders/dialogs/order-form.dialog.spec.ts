@@ -34,15 +34,32 @@ describe('OrderFormDialogComponent', () => {
 
     const form: HTMLFormElement | null = host.querySelector('form');
     form?.dispatchEvent(new Event('submit'));
-    expect(result).toEqual({
-      action: 'Quote',
-      description: undefined,
-      amount: 1450000,
-      appointmentAt: undefined,
-    });
+    expect(result).toEqual({ action: 'Quote', amount: 1450000 });
   });
 
-  it('should render ConfirmImpactDialog for Reject and Cancel actions', () => {
+  it('should prefill the odometer and emit the serviced km for Complete', () => {
+    const fixture: ComponentFixture<OrderFormDialogComponent> =
+      TestBed.createComponent(OrderFormDialogComponent);
+    fixture.componentRef.setInput('initialAmount', 48250);
+    fixture.componentRef.setInput('action', 'Complete');
+    fixture.componentRef.setInput('open', true);
+    fixture.detectChanges();
+
+    let result: OrderFormSubmitEvent | undefined;
+    fixture.componentInstance.submitted.subscribe((ev: OrderFormSubmitEvent) => {
+      result = ev;
+    });
+
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const kmInput: HTMLInputElement | null = host.querySelector(
+      '.order-form-dialog__amount-input'
+    );
+    expect(kmInput?.value).toBe('48250');
+    host.querySelector('form')?.dispatchEvent(new Event('submit'));
+    expect(result).toEqual({ action: 'Complete', amount: 48250 });
+  });
+
+  it('should render ConfirmImpactDialog for the Reject action', () => {
     const fixture: ComponentFixture<OrderFormDialogComponent> =
       TestBed.createComponent(OrderFormDialogComponent);
     fixture.componentRef.setInput('open', true);

@@ -152,7 +152,7 @@
           <div id="panel-rutinas" role="tabpanel" aria-labelledby="tab-rutinas">
             @if (planLoadable().data; as plan) {
               <ul class="routines">
-                @for (routine of plan.routines; track routine.routineId) {
+                @for (routine of routines(); track routine.routineId) {
                   <li class="routines__item">
                     <app-routine-row
                       [routine]="routine"
@@ -162,6 +162,8 @@
                       (toggleState)="onToggleRoutine($event)"
                       (editParams)="onOpenRoutineParams($event)"
                       (registerService)="onRegisterService($event)"
+                      (createOrder)="onCreateOrder($event)"
+                      (openOrder)="openServiceOrder($event)"
                     />
                   </li>
                 }
@@ -172,11 +174,30 @@
 
         @if (activeTab() === 'ordenes') {
           <div id="panel-ordenes" role="tabpanel" aria-labelledby="tab-ordenes">
-            <app-empty-state
-              icon="assignment"
-              [title]="texts.ordersNextPhaseTitle"
-              [message]="texts.ordersNextPhaseMessage"
-            />
+            @if (ordersLoadable().data.length > 0) {
+              <ul class="vehicle-orders">
+                @for (order of ordersLoadable().data; track order.id) {
+                  <li>
+                    <button
+                      type="button"
+                      class="vehicle-orders__item"
+                      [attr.aria-label]="texts.openOrderAriaPrefix + order.number"
+                      (click)="openServiceOrder(order.id)"
+                    >
+                      <span class="mono">{{ order.number }}</span>
+                      <span class="vehicle-orders__routine">{{ order.routineName }}</span>
+                      <app-status-pill [status]="order.status" [small]="true" />
+                    </button>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <app-empty-state
+                icon="assignment"
+                [title]="texts.ordersEmptyTitle"
+                [message]="texts.ordersEmptyMessage"
+              />
+            }
           </div>
         }
 
@@ -200,7 +221,7 @@
         <app-deactivate-vehicle-dialog
           [open]="deactivateDialogOpen()"
           [plate]="vehicle.plate"
-          [openOrdersCount]="openOrdersCount"
+          [openOrdersCount]="openOrdersCount()"
           [activeRoutinesCount]="activeRoutinesCount()"
           [busy]="deactivatingVehicle()"
           (confirmed)="onConfirmDeactivate(vehicle)"

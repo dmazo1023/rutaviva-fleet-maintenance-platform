@@ -112,76 +112,23 @@ export class ServiceOrdersFacade {
     );
   }
 
-  cancel(orderId: string): Observable<ServiceOrderDetailVm> {
-    return this.executeMutation(orderId, () =>
-      this.api.cancel(orderId, { cancelledBy: this.sessionStore.currentActorName() })
-    );
-  }
-
-  scheduleAppointment(orderId: string, appointmentAt: string): Observable<ServiceOrderDetailVm> {
-    return this.executeMutation(orderId, () =>
-      this.api.scheduleAppointment(orderId, {
-        appointmentAt,
-        scheduledBy: this.sessionStore.currentActorName(),
-      })
-    );
-  }
-
-  markOnSite(orderId: string): Observable<ServiceOrderDetailVm> {
-    return this.executeMutation(orderId, () =>
-      this.api.markOnSite(orderId, { markedBy: this.sessionStore.currentActorName() })
-    );
-  }
-
   start(orderId: string): Observable<ServiceOrderDetailVm> {
     return this.executeMutation(orderId, () =>
       this.api.start(orderId, { startedBy: this.sessionStore.currentActorName() })
     );
   }
 
-  complete(orderId: string): Observable<ServiceOrderDetailVm> {
+  complete(orderId: string, servicedKm: number): Observable<ServiceOrderDetailVm> {
     return this.executeMutation(orderId, () =>
-      this.api.complete(orderId, { completedBy: this.sessionStore.currentActorName() })
-    );
-  }
-
-  addAdditionalService(
-    orderId: string,
-    description: string,
-    amount: number
-  ): Observable<ServiceOrderDetailVm> {
-    return this.executeMutation(orderId, () =>
-      this.api.addAdditionalService(orderId, {
-        description,
-        amount,
-        addedBy: this.sessionStore.currentActorName(),
+      this.api.complete(orderId, {
+        completedBy: this.sessionStore.currentActorName(),
+        servicedKm,
       })
     );
   }
 
-  requestAdditionalService(
-    orderId: string,
-    description: string
-  ): Observable<ServiceOrderDetailVm> {
-    return this.executeMutation(orderId, () =>
-      this.api.requestAdditionalService(orderId, {
-        description,
-        requestedBy: this.sessionStore.currentActorName(),
-      })
-    );
-  }
-
-  priceAdditionalService(
-    orderId: string,
-    lineId: string,
-    amount: number
-  ): Observable<ServiceOrderDetailVm> {
-    return this.executeMutation(orderId, () =>
-      this.api.priceAdditionalService(orderId, lineId, {
-        amount,
-        pricedBy: this.sessionStore.currentActorName(),
-      })
-    );
+  vehicleOdometerKm(vehicleId: string): Observable<number | null> {
+    return this.api.getVehicleOdometerKm(vehicleId);
   }
 
   private executeMutation(

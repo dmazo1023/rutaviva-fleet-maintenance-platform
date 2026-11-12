@@ -26,42 +26,16 @@
         </div>
 
         <div class="order-form-dialog__body">
-          @if (cfg.showDescription) {
-            <label class="order-form-dialog__field">
-              <span>{{ texts.additionalDescLabel }}</span>
-              <input
-                type="text"
-                class="input order-form-dialog__desc-input"
-                [value]="descriptionInput()"
-                (input)="onDescriptionChange($event)"
-              />
-            </label>
-          }
-
-          @if (cfg.showAmount) {
-            <label class="order-form-dialog__field">
-              <span>{{ cfg.amountLabel }}</span>
-              <input
-                type="number"
-                class="input order-form-dialog__amount-input"
-                [value]="amountInput()"
-                (input)="onAmountChange($event)"
-              />
-            </label>
-          }
-
-          @if (cfg.showAppointmentDate) {
-            <label class="order-form-dialog__field">
-              <span>{{ texts.scheduleDateLabel }}</span>
-              <input
-                type="text"
-                class="input order-form-dialog__date-input"
-                [value]="dateInput()"
-                placeholder="15/11/2026 09:00"
-                (input)="onDateChange($event)"
-              />
-            </label>
-          }
+          <label class="order-form-dialog__field">
+            <span>{{ cfg.amountLabel }}</span>
+            <input
+              type="number"
+              min="1"
+              class="input order-form-dialog__amount-input"
+              [value]="amountInput()"
+              (input)="onAmountChange($event)"
+            />
+          </label>
 
           @if (validationError(); as err) {
             <p class="order-form-dialog__error" role="alert">{{ err }}</p>

@@ -34,6 +34,7 @@ describe('VehicleDetailPageComponent', () => {
               detailLoadable: fs.detailLoadable,
               planLoadable: ps.planLoadable,
               readingsLoadable: ps.readingsLoadable,
+              ordersLoadable: ps.ordersLoadable,
               flashedRoutineIds: ps.flashedRoutineIds,
               loadVehicleDetail: () => undefined,
             };

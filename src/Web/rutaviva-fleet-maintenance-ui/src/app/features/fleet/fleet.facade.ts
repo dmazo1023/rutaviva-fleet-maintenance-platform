@@ -22,6 +22,7 @@ import {
   MaintenancePlanDetailVm,
   MaintenancePlanSummaryVm,
   OdometerReadingVm,
+  PlanOrderSummaryVm,
   RoutineVm,
 } from '../maintenance/models/maintenance.vm';
 import { PlanStore } from '../maintenance/state/plan.store';
@@ -118,6 +119,8 @@ export class FleetFacade {
   readonly readingsLoadable: Signal<Loadable<readonly OdometerReadingVm[]>> =
     this.planStore.readingsLoadable;
   readonly flashedRoutineIds: Signal<ReadonlySet<string>> = this.planStore.flashedRoutineIds;
+  readonly ordersLoadable: Signal<Loadable<readonly PlanOrderSummaryVm[]>> =
+    this.planStore.ordersLoadable;
 
   constructor() {
     this.bindRealtimeEvents();
@@ -206,6 +209,22 @@ export class FleetFacade {
     );
   }
 
+  createServiceOrder(vehicle: VehicleDetailVm, routine: RoutineVm): Observable<string> {
+    return this.maintenanceApi
+      .createServiceOrder({
+        vehicleId: vehicle.vehicleId,
+        plate: vehicle.plate,
+        customerId: vehicle.customerId,
+        workshopId: vehicle.workshopId,
+        workshopName: vehicle.workshopName,
+        routineId: routine.routineId,
+        routineName: routine.name,
+        routineTypeCode: routine.typeCode,
+        createdBy: this.sessionStore.currentActorName(),
+      })
+      .pipe(tap({ error: () => this.showOperationError() }));
+  }
+
   private onVehicleLoaded(vehicle: VehicleDetailVm | null): void {
     this.fleetStore.setDetailReady(vehicle);
     if (!vehicle) {
@@ -268,6 +287,12 @@ export class FleetFacade {
     this.maintenanceApi.getOdometerReadings(vehicleId).subscribe({
       next: (readings: readonly OdometerReadingVm[]) => this.planStore.setReadingsReady(readings),
       error: () => this.planStore.setReadingsError(FLEET_TEXTS.errorMessage),
+    });
+
+    this.planStore.setOrdersLoading();
+    this.maintenanceApi.getVehicleOrders(vehicleId).subscribe({
+      next: (orders: readonly PlanOrderSummaryVm[]) => this.planStore.setOrdersReady(orders),
+      error: () => this.planStore.setOrdersError(FLEET_TEXTS.errorMessage),
     });
   }
 

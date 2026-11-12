@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <ProjectReference Include="../../../../src/Services/ServiceOrders/RutaViva.ServiceOrders.Api/RutaViva.ServiceOrders.Api.csproj" />
+    <ProjectReference Include="../../../../src/Services/ServiceOrders/RutaViva.ServiceOrders.Infrastructure/RutaViva.ServiceOrders.Infrastructure.csproj" />
+    <ProjectReference Include="../../../RutaViva.Testing.Fixtures/RutaViva.Testing.Fixtures.csproj" />
+  </ItemGroup>
+</Project>

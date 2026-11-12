@@ -1,1 +1,1 @@
-export const SERVICE_ORDERS_FEATURE_ENABLED = false;
+export const SERVICE_ORDERS_FEATURE_ENABLED = true;
