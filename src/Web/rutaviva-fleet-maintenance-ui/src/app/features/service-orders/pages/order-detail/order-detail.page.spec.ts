@@ -14,6 +14,7 @@ describe('OrderDetailPageComponent', () => {
   const baseOrder: ServiceOrderDetailVm = {
     id: 'OS-2026-001',
     number: 'OS-2026-001',
+    origin: 'Manual',
     vehicleId: 'RVA102',
     plate: 'RVA102',
     routineId: 'RT-RVA102-OIL',
@@ -110,6 +111,7 @@ describe('OrderDetailPageComponent', () => {
     sessionStore.setProfile('Operator');
     store.setDetailReady({
       ...baseOrder,
+      origin: 'Automatic',
       status: 'Cancelled',
       statusBeforeHold: null,
       availableActions: [],
@@ -122,6 +124,7 @@ describe('OrderDetailPageComponent', () => {
 
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
     expect(host.querySelector('.stepper-cancelled-banner')?.textContent).toContain('Orden cancelada');
+    expect(host.querySelector('.order-detail__origin')?.textContent).toContain('Automática');
 
     store.setDetailReady({
       ...baseOrder,

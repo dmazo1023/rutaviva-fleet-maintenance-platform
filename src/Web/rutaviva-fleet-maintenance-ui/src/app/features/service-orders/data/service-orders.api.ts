@@ -54,14 +54,20 @@ export class ServiceOrdersApi {
     );
   }
 
-  approve(id: string, body: { readonly approvedBy: string }): Observable<ServiceOrderDetailVm> {
+  approve(
+    id: string,
+    body: { readonly approvedBy: string; readonly approverId: string }
+  ): Observable<ServiceOrderDetailVm> {
     return this.apiClient.post<typeof body, ServiceOrderDetailVm>(
       ApiRoutes.serviceOrders.approve(id),
       body
     );
   }
 
-  reject(id: string, body: { readonly rejectedBy: string }): Observable<ServiceOrderDetailVm> {
+  reject(
+    id: string,
+    body: { readonly rejectedBy: string; readonly approverId: string }
+  ): Observable<ServiceOrderDetailVm> {
     return this.apiClient.post<typeof body, ServiceOrderDetailVm>(
       ApiRoutes.serviceOrders.reject(id),
       body

@@ -49,6 +49,9 @@
               <td>
                 <div class="orders-table__order-cell">
                   <span class="orders-table__num-code">{{ order.number }}</span>
+                  @if (order.origin === 'Automatic') {
+                    <span class="orders-table__origin">{{ texts.automaticOriginBadge }}</span>
+                  }
                   @if (order.priority === 'High' && order.status === 'PendingApproval') {
                     <span class="orders-table__priority">{{ texts.priorityBadge }}</span>
                   }

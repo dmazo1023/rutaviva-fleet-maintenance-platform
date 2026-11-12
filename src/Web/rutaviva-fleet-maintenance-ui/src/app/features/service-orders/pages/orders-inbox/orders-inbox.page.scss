@@ -63,6 +63,15 @@
     font-weight: 600;
   }
 
+  &__origin {
+    padding: 2px 6px;
+    border-radius: var(--r-chip);
+    background: var(--c-neutral-soft);
+    color: var(--c-neutral);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
   &__reason {
     font-size: 11px;
     color: var(--c-muted);

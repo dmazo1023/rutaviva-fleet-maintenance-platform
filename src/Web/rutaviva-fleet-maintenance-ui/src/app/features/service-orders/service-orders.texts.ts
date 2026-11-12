@@ -55,6 +55,9 @@ export const SERVICE_ORDERS_TEXTS = {
   cancelImpactOrderCancelled: 'La orden pasa a cancelada y no admite más acciones',
   cancelImpactRoutineOpen: 'La rutina queda disponible para crear una nueva orden',
   cancelledBannerText: 'Orden cancelada · el flujo se detuvo antes de completarse',
+  approverRequiredMessage:
+    'Elige el aprobador en la barra superior para aprobar o rechazar la orden',
+  automaticOriginBadge: 'Automática',
   highPriorityToastPrefix: 'Aprobación prioritaria: ',
   viewOrderAction: 'Ver orden',
   validationPositiveAmount: 'Ingresa un valor en pesos mayor que 0.',

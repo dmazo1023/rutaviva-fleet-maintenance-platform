@@ -11,7 +11,7 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Observable } from 'rxjs';
+import { finalize, Observable } from 'rxjs';
 import { SessionStore } from '../../../../core/context/session.store';
 import { ServiceOrderAction } from '../../../../core/models/enums';
 import { ViewRefreshService } from '../../../../core/shell/view-refresh.service';
@@ -114,21 +114,16 @@ export class OrderDetailPageComponent {
     }
 
     this.submittingAction.set(true);
-    call$.subscribe({
-      next: () => {
-        this.submittingAction.set(false);
-        this.dialogAction.set(null);
-      },
-      error: () => {
-        this.submittingAction.set(false);
-      },
+    call$.pipe(finalize(() => this.submittingAction.set(false))).subscribe({
+      next: () => this.dialogAction.set(null),
+      error: () => undefined,
     });
   }
 
   private runDirectAction(orderId: string, action: DirectAction): void {
     const call$: Observable<ServiceOrderDetailVm> =
       action === 'Approve' ? this.facade.approve(orderId) : this.facade.start(orderId);
-    call$.subscribe();
+    call$.subscribe({ error: () => undefined });
   }
 
   private openDialog(order: ServiceOrderDetailVm, action: ServiceOrderAction): void {

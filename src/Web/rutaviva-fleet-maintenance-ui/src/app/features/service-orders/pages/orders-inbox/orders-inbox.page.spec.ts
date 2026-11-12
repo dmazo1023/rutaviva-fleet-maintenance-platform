@@ -50,6 +50,7 @@ describe('OrdersInboxPageComponent', () => {
       {
         id: 'OS-3',
         number: 'OS-2026-003',
+        origin: 'Manual',
         vehicleId: 'RVA103',
         plate: 'RVA103',
         routineId: 'RT-3',
@@ -67,6 +68,7 @@ describe('OrdersInboxPageComponent', () => {
       {
         id: 'OS-2',
         number: 'OS-2026-002',
+        origin: 'Manual',
         vehicleId: 'RVA102',
         plate: 'RVA102',
         routineId: 'RT-2',
@@ -84,6 +86,7 @@ describe('OrdersInboxPageComponent', () => {
       {
         id: 'OS-1',
         number: 'OS-2026-001',
+        origin: 'Manual',
         vehicleId: 'RVA101',
         plate: 'RVA101',
         routineId: 'RT-1',
@@ -101,6 +104,7 @@ describe('OrdersInboxPageComponent', () => {
       {
         id: 'OS-4',
         number: 'OS-2026-004',
+        origin: 'Automatic',
         vehicleId: 'RVA104',
         plate: 'RVA104',
         routineId: 'RT-4',
@@ -123,6 +127,8 @@ describe('OrdersInboxPageComponent', () => {
 
     const orderedIds: readonly string[] = store.sortedOrders().map((o) => o.id);
     expect(orderedIds).toEqual(['OS-4', 'OS-1', 'OS-2', 'OS-3']);
+    expect(host.querySelectorAll('.orders-table__origin').length).toBe(1);
+    expect(host.querySelector('.orders-table__origin')?.textContent).toContain('Automática');
   });
 });
 

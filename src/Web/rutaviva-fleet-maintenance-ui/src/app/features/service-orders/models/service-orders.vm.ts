@@ -8,6 +8,7 @@ import {
   ServiceOrderAction,
   ServiceOrderBlockedReason,
   ServiceOrderChangeType,
+  ServiceOrderOrigin,
   ServiceOrderStatus,
 } from '../../../core/models/enums';
 
@@ -39,6 +40,7 @@ export interface ServiceOrderHistoryEntryVm {
 export interface ServiceOrderListItemVm {
   readonly id: string;
   readonly number: string;
+  readonly origin: ServiceOrderOrigin;
   readonly vehicleId: string;
   readonly plate: string;
   readonly routineId: string;
@@ -57,6 +59,7 @@ export interface ServiceOrderListItemVm {
 export interface ServiceOrderDetailVm {
   readonly id: string;
   readonly number: string;
+  readonly origin: ServiceOrderOrigin;
   readonly vehicleId: string;
   readonly plate: string;
   readonly routineId: string;

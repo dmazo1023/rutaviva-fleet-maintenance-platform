@@ -46,6 +46,15 @@
     font-weight: 600;
   }
 
+  &__origin {
+    padding: 3px 8px;
+    border-radius: var(--r-chip);
+    background: var(--c-neutral-soft);
+    color: var(--c-neutral);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
   &__layout {
     display: grid;
     grid-template-columns: 1fr;

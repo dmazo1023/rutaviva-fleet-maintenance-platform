@@ -40,6 +40,8 @@ export const FLEET_TEXTS = {
   ordersEmptyTitle: 'Sin órdenes de servicio',
   ordersEmptyMessage: 'Crea una orden desde una rutina por vencer o vencida.',
   openOrderAriaPrefix: 'Abrir orden ',
+  orderReplicaPendingMessage:
+    'El vehículo o la rutina aún no está disponible en órdenes; intenta en unos segundos',
   notFoundTitle: 'Vehículo no encontrado',
   notFoundMessage: 'No existe un vehículo con esa placa.',
   operationErrorMessage: 'No pudimos completar la operación. Intenta de nuevo.',

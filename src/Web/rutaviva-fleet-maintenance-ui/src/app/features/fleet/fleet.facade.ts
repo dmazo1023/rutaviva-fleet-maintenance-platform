@@ -38,6 +38,11 @@ import {
 import { FleetFilterKey, FleetStore } from './state/fleet.store';
 
 const HTTP_CONFLICT = 409;
+const HTTP_NOT_FOUND = 404;
+const REPLICA_PENDING_CODES: ReadonlySet<string> = new Set<string>([
+  'ServiceOrder.VehicleNotFound',
+  'ServiceOrder.RoutineNotFound',
+]);
 const OPEN_ORDER_EXISTS_CODE = 'ServiceOrder.OpenOrderExists';
 const STATUSES_REPORTED_BY_INTERCEPTOR: ReadonlySet<number> = new Set<number>([400, 409, 422]);
 
@@ -49,7 +54,19 @@ function isOpenOrderConflict(error: unknown): boolean {
   return (
     error instanceof HttpErrorResponse &&
     error.status === HTTP_CONFLICT &&
-    (error.error as { readonly code?: string } | null)?.code === OPEN_ORDER_EXISTS_CODE
+    problemCodeOf(error) === OPEN_ORDER_EXISTS_CODE
+  );
+}
+
+function problemCodeOf(error: HttpErrorResponse): string | undefined {
+  return (error.error as { readonly code?: string } | null)?.code;
+}
+
+function isReplicaPending(error: unknown): boolean {
+  return (
+    error instanceof HttpErrorResponse &&
+    error.status === HTTP_NOT_FOUND &&
+    REPLICA_PENDING_CODES.has(problemCodeOf(error) ?? '')
   );
 }
 
@@ -237,13 +254,7 @@ export class FleetFacade {
     return this.maintenanceApi
       .createServiceOrder({
         vehicleId: vehicle.vehicleId,
-        plate: vehicle.plate,
-        customerId: vehicle.customerId,
-        workshopId: vehicle.workshopId,
-        workshopName: vehicle.workshopName,
         routineId: routine.routineId,
-        routineName: routine.name,
-        routineTypeCode: routine.typeCode,
         createdBy: this.sessionStore.currentActorName(),
       })
       .pipe(
@@ -260,10 +271,18 @@ export class FleetFacade {
       this.loadVehicleOrders(vehicleId);
       return of({ kind: 'openOrderExists' });
     }
+    this.reportCreateOrderError(error);
+    return throwError(() => error);
+  }
+
+  private reportCreateOrderError(error: unknown): void {
+    if (isReplicaPending(error)) {
+      this.toastStore.show({ message: FLEET_TEXTS.orderReplicaPendingMessage, tone: 'warn' });
+      return;
+    }
     if (!isReportedByInterceptor(error)) {
       this.showOperationError();
     }
-    return throwError(() => error);
   }
 
   private onVehicleLoaded(vehicle: VehicleDetailVm | null): void {

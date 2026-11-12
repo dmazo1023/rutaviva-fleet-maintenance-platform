@@ -19,6 +19,9 @@
           <span class="ms" aria-hidden="true">arrow_back</span>
         </a>
         <h1 id="d-title" tabindex="-1" class="order-detail__number">{{ order.number }}</h1>
+        @if (order.origin === 'Automatic') {
+          <span class="order-detail__origin">{{ texts.automaticOriginBadge }}</span>
+        }
         <app-plate-chip [plate]="order.plate" [link]="'/flota/' + order.plate" />
         <span class="order-detail__routine">{{ order.routineName }}</span>
       </div>
