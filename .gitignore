@@ -23,3 +23,4 @@ test-results/
 .claude/settings.local.json
 .claude/harness/plan-context.local.json
 DEV I_Reto.md
+deploy/local/logs/

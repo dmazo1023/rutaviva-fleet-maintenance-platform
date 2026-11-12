@@ -1,92 +1,10 @@
 {
- "agents": [
-  {
-   "id": "S3.CI",
-   "tasks": 1,
-   "files": [
-    "src/Services/Customers/RutaViva.Customers.Infrastructure/",
-    "tests/Services/Customers/RutaViva.Customers.IntegrationTests/Persistence/"
-   ],
-   "read": [
-    "openspec/changes/supporting-contexts/design.md#L86-L89",
-    {
-     "label": "puertos y dominio de Customers (firmas)",
-     "lines": 300
-    },
-    {
-     "label": "Infrastructure de Maintenance (DbContext, config, repos, DI)",
-     "lines": 250
-    }
-   ],
-   "writeLines": 650,
-   "skills": 1
-  },
-  {
-   "id": "S3.WI",
-   "tasks": 1,
-   "files": [
-    "src/Services/Workshops/RutaViva.Workshops.Infrastructure/",
-    "tests/Services/Workshops/RutaViva.Workshops.IntegrationTests/Persistence/"
-   ],
-   "read": [
-    "openspec/changes/supporting-contexts/design.md#L86-L89",
-    {
-     "label": "puertos y dominio de Workshops",
-     "lines": 250
-    },
-    {
-     "label": "Infrastructure de Maintenance",
-     "lines": 250
-    }
-   ],
-   "writeLines": 550,
-   "skills": 1
-  },
-  {
-   "id": "S3.FI",
-   "tasks": 2,
-   "files": [
-    "src/Services/Fleet/RutaViva.Fleet.Infrastructure/Persistence/",
-    "src/Services/Fleet/RutaViva.Fleet.Infrastructure/DependencyInjection/",
-    "tests/Services/Fleet/RutaViva.Fleet.IntegrationTests/Persistence/"
-   ],
-   "read": [
-    "openspec/changes/supporting-contexts/design.md#L37-L48",
-    "openspec/changes/supporting-contexts/design.md#L86-L89",
-    {
-     "label": "firmas públicas de dominio y puertos de Fleet",
-     "lines": 250
-    },
-    {
-     "label": "Infrastructure de Maintenance",
-     "lines": 250
-    }
-   ],
-   "writeLines": 650,
-   "skills": 1
-  },
-  {
-   "id": "S3.FQ",
-   "tasks": 1,
-   "files": [
-    "src/Services/Fleet/RutaViva.Fleet.Application/Vehicles/Queries/",
-    "src/Services/Fleet/RutaViva.Fleet.Infrastructure/Queries/",
-    "tests/Services/Fleet/RutaViva.Fleet.Application.UnitTests/Queries/",
-    "tests/Services/Fleet/RutaViva.Fleet.IntegrationTests/Queries/"
-   ],
-   "read": [
-    "openspec/changes/supporting-contexts/design.md#L49-L60",
-    {
-     "label": "dominio y réplicas de Fleet",
-     "lines": 300
-    },
-    {
-     "label": "queries de Maintenance",
-     "lines": 150
-    }
-   ],
-   "writeLines": 550,
-   "skills": 1
-  }
- ]
+  "agents": [
+    { "id": "S4.CB", "tasks": 2, "files": ["src/Services/Customers/RutaViva.Customers.Api/", "src/Services/Customers/RutaViva.Customers.Application/Bulk/", "tests/Services/Customers/RutaViva.Customers.IntegrationTests/Api/"],
+      "read": ["openspec/changes/supporting-contexts/design.md#L61-L85", {"label": "commands/queries/DTOs de Customers", "lines": 200}, {"label": "API y fábrica de pruebas de Maintenance + BulkRegistrationHandler", "lines": 280}], "writeLines": 700, "skills": 1 },
+    { "id": "S4.WB", "tasks": 1, "files": ["src/Services/Workshops/RutaViva.Workshops.Api/", "src/Services/Workshops/RutaViva.Workshops.Application/Bulk/", "tests/Services/Workshops/RutaViva.Workshops.IntegrationTests/Api/"],
+      "read": ["openspec/changes/supporting-contexts/design.md#L61-L85", {"label": "commands/queries de Workshops", "lines": 150}, {"label": "API Maintenance + Bulk", "lines": 280}], "writeLines": 550, "skills": 1 },
+    { "id": "S4.FW", "tasks": 2, "files": ["src/Services/Fleet/RutaViva.Fleet.Api/", "src/Services/Fleet/RutaViva.Fleet.Application/Bulk/", "tests/Services/Fleet/RutaViva.Fleet.IntegrationTests/Api/"],
+      "read": ["openspec/changes/supporting-contexts/design.md#L61-L85", {"label": "commands/queries/puertos de Fleet", "lines": 250}, {"label": "API Maintenance + Bulk", "lines": 280}], "writeLines": 700, "skills": 1 }
+  ]
 }
