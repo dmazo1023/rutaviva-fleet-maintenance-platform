@@ -58,6 +58,10 @@ export const SERVICE_ORDERS_TEXTS = {
   approverRequiredMessage:
     'Elige el aprobador en la barra superior para aprobar o rechazar la orden',
   automaticOriginBadge: 'Automática',
+  workshopRequiredMessage: 'Elige el taller en la barra superior',
+  actorRequiredTitle: 'Elige quién eres para ver tus órdenes',
+  approverRequiredInboxMessage: 'Selecciona el aprobador en la barra superior.',
+  workshopRequiredInboxMessage: 'Selecciona el taller en la barra superior.',
   nextStepSeparator: ' · ',
   nextStepWaitingQuote: 'Esperando cotización del taller',
   nextStepWaitingApproval: 'Esperando aprobación del cliente',

@@ -1,4 +1,4 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ServiceOrderListItemVm } from '../../models/service-orders.vm';
@@ -8,8 +8,10 @@ import { OrdersInboxPageComponent } from './orders-inbox.page';
 
 describe('OrdersInboxPageComponent', () => {
   let store: ServiceOrdersStore;
+  let actorRequiredMessage: WritableSignal<string | null>;
 
   beforeEach(async () => {
+    actorRequiredMessage = signal<string | null>(null);
     await TestBed.configureTestingModule({
       imports: [OrdersInboxPageComponent],
       providers: [
@@ -27,6 +29,8 @@ describe('OrdersInboxPageComponent', () => {
               activeFilter: s.activeFilter,
               flashedOrderIds: s.flashedOrderIds,
               loadOrders: () => undefined,
+              ordersScope: signal({}),
+              actorRequiredMessage,
               setActiveFilter: (f: OrdersFilterKey) => s.setActiveFilter(f),
             };
           },
@@ -130,5 +134,17 @@ describe('OrdersInboxPageComponent', () => {
     expect(host.querySelectorAll('.orders-table__origin').length).toBe(1);
     expect(host.querySelector('.orders-table__origin')?.textContent).toContain('Automática');
   });
-});
 
+  it('should ask the user to pick the actor when the profile has none selected', () => {
+    actorRequiredMessage.set('Selecciona el taller en la barra superior.');
+    store.setListReady([]);
+
+    const fixture: ComponentFixture<OrdersInboxPageComponent> =
+      TestBed.createComponent(OrdersInboxPageComponent);
+    fixture.detectChanges();
+
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Elige quién eres para ver tus órdenes');
+    expect(host.textContent).toContain('Selecciona el taller en la barra superior.');
+  });
+});

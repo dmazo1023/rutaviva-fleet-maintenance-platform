@@ -1,8 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of, Subject, throwError } from 'rxjs';
-import { SessionStore } from '../../core/context/session.store';
+import { ApproverOption, SessionStore } from '../../core/context/session.store';
 import { ToastStore } from '../../core/feedback/toast.store';
 import { NotificationsService } from '../../core/realtime/notifications.service';
 import {
@@ -18,6 +18,8 @@ describe('ServiceOrdersFacade', () => {
   let approvalRequestedSubject: Subject<ApprovalRequestedEvent>;
   let getOrderByIdSpy: ReturnType<typeof vi.fn>;
   let approveSpy: ReturnType<typeof vi.fn>;
+  let getOrdersSpy: ReturnType<typeof vi.fn>;
+  let quoteSpy: ReturnType<typeof vi.fn>;
 
   const sampleDetail: ServiceOrderDetailVm = {
     id: 'OS-2026-001',
@@ -53,6 +55,8 @@ describe('ServiceOrdersFacade', () => {
     orderChangedSubject = new Subject<ServiceOrderChangedEvent>();
     approvalRequestedSubject = new Subject<ApprovalRequestedEvent>();
     getOrderByIdSpy = vi.fn(() => of(sampleDetail));
+    getOrdersSpy = vi.fn(() => of([]));
+    quoteSpy = vi.fn(() => of(sampleDetail));
     approveSpy = vi.fn(() =>
       throwError(() => new HttpErrorResponse({ status: 409, statusText: 'Conflict' }))
     );
@@ -63,7 +67,8 @@ describe('ServiceOrdersFacade', () => {
         {
           provide: ServiceOrdersApi,
           useValue: {
-            getOrders: () => of([]),
+            getOrders: getOrdersSpy,
+            quote: quoteSpy,
             getOrderById: getOrderByIdSpy,
             approve: approveSpy,
           },
@@ -124,5 +129,61 @@ describe('ServiceOrdersFacade', () => {
 
     expect(approveSpy).not.toHaveBeenCalled();
     expect(toastStore.toasts()[0]?.message).toContain('Elige el aprobador');
+  });
+
+  it('should scope the inbox to the selected workshop and send its id when quoting', () => {
+    const sessionStore: SessionStore = TestBed.inject(SessionStore);
+    sessionStore.setProfile('Workshop');
+    sessionStore.setActor('WS-1');
+    const facade: ServiceOrdersFacade = TestBed.inject(ServiceOrdersFacade);
+
+    facade.loadOrders();
+    facade.quote('OS-2026-001', 450000).subscribe();
+
+    expect(getOrdersSpy).toHaveBeenLastCalledWith({ workshopId: 'WS-1' });
+    expect(quoteSpy).toHaveBeenCalledWith('OS-2026-001', {
+      amount: 450000,
+      quotedBy: expect.any(String),
+      workshopId: 'WS-1',
+    });
+  });
+
+  it('should scope approvers to their customer and skip the request when no actor is chosen', () => {
+    const sessionStore: SessionStore = TestBed.inject(SessionStore);
+    const approver: ApproverOption = {
+      id: 'APR-9',
+      customerId: 'CUST-7',
+      fullName: 'Camila Torres',
+      email: 'camila@example.test',
+      status: 'Active',
+    };
+    Object.defineProperty(sessionStore, 'availableApprovers', {
+      value: signal<readonly ApproverOption[]>([approver]),
+    });
+    sessionStore.setProfile('Approver');
+    sessionStore.setActor('APR-9');
+    const facade: ServiceOrdersFacade = TestBed.inject(ServiceOrdersFacade);
+
+    facade.loadOrders();
+    expect(getOrdersSpy).toHaveBeenLastCalledWith({ customerId: 'CUST-7' });
+
+    sessionStore.setActor(null);
+    getOrdersSpy.mockClear();
+    facade.loadOrders();
+    expect(getOrdersSpy).not.toHaveBeenCalled();
+    expect(facade.actorRequiredMessage()).toBe('Selecciona el aprobador en la barra superior.');
+  });
+
+  it('should not quote and should warn when no workshop is selected', () => {
+    const sessionStore: SessionStore = TestBed.inject(SessionStore);
+    sessionStore.setProfile('Workshop');
+    sessionStore.setActor(null);
+    const facade: ServiceOrdersFacade = TestBed.inject(ServiceOrdersFacade);
+    const toastStore: ToastStore = TestBed.inject(ToastStore);
+
+    facade.quote('OS-2026-001', 450000).subscribe();
+
+    expect(quoteSpy).not.toHaveBeenCalled();
+    expect(toastStore.toasts()[0]?.message).toBe('Elige el taller en la barra superior');
   });
 });

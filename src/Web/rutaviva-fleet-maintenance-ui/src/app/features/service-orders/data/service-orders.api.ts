@@ -46,7 +46,7 @@ export class ServiceOrdersApi {
 
   quote(
     id: string,
-    body: { readonly amount: number; readonly quotedBy: string }
+    body: { readonly amount: number; readonly quotedBy: string; readonly workshopId: string }
   ): Observable<ServiceOrderDetailVm> {
     return this.apiClient.post<typeof body, ServiceOrderDetailVm>(
       ApiRoutes.serviceOrders.quote(id),
@@ -81,7 +81,10 @@ export class ServiceOrdersApi {
     );
   }
 
-  start(id: string, body: { readonly startedBy: string }): Observable<ServiceOrderDetailVm> {
+  start(
+    id: string,
+    body: { readonly startedBy: string; readonly workshopId: string }
+  ): Observable<ServiceOrderDetailVm> {
     return this.apiClient.post<typeof body, ServiceOrderDetailVm>(
       ApiRoutes.serviceOrders.start(id),
       body
@@ -90,7 +93,7 @@ export class ServiceOrdersApi {
 
   complete(
     id: string,
-    body: { readonly completedBy: string; readonly servicedKm: number }
+    body: { readonly completedBy: string; readonly servicedKm: number; readonly workshopId: string }
   ): Observable<ServiceOrderDetailVm> {
     return this.apiClient.post<typeof body, ServiceOrderDetailVm>(
       ApiRoutes.serviceOrders.complete(id),

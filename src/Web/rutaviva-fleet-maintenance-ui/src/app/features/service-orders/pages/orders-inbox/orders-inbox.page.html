@@ -24,6 +24,12 @@
       [retryLabel]="texts.retry"
       (retryClicked)="onRetry()"
     />
+  } @else if (actorRequiredMessage(); as actorMessage) {
+    <app-empty-state
+      icon="badge"
+      [title]="texts.actorRequiredTitle"
+      [message]="actorMessage"
+    />
   } @else if (filteredOrders().length === 0) {
     <app-empty-state icon="assignment_turned_in" [title]="emptyStateTitle()" tone="is-ok" />
   } @else {

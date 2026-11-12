@@ -1,8 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { DestroyRef, inject, Injectable, Signal } from '@angular/core';
+import { computed, DestroyRef, inject, Injectable, Signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, EMPTY, Observable, tap, throwError } from 'rxjs';
-import { SessionStore } from '../../core/context/session.store';
+import { ApproverOption, SessionStore } from '../../core/context/session.store';
+import { ServiceOrdersQuery } from '../../core/api/api-routes';
+import { Profile } from '../../core/models/enums';
 import { ToastStore } from '../../core/feedback/toast.store';
 import { NotificationsService } from '../../core/realtime/notifications.service';
 import {
@@ -20,6 +22,11 @@ import { SERVICE_ORDERS_TEXTS } from './service-orders.texts';
 import { OrdersFilterKey, ServiceOrdersStore } from './state/service-orders.store';
 
 const HTTP_CONFLICT = 409;
+
+const ACTOR_REQUIRED_MESSAGES: Readonly<Partial<Record<Profile, string>>> = {
+  Approver: SERVICE_ORDERS_TEXTS.approverRequiredInboxMessage,
+  Workshop: SERVICE_ORDERS_TEXTS.workshopRequiredInboxMessage,
+};
 
 @Injectable({
   providedIn: 'root',
@@ -46,6 +53,19 @@ export class ServiceOrdersFacade {
   readonly activeFilter: Signal<OrdersFilterKey> = this.store.activeFilter;
   readonly flashedOrderIds: Signal<ReadonlySet<string>> = this.store.flashedOrderIds;
 
+  readonly ordersScope: Signal<ServiceOrdersQuery | null> = computed(() => {
+    const scopes: Readonly<Record<Profile, () => ServiceOrdersQuery | null>> = {
+      Operator: () => ({ customerId: this.sessionStore.customerId() || undefined }),
+      Approver: () => this.approverScope(),
+      Workshop: () => this.workshopScope(),
+    };
+    return scopes[this.sessionStore.profile()]();
+  });
+
+  readonly actorRequiredMessage: Signal<string | null> = computed(() =>
+    this.ordersScope() ? null : (ACTOR_REQUIRED_MESSAGES[this.sessionStore.profile()] ?? null)
+  );
+
   constructor() {
     this.bindRealtimeEvents();
     this.viewRefresh.refresh$
@@ -59,10 +79,15 @@ export class ServiceOrdersFacade {
   }
 
   loadOrders(): void {
-    const customerId: string | undefined = this.sessionStore.customerId() || undefined;
+    const scope: ServiceOrdersQuery | null = this.ordersScope();
+    if (!scope) {
+      this.store.setListReady([]);
+      this.sessionStore.setPendingApprovalsCount(0);
+      return;
+    }
     this.store.setListLoading();
 
-    this.api.getOrders({ customerId }).subscribe({
+    this.api.getOrders(scope).subscribe({
       next: (orders: readonly ServiceOrderListItemVm[]) => {
         this.store.setListReady(orders);
         const pendingCount: number = orders.filter(
@@ -95,8 +120,14 @@ export class ServiceOrdersFacade {
   }
 
   quote(orderId: string, amount: number): Observable<ServiceOrderDetailVm> {
-    return this.executeMutation(orderId, () =>
-      this.api.quote(orderId, { amount, quotedBy: this.sessionStore.currentActorName() })
+    return this.asWorkshop((workshopId: string) =>
+      this.executeMutation(orderId, () =>
+        this.api.quote(orderId, {
+          amount,
+          quotedBy: this.sessionStore.currentActorName(),
+          workshopId,
+        })
+      )
     );
   }
 
@@ -129,22 +160,51 @@ export class ServiceOrdersFacade {
   }
 
   start(orderId: string): Observable<ServiceOrderDetailVm> {
-    return this.executeMutation(orderId, () =>
-      this.api.start(orderId, { startedBy: this.sessionStore.currentActorName() })
+    return this.asWorkshop((workshopId: string) =>
+      this.executeMutation(orderId, () =>
+        this.api.start(orderId, { startedBy: this.sessionStore.currentActorName(), workshopId })
+      )
     );
   }
 
   complete(orderId: string, servicedKm: number): Observable<ServiceOrderDetailVm> {
-    return this.executeMutation(orderId, () =>
-      this.api.complete(orderId, {
-        completedBy: this.sessionStore.currentActorName(),
-        servicedKm,
-      })
+    return this.asWorkshop((workshopId: string) =>
+      this.executeMutation(orderId, () =>
+        this.api.complete(orderId, {
+          completedBy: this.sessionStore.currentActorName(),
+          servicedKm,
+          workshopId,
+        })
+      )
     );
   }
 
   vehicleOdometerKm(vehicleId: string): Observable<number | null> {
     return this.api.getVehicleOdometerKm(vehicleId);
+  }
+
+  private approverScope(): ServiceOrdersQuery | null {
+    const actorId: string | null = this.sessionStore.actorId();
+    const approver: ApproverOption | undefined = this.sessionStore
+      .availableApprovers()
+      .find((item: ApproverOption) => item.id === actorId);
+    return approver ? { customerId: approver.customerId } : null;
+  }
+
+  private workshopScope(): ServiceOrdersQuery | null {
+    const actorId: string | null = this.sessionStore.actorId();
+    return actorId ? { workshopId: actorId } : null;
+  }
+
+  private asWorkshop(
+    call: (workshopId: string) => Observable<ServiceOrderDetailVm>
+  ): Observable<ServiceOrderDetailVm> {
+    const workshopId: string | null = this.sessionStore.actorId();
+    if (!workshopId) {
+      this.toastStore.show({ message: SERVICE_ORDERS_TEXTS.workshopRequiredMessage, tone: 'warn' });
+      return EMPTY;
+    }
+    return call(workshopId);
   }
 
   private asApprover(

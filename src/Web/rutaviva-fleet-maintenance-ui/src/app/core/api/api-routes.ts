@@ -12,6 +12,7 @@ export type ServiceOrderStatusGroup = 'PendingApproval' | 'Open' | 'Closed';
 
 export interface ServiceOrdersQuery {
   readonly customerId?: string;
+  readonly workshopId?: string;
   readonly vehicleId?: string;
   readonly routineId?: string;
   readonly statusGroup?: ServiceOrderStatusGroup;
@@ -121,6 +122,7 @@ export const ApiRoutes = {
     list: (query?: ServiceOrdersQuery): string =>
       `${API_V1}/service-orders${buildQuery({
         customerId: query?.customerId,
+        workshopId: query?.workshopId,
         vehicleId: query?.vehicleId,
         routineId: query?.routineId,
         statusGroup: query?.statusGroup,

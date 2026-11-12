@@ -8,6 +8,7 @@ import {
   InputSignal,
   OnInit,
   Signal,
+  untracked,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { ENUM_LABELS } from '../../../../core/models/enum-labels';
@@ -104,7 +105,14 @@ export class OrdersInboxPageComponent implements OnInit {
     return this.texts.emptyAllTitle;
   });
 
+  readonly actorRequiredMessage: Signal<string | null> = this.facade.actorRequiredMessage;
+
   constructor() {
+    effect(() => {
+      this.facade.ordersScope();
+      untracked(() => this.facade.loadOrders());
+    });
+
     effect(() => {
       const param: string | undefined = this.statusGroup();
       if (param && VALID_FILTERS.has(param)) {
@@ -117,7 +125,6 @@ export class OrdersInboxPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.viewRefresh.setActiveVehicleId(null);
-    this.facade.loadOrders();
   }
 
   isFlashed(orderId: string): boolean {

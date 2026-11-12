@@ -14,6 +14,7 @@ export const API_ERROR_MESSAGES: Readonly<Record<string, string>> = {
   'Customer.Inactive': 'El cliente está inactivo.',
   'Customer.NotFound': 'No se encontró el cliente.',
   'ServiceOrder.ApproverNotAuthorized': 'Este aprobador no puede aprobar órdenes de este vehículo',
+  'ServiceOrder.WorkshopNotAuthorized': 'Este taller no está asignado a la orden',
   'ServiceOrder.OpenOrderExists': 'Esta rutina ya tiene una orden de servicio abierta.',
   'Customer.TaxIdAlreadyRegistered': 'El NIT del cliente ya está registrado.',
   'DueSoonThreshold.OutOfRange': 'El porcentaje de aviso está fuera del rango permitido.',
