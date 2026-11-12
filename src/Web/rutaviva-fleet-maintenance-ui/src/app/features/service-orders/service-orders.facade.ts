@@ -112,6 +112,12 @@ export class ServiceOrdersFacade {
     );
   }
 
+  cancel(orderId: string): Observable<ServiceOrderDetailVm> {
+    return this.executeMutation(orderId, () =>
+      this.api.cancel(orderId, { cancelledBy: this.sessionStore.currentActorName() })
+    );
+  }
+
   start(orderId: string): Observable<ServiceOrderDetailVm> {
     return this.executeMutation(orderId, () =>
       this.api.start(orderId, { startedBy: this.sessionStore.currentActorName() })

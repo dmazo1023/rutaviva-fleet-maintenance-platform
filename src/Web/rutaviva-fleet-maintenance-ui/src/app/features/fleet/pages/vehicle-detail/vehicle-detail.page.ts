@@ -38,7 +38,7 @@ import { RoutineVm } from '../../../maintenance/models/maintenance.vm';
 import { isOpenOrder, withOpenOrders } from '../../../maintenance/models/routine-orders';
 import { ServiceRegistrationStore } from '../../../maintenance/state/service-registration.store';
 import { DeactivateVehicleDialogComponent } from '../../dialogs/deactivate-vehicle/deactivate-vehicle.dialog';
-import { FleetFacade } from '../../fleet.facade';
+import { CreateServiceOrderOutcome, FleetFacade } from '../../fleet.facade';
 import { FLEET_TEXTS } from '../../fleet.texts';
 import { VehicleDetailVm } from '../../models/fleet.vm';
 import { FleetFilterKey } from '../../state/fleet.store';
@@ -123,6 +123,7 @@ export class VehicleDetailPageComponent implements OnInit {
   readonly savingRoutineParams: WritableSignal<boolean> = signal<boolean>(false);
   readonly deactivateDialogOpen: WritableSignal<boolean> = signal<boolean>(false);
   readonly deactivatingVehicle: WritableSignal<boolean> = signal<boolean>(false);
+  readonly openOrderNoticeRoutineId: WritableSignal<string | null> = signal<string | null>(null);
 
   readonly canManage: Signal<boolean> = computed(() => this.sessionStore.profile() === 'Operator');
 
@@ -209,9 +210,19 @@ export class VehicleDetailPageComponent implements OnInit {
     if (!vehicle) {
       return;
     }
-    this.facade
-      .createServiceOrder(vehicle, routine)
-      .subscribe((orderId: string) => this.openServiceOrder(orderId));
+    this.openOrderNoticeRoutineId.set(null);
+    this.facade.createServiceOrder(vehicle, routine).subscribe({
+      next: (outcome: CreateServiceOrderOutcome) => this.onCreateOrderOutcome(routine, outcome),
+      error: () => undefined,
+    });
+  }
+
+  private onCreateOrderOutcome(routine: RoutineVm, outcome: CreateServiceOrderOutcome): void {
+    if (outcome.kind === 'created') {
+      this.openServiceOrder(outcome.orderId);
+      return;
+    }
+    this.openOrderNoticeRoutineId.set(routine.routineId);
   }
 
   openServiceOrder(orderId: string): void {

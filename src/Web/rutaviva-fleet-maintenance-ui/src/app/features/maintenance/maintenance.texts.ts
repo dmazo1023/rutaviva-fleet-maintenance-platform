@@ -6,6 +6,7 @@ export const MAINTENANCE_TEXTS = {
   activeSuffix: ' activa',
   createOrder: 'Crear orden',
   createOrderAriaPrefix: 'Crear orden de servicio para ',
+  openOrderExistsNotice: 'Esta rutina ya tiene una orden abierta',
   creatingOrder: 'Creando…',
   undoAction: 'Deshacer',
   deactivatedSuffix: ' desactivada',

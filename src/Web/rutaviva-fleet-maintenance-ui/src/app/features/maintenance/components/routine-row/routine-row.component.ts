@@ -47,6 +47,7 @@ export class RoutineRowComponent {
   readonly vehicleActive: InputSignal<boolean> = input<boolean>(true);
   readonly canManage: InputSignal<boolean> = input<boolean>(true);
   readonly flashed: InputSignal<boolean> = input<boolean>(false);
+  readonly showOpenOrderNotice: InputSignal<boolean> = input<boolean>(false);
 
   readonly toggleState: OutputEmitterRef<RoutineVm> = output<RoutineVm>();
   readonly editParams: OutputEmitterRef<RoutineVm> = output<RoutineVm>();
