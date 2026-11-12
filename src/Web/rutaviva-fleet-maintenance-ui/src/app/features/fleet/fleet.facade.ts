@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin, Observable, tap } from 'rxjs';
 import { SessionStore } from '../../core/context/session.store';
 import { ToastStore } from '../../core/feedback/toast.store';
-import { RoutineState, ServiceOrderStatus, VehicleStatus } from '../../core/models/enums';
+import { RoutineState, VehicleStatus } from '../../core/models/enums';
 import { NotificationsService } from '../../core/realtime/notifications.service';
 import {
   OdometerReadingRecordedEvent,
@@ -25,73 +25,62 @@ import {
   RoutineVm,
 } from '../maintenance/models/maintenance.vm';
 import { PlanStore } from '../maintenance/state/plan.store';
-import { FleetApi, VehicleServiceOrderSummaryDto } from './data/fleet.api';
+import { FleetApi } from './data/fleet.api';
 import { FLEET_TEXTS } from './fleet.texts';
 import {
   VehicleDetailVm,
   VehicleListItemVm,
-  VehicleNextMaintenanceVm,
-  VehicleOpenOrderSummaryVm,
+  VehicleMaintenanceSummaryVm,
+  VehicleSummaryVm,
 } from './models/fleet.vm';
 import { FleetFilterKey, FleetStore } from './state/fleet.store';
 
-const CLOSED_ORDER_STATUSES: ReadonlySet<ServiceOrderStatus> = new Set<ServiceOrderStatus>([
-  'Completed',
-  'Cancelled',
-]);
+function toMaintenanceSummary(plan: MaintenancePlanSummaryVm): VehicleMaintenanceSummaryVm {
+  return {
+    worstDueStatus: plan.worstDueStatus,
+    maxConsumedPercent: plan.maxConsumedPercent,
+    upToDateCount: plan.upToDateCount,
+    dueSoonCount: plan.dueSoonCount,
+    overdueCount: plan.overdueCount,
+  };
+}
+
+function composeVehicleListItem(
+  vehicle: VehicleSummaryVm,
+  plan: MaintenancePlanSummaryVm | undefined
+): VehicleListItemVm {
+  const isActive: boolean = vehicle.status === 'Active';
+  const maintenance: VehicleMaintenanceSummaryVm | null =
+    isActive && plan ? toMaintenanceSummary(plan) : null;
+
+  return {
+    vehicleId: vehicle.vehicleId,
+    plate: vehicle.plate,
+    brand: vehicle.brand,
+    model: vehicle.model,
+    modelYear: vehicle.modelYear,
+    customerId: vehicle.customerId,
+    customerName: vehicle.customerName,
+    status: vehicle.status,
+    worstDueStatus: maintenance?.worstDueStatus ?? null,
+    maxConsumedPercent: maintenance?.maxConsumedPercent ?? 0,
+    odometerKm: plan?.odometerKm ?? null,
+    maintenance,
+  };
+}
 
 export function composeVehicleListItems(
-  vehicles: readonly VehicleDetailVm[],
-  planSummaries: readonly MaintenancePlanSummaryVm[],
-  openOrdersByVehicle: ReadonlyMap<string, VehicleOpenOrderSummaryVm>
+  vehicles: readonly VehicleSummaryVm[],
+  planSummaries: readonly MaintenancePlanSummaryVm[]
 ): readonly VehicleListItemVm[] {
   const planMap: Map<string, MaintenancePlanSummaryVm> = new Map<
     string,
     MaintenancePlanSummaryVm
   >(planSummaries.map((p: MaintenancePlanSummaryVm) => [p.vehicleId, p]));
 
-  return vehicles.map((vehicle: VehicleDetailVm): VehicleListItemVm => {
-    const plan: MaintenancePlanSummaryVm | undefined = planMap.get(vehicle.vehicleId);
-    const openOrder: VehicleOpenOrderSummaryVm | null =
-      openOrdersByVehicle.get(vehicle.vehicleId) ?? null;
-
-    let nextMaintenance: VehicleNextMaintenanceVm | null = null;
-    if (
-      vehicle.status === 'Active' &&
-      plan?.worstDueStatus &&
-      plan.nextRoutineName &&
-      plan.nextRemainingKind &&
-      plan.nextRemainingValue !== null
-    ) {
-      nextMaintenance = {
-        routineName: plan.nextRoutineName,
-        status: plan.worstDueStatus,
-        consumedPercent: plan.worstConsumedPercent,
-        remainingKind: plan.nextRemainingKind,
-        remainingValue: plan.nextRemainingValue,
-        triggeredBy: plan.worstTriggeredBy,
-      };
-    }
-
-    return {
-      vehicleId: vehicle.vehicleId,
-      plate: vehicle.plate,
-      brand: vehicle.brand,
-      model: vehicle.model,
-      modelYear: vehicle.modelYear,
-      customerId: vehicle.customerId,
-      customerName: vehicle.customerName,
-      status: vehicle.status,
-      worstDueStatus: vehicle.status === 'Active' ? (plan?.worstDueStatus ?? null) : null,
-      worstConsumedPercent:
-        vehicle.status === 'Active' ? (plan?.worstConsumedPercent ?? 0) : 0,
-      worstTriggeredBy:
-        vehicle.status === 'Active' ? (plan?.worstTriggeredBy ?? null) : null,
-      odometerKm: plan?.odometerKm ?? vehicle.odometerKm,
-      nextMaintenance,
-      openOrder,
-    };
-  });
+  return vehicles.map((vehicle: VehicleSummaryVm) =>
+    composeVehicleListItem(vehicle, planMap.get(vehicle.vehicleId))
+  );
 }
 
 @Injectable({
@@ -127,20 +116,16 @@ export class FleetFacade {
     this.planStore.planLoadable;
   readonly readingsLoadable: Signal<Loadable<readonly OdometerReadingVm[]>> =
     this.planStore.readingsLoadable;
-  readonly ordersLoadable: Signal<Loadable<readonly VehicleServiceOrderSummaryDto[]>> =
-    this.planStore.ordersLoadable;
   readonly flashedRoutineIds: Signal<ReadonlySet<string>> = this.planStore.flashedRoutineIds;
 
   constructor() {
     this.bindRealtimeEvents();
-    this.viewRefresh.refresh$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.loadFleetList();
-        if (this.activePlate) {
-          this.loadVehicleDetail(this.activePlate);
-        }
-      });
+    this.viewRefresh.refresh$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.loadFleetList();
+      if (this.activePlate) {
+        this.loadVehicleDetail(this.activePlate);
+      }
+    });
   }
 
   loadFleetList(): void {
@@ -149,33 +134,11 @@ export class FleetFacade {
 
     forkJoin({
       vehicles: this.fleetApi.getVehicles({ customerId }),
-      plans: this.maintenanceApi.getPlanSummaries(customerId),
-      orders: this.fleetApi.getVehicleOrders(''),
+      plans: this.maintenanceApi.getPlanSummaries(),
     }).subscribe({
-      next: ({ vehicles, plans, orders }) => {
-        const openOrdersMap: Map<string, VehicleOpenOrderSummaryVm> = new Map<
-          string,
-          VehicleOpenOrderSummaryVm
-        >();
-        for (const order of orders) {
-          if (!CLOSED_ORDER_STATUSES.has(order.status) && !openOrdersMap.has(order.vehicleId)) {
-            openOrdersMap.set(order.vehicleId, {
-              orderId: order.id,
-              number: order.number,
-              status: order.status,
-            });
-          }
-        }
-        const items: readonly VehicleListItemVm[] = composeVehicleListItems(
-          vehicles,
-          plans,
-          openOrdersMap
-        );
-        this.fleetStore.setListReady(items);
-      },
-      error: () => {
-        this.fleetStore.setListError(FLEET_TEXTS.errorMessage);
-      },
+      next: ({ vehicles, plans }) =>
+        this.fleetStore.setListReady(composeVehicleListItems(vehicles, plans)),
+      error: () => this.fleetStore.setListError(FLEET_TEXTS.errorMessage),
     });
   }
 
@@ -184,22 +147,10 @@ export class FleetFacade {
     this.fleetStore.setDetailLoading();
     this.planStore.setPlanLoading();
     this.planStore.setReadingsLoading();
-    this.planStore.setOrdersLoading();
 
     this.fleetApi.getVehicleByPlate(plate).subscribe({
-      next: (vehicle: VehicleDetailVm | null) => {
-        this.fleetStore.setDetailReady(vehicle);
-        if (!vehicle) {
-          this.planStore.setPlanReady(null);
-          this.planStore.setReadingsReady([]);
-          this.planStore.setOrdersReady([]);
-          return;
-        }
-        this.loadVehicleSubResources(vehicle.vehicleId);
-      },
-      error: () => {
-        this.fleetStore.setDetailError(FLEET_TEXTS.errorMessage);
-      },
+      next: (vehicle: VehicleDetailVm | null) => this.onVehicleLoaded(vehicle),
+      error: () => this.fleetStore.setDetailError(FLEET_TEXTS.errorMessage),
     });
   }
 
@@ -222,31 +173,8 @@ export class FleetFacade {
     this.maintenanceApi
       .updateRoutineState(routine.vehicleId, routine.routineId, nextState)
       .subscribe({
-        next: (updated: RoutineVm) => {
-          this.planStore.replaceRoutine(updated);
-          this.planStore.markRoutineFlashed(updated.routineId);
-          this.loadFleetList();
-
-          const message: string =
-            nextState === 'Inactive'
-              ? `${routine.name}${MAINTENANCE_TEXTS.deactivatedSuffix}`
-              : `${routine.name}${MAINTENANCE_TEXTS.activatedSuffix}`;
-
-          this.toastStore.show({
-            message,
-            action: {
-              label: MAINTENANCE_TEXTS.undoAction,
-              callback: () => {
-                this.maintenanceApi
-                  .updateRoutineState(routine.vehicleId, routine.routineId, previousState)
-                  .subscribe((restored: RoutineVm) => {
-                    this.planStore.replaceRoutine(restored);
-                    this.loadFleetList();
-                  });
-              },
-            },
-          });
-        },
+        next: (updated: RoutineVm) => this.onRoutineToggled(routine, updated, previousState),
+        error: () => this.showOperationError(),
       });
   }
 
@@ -264,26 +192,70 @@ export class FleetFacade {
     );
   }
 
-  updateVehicleStatus(vehicleId: string, status: VehicleStatus): Observable<VehicleDetailVm> {
-    return this.fleetApi.updateVehicleStatus(vehicleId, status).pipe(
-      tap((updated: VehicleDetailVm) => {
+  updateVehicleStatus(
+    vehicle: VehicleDetailVm,
+    status: VehicleStatus
+  ): Observable<VehicleDetailVm | null> {
+    return this.fleetApi.updateVehicleStatus(vehicle.vehicleId, vehicle.plate, status).pipe(
+      tap((updated: VehicleDetailVm | null) => {
         this.fleetStore.setDetailReady(updated);
-        this.loadVehicleSubResources(updated.vehicleId);
+        this.loadVehicleSubResources(vehicle.vehicleId);
         this.loadFleetList();
       })
     );
   }
 
-  createManualOrder(
-    vehicleId: string,
-    routineId: string
-  ): Observable<{ readonly id: string; readonly number: string }> {
-    return this.fleetApi.createManualServiceOrder(vehicleId, routineId).pipe(
-      tap(() => {
-        this.loadVehicleSubResources(vehicleId);
-        this.loadFleetList();
-      })
-    );
+  private onVehicleLoaded(vehicle: VehicleDetailVm | null): void {
+    this.fleetStore.setDetailReady(vehicle);
+    if (!vehicle) {
+      this.planStore.setPlanReady(null);
+      this.planStore.setReadingsReady([]);
+      return;
+    }
+    this.loadVehicleSubResources(vehicle.vehicleId);
+  }
+
+  private onRoutineToggled(
+    routine: RoutineVm,
+    updated: RoutineVm,
+    previousState: RoutineState
+  ): void {
+    this.planStore.replaceRoutine(updated);
+    this.planStore.markRoutineFlashed(updated.routineId);
+    this.loadFleetList();
+
+    const suffix: string =
+      updated.state === 'Inactive'
+        ? MAINTENANCE_TEXTS.deactivatedSuffix
+        : MAINTENANCE_TEXTS.activatedSuffix;
+
+    this.toastStore.show({
+      message: `${routine.name}${suffix}`,
+      action: {
+        label: MAINTENANCE_TEXTS.undoAction,
+        callback: () => this.undoRoutineToggle(routine, previousState),
+      },
+    });
+  }
+
+  private undoRoutineToggle(routine: RoutineVm, previousState: RoutineState): void {
+    this.maintenanceApi
+      .updateRoutineState(routine.vehicleId, routine.routineId, previousState)
+      .subscribe({
+        next: (restored: RoutineVm) => {
+          this.planStore.replaceRoutine(restored);
+          this.loadFleetList();
+        },
+        error: () => this.showOperationError(),
+      });
+  }
+
+  private showOperationError(): void {
+    this.toastStore.show({
+      message: FLEET_TEXTS.operationErrorMessage,
+      tone: 'danger',
+      isError: true,
+    });
   }
 
   private loadVehicleSubResources(vehicleId: string): void {
@@ -296,12 +268,12 @@ export class FleetFacade {
       next: (readings: readonly OdometerReadingVm[]) => this.planStore.setReadingsReady(readings),
       error: () => this.planStore.setReadingsError(FLEET_TEXTS.errorMessage),
     });
+  }
 
-    this.fleetApi.getVehicleOrders(vehicleId).subscribe({
-      next: (orders: readonly VehicleServiceOrderSummaryDto[]) =>
-        this.planStore.setOrdersReady(orders),
-      error: () => this.planStore.setOrdersError(FLEET_TEXTS.errorMessage),
-    });
+  private isActiveVehicle(vehicleId: string): boolean {
+    return (
+      this.activePlate !== null && this.fleetStore.detailLoadable().data?.vehicleId === vehicleId
+    );
   }
 
   private bindRealtimeEvents(): void {
@@ -311,39 +283,37 @@ export class FleetFacade {
         this.fleetStore.markVehicleFlashed(event.vehicleId);
         this.planStore.markRoutineFlashed(event.routineId);
         this.loadFleetList();
-        if (this.activePlate && this.fleetStore.detailLoadable().data?.vehicleId === event.vehicleId) {
+        if (this.isActiveVehicle(event.vehicleId)) {
           this.loadVehicleSubResources(event.vehicleId);
         }
       });
 
     this.notifications.odometerReadingRecorded$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((event: OdometerReadingRecordedEvent) => {
-        this.fleetStore.markVehicleFlashed(event.vehicleId);
-        this.loadFleetList();
-        if (this.activePlate && this.fleetStore.detailLoadable().data?.vehicleId === event.vehicleId) {
-          this.loadVehicleDetail(this.activePlate);
-        }
-      });
+      .subscribe((event: OdometerReadingRecordedEvent) =>
+        this.refreshVehicleDetail(event.vehicleId)
+      );
 
     this.notifications.vehicleChanged$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((event: VehicleChangedEvent) => {
-        this.fleetStore.markVehicleFlashed(event.vehicleId);
-        this.loadFleetList();
-        if (this.activePlate && this.fleetStore.detailLoadable().data?.vehicleId === event.vehicleId) {
-          this.loadVehicleDetail(this.activePlate);
-        }
-      });
+      .subscribe((event: VehicleChangedEvent) => this.refreshVehicleDetail(event.vehicleId));
 
     this.notifications.serviceOrderChanged$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((event: ServiceOrderChangedEvent) => {
         this.fleetStore.markVehicleFlashed(event.vehicleId);
         this.loadFleetList();
-        if (this.activePlate && this.fleetStore.detailLoadable().data?.vehicleId === event.vehicleId) {
+        if (this.isActiveVehicle(event.vehicleId)) {
           this.loadVehicleSubResources(event.vehicleId);
         }
       });
+  }
+
+  private refreshVehicleDetail(vehicleId: string): void {
+    this.fleetStore.markVehicleFlashed(vehicleId);
+    this.loadFleetList();
+    if (this.activePlate && this.isActiveVehicle(vehicleId)) {
+      this.loadVehicleDetail(this.activePlate);
+    }
   }
 }

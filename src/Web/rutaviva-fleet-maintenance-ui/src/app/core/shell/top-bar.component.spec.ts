@@ -49,6 +49,16 @@ describe('TopBarComponent', () => {
     expect(statusEl?.classList.contains('is-off')).toBe(true);
   });
 
+  it('should display "Sin tiempo real" when realtime is unavailable', () => {
+    notifications.setConnectionStateForTest('unavailable');
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const statusEl: HTMLElement | null = host.querySelector('.live');
+
+    expect(statusEl?.textContent?.trim()).toBe('Sin tiempo real');
+    expect(statusEl?.classList.contains('is-off')).toBe(true);
+  });
+
   it('should disable refresh button with aria-busy="true" and ellipsis text while reevaluating', () => {
     viewRefresh.setActiveVehicleId('RVA101');
     fixture.detectChanges();

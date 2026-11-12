@@ -3,9 +3,11 @@ import { MiniBarComponent } from '../../../../shared/mini-bar/mini-bar.component
 import { PlateChipComponent } from '../../../../shared/plate-chip/plate-chip.component';
 import { StatusPillComponent } from '../../../../shared/status-pill/status-pill.component';
 import { FLEET_TEXTS } from '../../fleet.texts';
-import { VehicleListItemVm, VehicleNextMaintenanceVm } from '../../models/fleet.vm';
+import { VehicleListItemVm, VehicleMaintenanceSummaryVm } from '../../models/fleet.vm';
 
 const NUMBER_FORMATTER: Intl.NumberFormat = new Intl.NumberFormat('es-CO');
+const NON_BREAKING_SPACE = '\u00A0';
+const COUNT_SEPARATOR = ' · ';
 
 @Component({
   selector: 'app-vehicle-list',
@@ -22,7 +24,6 @@ export class VehicleListComponent {
   );
 
   readonly selectVehicle: OutputEmitterRef<string> = output<string>();
-  readonly selectOrder: OutputEmitterRef<string> = output<string>();
 
   readonly texts: typeof FLEET_TEXTS = FLEET_TEXTS;
 
@@ -30,24 +31,32 @@ export class VehicleListComponent {
     return this.flashedIds().has(vehicleId);
   }
 
-  formatKm(km: number): string {
-    return `${NUMBER_FORMATTER.format(km)}\u00A0${this.texts.kmUnit}`;
+  formatOdometer(km: number | null): string {
+    if (km === null) {
+      return this.texts.emptyValue;
+    }
+    return `${NUMBER_FORMATTER.format(km)}${NON_BREAKING_SPACE}${this.texts.kmUnit}`;
   }
 
-  formatRemaining(next: VehicleNextMaintenanceVm): string {
-    const absVal: string = NUMBER_FORMATTER.format(Math.abs(next.remainingValue));
-    const sign: string = next.remainingValue < 0 ? '−' : '';
-    const unit: string = next.remainingKind === 'km' ? this.texts.kmUnit : this.texts.daysUnit;
-    return `${sign}${absVal}\u00A0${unit}`;
+  formatConsumed(percent: number): string {
+    return `${NUMBER_FORMATTER.format(Math.round(percent))}${NON_BREAKING_SPACE}%${NON_BREAKING_SPACE}${this.texts.consumedLabel}`;
+  }
+
+  formatCounts(summary: VehicleMaintenanceSummaryVm): string {
+    return [
+      this.formatCount(summary.overdueCount, this.texts.overdueCountLabel),
+      this.formatCount(summary.dueSoonCount, this.texts.dueSoonCountLabel),
+      this.formatCount(summary.upToDateCount, this.texts.upToDateCountLabel),
+    ]
+      .filter((part: string) => part !== '')
+      .join(COUNT_SEPARATOR);
   }
 
   onRowClick(plate: string): void {
     this.selectVehicle.emit(plate);
   }
 
-  onOrderClick(event: Event, orderId: string): void {
-    event.stopPropagation();
-    this.selectOrder.emit(orderId);
+  private formatCount(count: number, label: string): string {
+    return count > 0 ? `${count}${NON_BREAKING_SPACE}${label}` : '';
   }
 }
-

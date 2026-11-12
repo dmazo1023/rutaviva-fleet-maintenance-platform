@@ -1,11 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { EmptyStateComponent } from '../../../../shared/empty-state/empty-state.component';
-
-export const REPORTS_TEXTS = {
-  title: 'Reportes',
-  emptyTitle: 'Reportes operativos',
-  emptyDesc: 'Consulta y exportación de estado de flota, órdenes, costos y alertas.',
-} as const;
+import { REPORTS_TEXTS } from '../../reports.texts';
 
 @Component({
   selector: 'app-reports-page',
@@ -15,6 +10,6 @@ export const REPORTS_TEXTS = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportsPageComponent {
-  readonly texts = REPORTS_TEXTS;
+  readonly texts: typeof REPORTS_TEXTS = REPORTS_TEXTS;
 }
 

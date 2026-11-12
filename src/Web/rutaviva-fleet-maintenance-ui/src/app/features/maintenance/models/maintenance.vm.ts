@@ -31,9 +31,9 @@ export interface RoutineVm {
   readonly cycleStartDate: string;
   readonly intervalKm: number | null;
   readonly intervalMonths: number | null;
-  readonly defaultIntervalKm: number;
-  readonly defaultIntervalMonths: number;
-  readonly defaultDueSoonPercent: number;
+  readonly defaultIntervalKm: number | null;
+  readonly defaultIntervalMonths: number | null;
+  readonly defaultDueSoonPercent: number | null;
   readonly intervalKmOverride: number | null;
   readonly intervalMonthsOverride: number | null;
   readonly dueSoonPercentOverride: number | null;
@@ -48,24 +48,24 @@ export interface RoutineVm {
 export interface MaintenancePlanDetailVm {
   readonly vehicleId: string;
   readonly plate: string;
-  readonly customerId: string;
   readonly status: MaintenancePlanStatus;
   readonly odometerKm: number;
+  readonly worstDueStatus: DueStatus | null;
+  readonly maxConsumedPercent: number;
   readonly routines: readonly RoutineVm[];
 }
 
 export interface MaintenancePlanSummaryVm {
   readonly vehicleId: string;
   readonly plate: string;
-  readonly customerId: string;
   readonly status: MaintenancePlanStatus;
   readonly odometerKm: number;
   readonly worstDueStatus: DueStatus | null;
-  readonly worstConsumedPercent: number;
-  readonly worstTriggeredBy: TriggeredBy | null;
-  readonly nextRoutineName: string | null;
-  readonly nextRemainingKind: 'km' | 'time' | null;
-  readonly nextRemainingValue: number | null;
+  readonly maxConsumedPercent: number;
+  readonly upToDateCount: number;
+  readonly dueSoonCount: number;
+  readonly overdueCount: number;
+  readonly inactiveCount: number;
 }
 
 export interface OdometerReadingVm {
@@ -82,13 +82,36 @@ export interface AlertVm {
   readonly customerId: string;
   readonly routineId: string;
   readonly routineName: string;
-  readonly routineTypeCode: string;
   readonly type: AlertType;
   readonly triggeredBy: TriggeredBy;
   readonly status: AlertStatus;
   readonly raisedAt: string;
   readonly acknowledgedBy: string | null;
   readonly resolutionReason: AlertResolutionReason | null;
+}
+
+export interface PlanOrderSummaryVm {
+  readonly id: string;
+  readonly number: string;
+  readonly vehicleId: string;
+  readonly plate: string;
+  readonly routineId: string;
+  readonly routineName: string;
+  readonly routineTypeCode: string;
+  readonly status: ServiceOrderStatus;
+  readonly statusBeforeHold: ServiceOrderStatus | null;
+  readonly total: number | null;
+  readonly appointmentAt: string | null;
+}
+
+export interface AlertsPageVm {
+  readonly items: readonly AlertVm[];
+  readonly totalCount: number;
+}
+
+export interface RegisterServiceRequest {
+  readonly servicedKm: number;
+  readonly servicedAt: string;
 }
 
 export interface ReevaluationSummaryVm {

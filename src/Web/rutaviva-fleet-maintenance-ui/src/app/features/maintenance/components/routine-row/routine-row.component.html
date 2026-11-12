@@ -39,13 +39,25 @@
             <app-status-pill [status]="routine().openServiceOrderStatus!" [small]="true" />
           }
         </button>
-      } @else if (routine().canCreateOrder && vehicleActive() && canManage() && isActive()) {
+      } @else if (canShowCreateOrder()) {
         <button
           type="button"
           class="btn btn--primary routine-row__create-btn"
-          (click)="onCreateOrder()"
+          disabled
+          [attr.title]="texts.createOrderNextPhaseHint"
         >
-          {{ texts.createOrder }}
+          {{ texts.createOrderNextPhase }}
+        </button>
+      }
+
+      @if (canRegisterService()) {
+        <button
+          type="button"
+          class="btn btn--secondary routine-row__service-btn"
+          [attr.aria-label]="texts.registerServiceAriaPrefix + routine().name"
+          (click)="onRegisterService()"
+        >
+          {{ texts.registerServiceAction }}
         </button>
       }
 

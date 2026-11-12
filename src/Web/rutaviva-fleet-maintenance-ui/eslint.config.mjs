@@ -20,10 +20,16 @@ const featureRules = FEATURES.map((feature) => ({
       {
         patterns: FEATURES.filter(
           (other) => other !== feature && !(feature === 'fleet' && other === 'maintenance')
-        ).map((other) => ({
-          group: [`**/features/${other}`, `**/features/${other}/**`],
-          message: `Feature '${feature}' cannot import from feature '${other}'.`,
-        })),
+        ).flatMap((other) => [
+          {
+            group: [`**/features/${other}`, `**/features/${other}/**`],
+            message: `Feature '${feature}' cannot import from feature '${other}'.`,
+          },
+          {
+            regex: `^(\\.\\./)+${other}(/|$)`,
+            message: `Feature '${feature}' cannot import from feature '${other}'.`,
+          },
+        ]),
       },
     ],
   },

@@ -25,7 +25,6 @@ describe('VehicleDetailPageComponent', () => {
               detailLoadable: fs.detailLoadable,
               planLoadable: ps.planLoadable,
               readingsLoadable: ps.readingsLoadable,
-              ordersLoadable: ps.ordersLoadable,
               flashedRoutineIds: ps.flashedRoutineIds,
               loadVehicleDetail: () => undefined,
             };
@@ -53,19 +52,18 @@ describe('VehicleDetailPageComponent', () => {
       responsibleApproverId: null,
       responsibleApproverName: null,
       status: 'Inactive',
-      odometerKm: 58900,
-      lastReadingText: 'hace 90 días',
+      initialOdometerKm: 58900,
     });
     planStore.setPlanReady({
       vehicleId: 'RVA110',
       plate: 'RVA110',
-      customerId: 'CUST-1',
       status: 'Suspended',
       odometerKm: 58900,
+      worstDueStatus: null,
+      maxConsumedPercent: 0,
       routines: [],
     });
     planStore.setReadingsReady([]);
-    planStore.setOrdersReady([]);
 
     const fixture: ComponentFixture<VehicleDetailPageComponent> =
       TestBed.createComponent(VehicleDetailPageComponent);

@@ -28,47 +28,31 @@
             </div>
           </td>
           <td class="vehicle-table__customer">{{ v.customerName }}</td>
-          <td class="vehicle-table__num">{{ formatKm(v.odometerKm) }}</td>
+          <td class="vehicle-table__num">{{ formatOdometer(v.odometerKm) }}</td>
           <td>
-            @if (v.nextMaintenance; as next) {
+            @if (v.maintenance; as m) {
               <div class="vehicle-table__next">
                 <div class="vehicle-table__next-top">
-                  <span class="vehicle-table__routine">{{ next.routineName }}</span>
-                  <span
-                    class="vehicle-table__rem"
-                    [class.vehicle-table__rem--neg]="next.remainingValue < 0"
-                  >
-                    {{ formatRemaining(next) }}
-                  </span>
+                  <span class="vehicle-table__routine">{{ formatConsumed(m.maxConsumedPercent) }}</span>
+                  <span class="vehicle-table__rem">{{ formatCounts(m) }}</span>
                 </div>
-                <app-mini-bar [percent]="next.consumedPercent" [status]="next.status" />
+                <app-mini-bar [percent]="m.maxConsumedPercent" [status]="m.worstDueStatus ?? 'UpToDate'" />
               </div>
             } @else {
-              <span class="vehicle-table__muted">{{ texts.noActiveRoutines }}</span>
+              <span class="vehicle-table__muted">{{ texts.noPlan }}</span>
             }
           </td>
           <td>
             @if (v.status === 'Inactive') {
               <app-status-pill status="Inactive" />
             } @else if (v.worstDueStatus) {
-              <app-status-pill [status]="v.worstDueStatus" [trigger]="v.worstTriggeredBy" />
+              <app-status-pill [status]="v.worstDueStatus" />
             } @else {
               <app-status-pill status="UpToDate" />
             }
           </td>
           <td>
-            @if (v.openOrder; as ord) {
-              <button
-                type="button"
-                class="btn btn--ghost vehicle-table__order-btn"
-                (click)="onOrderClick($event, ord.orderId)"
-              >
-                <span class="vehicle-table__order-num">{{ ord.number }}</span>
-                <app-status-pill [status]="ord.status" [small]="true" />
-              </button>
-            } @else {
-              <span class="vehicle-table__muted">—</span>
-            }
+            <span class="vehicle-table__muted">{{ texts.nextPhase }}</span>
           </td>
         </tr>
       }

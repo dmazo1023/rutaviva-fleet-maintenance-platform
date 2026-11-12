@@ -2,6 +2,11 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, Observable, Subject, throwError } from 'rxjs';
 import { ToastStore } from '../feedback/toast.store';
+import {
+  API_ERROR_FALLBACK_MESSAGE,
+  API_ERROR_MESSAGES,
+  API_ERROR_TITLE,
+} from './api-errors.texts';
 
 export interface ProblemDetailsPayload {
   readonly title?: string;
@@ -13,7 +18,6 @@ export interface ProblemDetailsPayload {
 const HANDLED_STATUS_CODES: readonly number[] = [400, 409, 422];
 const HTTP_CONFLICT_STATUS = 409;
 const SERVICE_ORDER_ID_REGEX = /\/api\/v1\/service-orders\/([^/?]+)/;
-const DEFAULT_ERROR_TITLE = 'No se pudo completar la operación';
 
 @Injectable({
   providedIn: 'root',
@@ -40,6 +44,11 @@ function extractProblemDetails(payload: unknown): ProblemDetailsPayload | null {
   };
 }
 
+export function resolveErrorMessage(problem: ProblemDetailsPayload | null): string {
+  const code: string | undefined = problem?.code;
+  return (code && API_ERROR_MESSAGES[code]) || API_ERROR_FALLBACK_MESSAGE;
+}
+
 function extractServiceOrderId(url: string | null): string | null {
   if (!url) {
     return null;
@@ -59,12 +68,10 @@ export const problemDetailsInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse && HANDLED_STATUS_CODES.includes(error.status)) {
         const problem: ProblemDetailsPayload | null = extractProblemDetails(error.error);
-        const title: string = problem?.title ?? DEFAULT_ERROR_TITLE;
-        const detail: string | null = problem?.detail ?? null;
 
         toastStore.show({
-          message: title,
-          detail,
+          message: API_ERROR_TITLE,
+          detail: resolveErrorMessage(problem),
           tone: 'danger',
           isError: true,
         });

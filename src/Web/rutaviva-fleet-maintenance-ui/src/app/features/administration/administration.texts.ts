@@ -10,6 +10,11 @@ export const ADMINISTRATION_TEXTS = {
   colAction: 'Acción',
   saveAction: 'Guardar',
   savedToast: 'Parámetros actualizados',
+  policyComingSoonTitle: 'Próxima fase',
+  policyComingSoonMessage:
+    'La política de autoaprobación se habilitará junto con las órdenes de servicio, en una próxima fase.',
+  loadErrorMessage: 'No se pudieron cargar los tipos de rutina. Intenta de nuevo.',
+  saveErrorToast: 'No se pudo guardar el tipo de rutina',
   policyTitle: 'Política de autoaprobación',
   policySub: 'Las cotizaciones con total menor o igual a este tope se aprueban automáticamente.',
   policyCurrentLabel: 'Tope vigente (COP)',

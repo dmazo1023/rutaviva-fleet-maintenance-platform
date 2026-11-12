@@ -13,8 +13,8 @@ describe('SimulatorsPageComponent', () => {
     recordOdoSpy = vi.fn(() =>
       of({
         plate: 'RVA101',
-        kilometers: 45000,
-        readAt: '12/11/2026 09:00',
+        odometerKm: 45000,
+        readAt: '2026-11-12T09:00:00-05:00',
         outcome: 'Ignored' as const,
         ignoredReason: 'NotGreaterThanCurrent' as const,
       })
@@ -23,9 +23,9 @@ describe('SimulatorsPageComponent', () => {
       of({
         asOfDate: '2026-11-12',
         evaluatedPlans: 9,
-        dueSoonRoutines: 3,
-        overdueRoutines: 4,
-        requestedOrders: 3,
+        dueSoon: 3,
+        overdue: 4,
+        ordersRequested: 3,
       })
     );
 
@@ -57,7 +57,13 @@ describe('SimulatorsPageComponent', () => {
     forms[0]?.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
 
-    expect(recordOdoSpy).toHaveBeenCalled();
+    expect(recordOdoSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        plate: 'RVA101',
+        odometerKm: 50200,
+        readAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00-05:00$/),
+      })
+    );
     expect(host.textContent).toContain('Ignorada');
     expect(host.textContent).toContain('No es mayor que el odómetro actual');
 
@@ -67,6 +73,7 @@ describe('SimulatorsPageComponent', () => {
     expect(runTimeSpy).toHaveBeenCalled();
     expect(host.textContent).toContain('9');
     expect(host.textContent).toContain('Planes evaluados');
+    expect(host.textContent).toContain('2026-11-12');
   });
 });
 

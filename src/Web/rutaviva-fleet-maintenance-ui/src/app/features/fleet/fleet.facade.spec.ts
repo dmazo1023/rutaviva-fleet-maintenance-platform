@@ -11,9 +11,47 @@ import {
 import { MaintenanceApi } from '../maintenance/data/maintenance.api';
 import { MaintenancePlanSummaryVm } from '../maintenance/models/maintenance.vm';
 import { FleetApi } from './data/fleet.api';
-import { FleetFacade } from './fleet.facade';
-import { VehicleDetailVm, VehicleListItemVm } from './models/fleet.vm';
+import { composeVehicleListItems, FleetFacade } from './fleet.facade';
+import { VehicleListItemVm, VehicleSummaryVm } from './models/fleet.vm';
 import { sortVehiclesByUrgency } from './state/fleet.store';
+
+function buildVehicle(plate: string, status: 'Active' | 'Inactive' = 'Active'): VehicleSummaryVm {
+  return {
+    vehicleId: plate,
+    plate,
+    vin: null,
+    brand: 'Chevrolet',
+    model: 'NHR',
+    modelYear: 2022,
+    status,
+    customerId: 'CUST-1',
+    customerName: 'Logística Andina',
+    workshopId: 'WS-1',
+    workshopName: 'Taller Norte',
+    responsibleApproverId: null,
+    responsibleApproverName: null,
+  };
+}
+
+function buildPlan(
+  plate: string,
+  worstDueStatus: MaintenancePlanSummaryVm['worstDueStatus'],
+  maxConsumedPercent: number,
+  odometerKm: number
+): MaintenancePlanSummaryVm {
+  return {
+    vehicleId: plate,
+    plate,
+    status: 'Active',
+    odometerKm,
+    worstDueStatus,
+    maxConsumedPercent,
+    upToDateCount: 1,
+    dueSoonCount: worstDueStatus === 'DueSoon' ? 1 : 0,
+    overdueCount: worstDueStatus === 'Overdue' ? 1 : 0,
+    inactiveCount: 0,
+  };
+}
 
 describe('FleetFacade', () => {
   let routineChangedSubject: Subject<RoutineChangedEvent>;
@@ -21,160 +59,20 @@ describe('FleetFacade', () => {
   let vehicleChangedSubject: Subject<VehicleChangedEvent>;
   let orderChangedSubject: Subject<ServiceOrderChangedEvent>;
 
-  const sampleVehicles: readonly VehicleDetailVm[] = [
-    {
-      vehicleId: 'RVA103',
-      plate: 'RVA103',
-      vin: 'VIN103',
-      brand: 'Chevrolet',
-      model: 'NHR',
-      modelYear: 2022,
-      customerId: 'CUST-1',
-      customerName: 'Logística Andina',
-      workshopId: 'WS-1',
-      workshopName: 'Taller Norte',
-      responsibleApproverId: 'APP-1',
-      responsibleApproverName: 'Laura Gómez',
-      status: 'Active',
-      odometerKm: 22100,
-      lastReadingText: 'hace 1 h',
-    },
-    {
-      vehicleId: 'RVA110',
-      plate: 'RVA110',
-      vin: 'VIN110',
-      brand: 'Hino',
-      model: 'DUTRO',
-      modelYear: 2019,
-      customerId: 'CUST-1',
-      customerName: 'Logística Andina',
-      workshopId: 'WS-1',
-      workshopName: 'Taller Norte',
-      responsibleApproverId: 'APP-1',
-      responsibleApproverName: 'Laura Gómez',
-      status: 'Inactive',
-      odometerKm: 58900,
-      lastReadingText: 'hace 90 días',
-    },
-    {
-      vehicleId: 'RVA104',
-      plate: 'RVA104',
-      vin: 'VIN104',
-      brand: 'Hino',
-      model: 'FC9J',
-      modelYear: 2021,
-      customerId: 'CUST-1',
-      customerName: 'Logística Andina',
-      workshopId: 'WS-1',
-      workshopName: 'Taller Norte',
-      responsibleApproverId: 'APP-1',
-      responsibleApproverName: 'Laura Gómez',
-      status: 'Active',
-      odometerKm: 60800,
-      lastReadingText: 'hace 5 min',
-    },
-    {
-      vehicleId: 'RVA101',
-      plate: 'RVA101',
-      vin: 'VIN101',
-      brand: 'Chevrolet',
-      model: 'NHR',
-      modelYear: 2022,
-      customerId: 'CUST-1',
-      customerName: 'Logística Andina',
-      workshopId: 'WS-1',
-      workshopName: 'Taller Norte',
-      responsibleApproverId: 'APP-1',
-      responsibleApproverName: 'Laura Gómez',
-      status: 'Active',
-      odometerKm: 49200,
-      lastReadingText: 'hace 3 min',
-    },
-    {
-      vehicleId: 'RVA102',
-      plate: 'RVA102',
-      vin: 'VIN102',
-      brand: 'Chevrolet',
-      model: 'NPR',
-      modelYear: 2021,
-      customerId: 'CUST-1',
-      customerName: 'Logística Andina',
-      workshopId: 'WS-1',
-      workshopName: 'Taller Norte',
-      responsibleApproverId: 'APP-1',
-      responsibleApproverName: 'Laura Gómez',
-      status: 'Active',
-      odometerKm: 81400,
-      lastReadingText: 'hace 12 min',
-    },
+  const sampleVehicles: readonly VehicleSummaryVm[] = [
+    buildVehicle('RVA103'),
+    buildVehicle('RVA110', 'Inactive'),
+    buildVehicle('RVA104'),
+    buildVehicle('RVA101'),
+    buildVehicle('RVA102'),
   ];
 
   const samplePlans: readonly MaintenancePlanSummaryVm[] = [
-    {
-      vehicleId: 'RVA103',
-      plate: 'RVA103',
-      customerId: 'CUST-1',
-      status: 'Active',
-      odometerKm: 22100,
-      worstDueStatus: 'UpToDate',
-      worstConsumedPercent: 21,
-      worstTriggeredBy: null,
-      nextRoutineName: 'Cambio de aceite',
-      nextRemainingKind: 'km',
-      nextRemainingValue: 7900,
-    },
-    {
-      vehicleId: 'RVA110',
-      plate: 'RVA110',
-      customerId: 'CUST-1',
-      status: 'Suspended',
-      odometerKm: 58900,
-      worstDueStatus: null,
-      worstConsumedPercent: 0,
-      worstTriggeredBy: null,
-      nextRoutineName: null,
-      nextRemainingKind: null,
-      nextRemainingValue: null,
-    },
-    {
-      vehicleId: 'RVA104',
-      plate: 'RVA104',
-      customerId: 'CUST-1',
-      status: 'Active',
-      odometerKm: 60800,
-      worstDueStatus: 'Overdue',
-      worstConsumedPercent: 120,
-      worstTriggeredBy: 'DistanceAndTime',
-      nextRoutineName: 'Frenos',
-      nextRemainingKind: 'km',
-      nextRemainingValue: -4800,
-    },
-    {
-      vehicleId: 'RVA101',
-      plate: 'RVA101',
-      customerId: 'CUST-1',
-      status: 'Active',
-      odometerKm: 49200,
-      worstDueStatus: 'DueSoon',
-      worstConsumedPercent: 92,
-      worstTriggeredBy: 'Distance',
-      nextRoutineName: 'Cambio de aceite',
-      nextRemainingKind: 'km',
-      nextRemainingValue: 800,
-    },
-    {
-      vehicleId: 'RVA102',
-      plate: 'RVA102',
-      customerId: 'CUST-1',
-      status: 'Active',
-      odometerKm: 81400,
-      worstDueStatus: 'Overdue',
-      worstConsumedPercent: 114,
-      worstTriggeredBy: 'Distance',
-      nextRoutineName: 'Cambio de aceite',
-      nextRemainingKind: 'km',
-      nextRemainingValue: -1400,
-    },
+    buildPlan('RVA103', 'UpToDate', 21, 22_100),
+    buildPlan('RVA110', null, 0, 58_900),
+    buildPlan('RVA104', 'Overdue', 120, 60_800),
+    buildPlan('RVA101', 'DueSoon', 92, 49_200),
+    buildPlan('RVA102', 'Overdue', 114, 81_400),
   ];
 
   beforeEach(() => {
@@ -190,7 +88,6 @@ describe('FleetFacade', () => {
           provide: FleetApi,
           useValue: {
             getVehicles: () => of(sampleVehicles),
-            getVehicleOrders: () => of([]),
           },
         },
         {
@@ -212,7 +109,7 @@ describe('FleetFacade', () => {
     });
   });
 
-  it('should sort vehicles by urgency (Overdue -> DueSoon -> UpToDate -> Inactive) and then by worstConsumedPercent descending', () => {
+  it('should sort vehicles by urgency (Overdue -> DueSoon -> UpToDate -> Inactive) and then by maxConsumedPercent descending', () => {
     const facade: FleetFacade = TestBed.inject(FleetFacade);
     facade.loadFleetList();
 
@@ -222,7 +119,49 @@ describe('FleetFacade', () => {
     expect(sortedPlates).toEqual(['RVA104', 'RVA102', 'RVA101', 'RVA103', 'RVA110']);
   });
 
-  it('should flash vehicle and refresh list when RoutineChanged or OdometerReadingRecorded arrives', () => {
+  it('should load the list without calling any service-orders endpoint', () => {
+    const facade: FleetFacade = TestBed.inject(FleetFacade);
+    facade.loadFleetList();
+
+    expect(facade.listLoadable().status).toBe('ready');
+    expect(facade.listLoadable().data.length).toBe(5);
+  });
+
+  it('should compose the maintenance summary with worst status, max percent and counts', () => {
+    const items: readonly VehicleListItemVm[] = composeVehicleListItems(
+      sampleVehicles,
+      samplePlans
+    );
+    const overdue: VehicleListItemVm | undefined = items.find(
+      (v: VehicleListItemVm) => v.plate === 'RVA104'
+    );
+
+    expect(overdue?.maintenance?.worstDueStatus).toBe('Overdue');
+    expect(overdue?.maintenance?.maxConsumedPercent).toBe(120);
+    expect(overdue?.maintenance?.overdueCount).toBe(1);
+    expect(overdue?.odometerKm).toBe(60_800);
+  });
+
+  it('should leave maintenance empty for inactive vehicles and vehicles without plan', () => {
+    const items: readonly VehicleListItemVm[] = composeVehicleListItems(
+      [buildVehicle('RVA110', 'Inactive'), buildVehicle('RVA999')],
+      samplePlans
+    );
+
+    expect(items[0]?.maintenance).toBeNull();
+    expect(items[1]?.maintenance).toBeNull();
+    expect(items[1]?.odometerKm).toBeNull();
+  });
+
+  it('should keep searching when a vehicle has a null customer name', () => {
+    const facade: FleetFacade = TestBed.inject(FleetFacade);
+    facade.loadFleetList();
+    facade.setSearchQuery('rva101');
+
+    expect(facade.filteredVehicles().map((v: VehicleListItemVm) => v.plate)).toEqual(['RVA101']);
+  });
+
+  it('should flash vehicle and refresh list when RoutineChanged arrives', () => {
     const facade: FleetFacade = TestBed.inject(FleetFacade);
     facade.loadFleetList();
 

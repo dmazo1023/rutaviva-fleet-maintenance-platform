@@ -70,18 +70,15 @@ describe('FleetPageComponent', () => {
         customerName: 'Logística Andina',
         status: 'Active',
         worstDueStatus: 'DueSoon',
-        worstConsumedPercent: 92,
-        worstTriggeredBy: 'Distance',
+        maxConsumedPercent: 92,
         odometerKm: 49200,
-        nextMaintenance: {
-          routineName: 'Cambio de aceite',
-          status: 'DueSoon',
-          consumedPercent: 92,
-          remainingKind: 'km',
-          remainingValue: 800,
-          triggeredBy: 'Distance',
+        maintenance: {
+          worstDueStatus: 'DueSoon',
+          maxConsumedPercent: 92,
+          upToDateCount: 1,
+          dueSoonCount: 1,
+          overdueCount: 0,
         },
-        openOrder: null,
       },
     ]);
     store.setSearchQuery('ZZZ999');

@@ -9,6 +9,9 @@
       <span>{{ texts.restrictedMessage }}</span>
     </div>
   } @else {
+    @if (errorMessage(); as err) {
+      <p class="simulators-page__restricted" role="alert">{{ err }}</p>
+    }
     <div class="simulators-grid">
       <section class="sim-card">
         <div class="sim-card__head">
@@ -42,7 +45,7 @@
           <label class="sim-card__field">
             <span>{{ texts.readAtLabel }}</span>
             <input
-              type="text"
+              type="datetime-local"
               class="input sim-card__readat-input"
               [value]="readAtInput()"
               (input)="onReadAtChange($event)"
@@ -79,7 +82,7 @@
           <label class="sim-card__field">
             <span>{{ texts.asOfDateLabel }}</span>
             <input
-              type="text"
+              type="date"
               class="input sim-card__date-input"
               [value]="asOfDateInput()"
               (input)="onAsOfDateChange($event)"
@@ -94,20 +97,24 @@
         @if (timeResult(); as tr) {
           <dl class="sim-card__summary">
             <div>
+              <dt>{{ texts.asOfDateResultLabel }}</dt>
+              <dd>{{ tr.asOfDate }}</dd>
+            </div>
+            <div>
               <dt>{{ texts.evaluatedPlansLabel }}</dt>
               <dd>{{ tr.evaluatedPlans }}</dd>
             </div>
             <div>
               <dt>{{ texts.dueSoonLabel }}</dt>
-              <dd>{{ tr.dueSoonRoutines }}</dd>
+              <dd>{{ tr.dueSoon }}</dd>
             </div>
             <div>
               <dt>{{ texts.overdueLabel }}</dt>
-              <dd>{{ tr.overdueRoutines }}</dd>
+              <dd>{{ tr.overdue }}</dd>
             </div>
             <div>
               <dt>{{ texts.requestedOrdersLabel }}</dt>
-              <dd>{{ tr.requestedOrders }}</dd>
+              <dd>{{ tr.ordersRequested }}</dd>
             </div>
           </dl>
         }

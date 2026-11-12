@@ -10,6 +10,13 @@
     </div>
   }
 
+  @if (loadFailed()) {
+    <div class="parameters-page__readonly" role="alert">
+      <span class="ms" aria-hidden="true">error</span>
+      <span>{{ texts.loadErrorMessage }}</span>
+    </div>
+  }
+
   <section class="parameters-card">
     <div class="parameters-card__head">
       <h2 class="parameters-card__title">{{ texts.routineTypesTitle }}</h2>
@@ -34,7 +41,6 @@
             <tr class="parameters-table__row">
               <td>
                 <div class="parameters-table__type-cell">
-                  <span class="ms" aria-hidden="true">{{ item.icon }}</span>
                   <div>
                     <strong class="parameters-table__name">{{ item.name }}</strong>
                     <code class="parameters-table__code">{{ item.code }}</code>
@@ -89,7 +95,15 @@
     </div>
   </section>
 
-  @if (policy(); as pol) {
+  @if (!policyEnabled) {
+    <section class="parameters-card">
+      <app-empty-state
+        icon="schedule"
+        [title]="texts.policyComingSoonTitle"
+        [message]="texts.policyComingSoonMessage"
+      />
+    </section>
+  } @else if (policy(); as pol) {
     <section class="parameters-card">
       <div class="parameters-card__head">
         <h2 class="parameters-card__title">{{ texts.policyTitle }}</h2>

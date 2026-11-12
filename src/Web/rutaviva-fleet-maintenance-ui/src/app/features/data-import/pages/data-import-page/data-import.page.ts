@@ -1,11 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { EmptyStateComponent } from '../../../../shared/empty-state/empty-state.component';
-
-export const DATA_IMPORT_TEXTS = {
-  title: 'Carga masiva',
-  emptyTitle: 'Carga masiva de datos',
-  emptyDesc: 'Importación por etapas (Talleres, Clientes, Aprobadores, Vehículos y Rutinas).',
-} as const;
+import { DATA_IMPORT_TEXTS } from '../../data-import.texts';
 
 @Component({
   selector: 'app-data-import-page',
@@ -15,6 +10,6 @@ export const DATA_IMPORT_TEXTS = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DataImportPageComponent {
-  readonly texts = DATA_IMPORT_TEXTS;
+  readonly texts: typeof DATA_IMPORT_TEXTS = DATA_IMPORT_TEXTS;
 }
 

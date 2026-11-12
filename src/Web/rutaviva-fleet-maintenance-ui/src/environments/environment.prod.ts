@@ -4,5 +4,5 @@ export const environment: AppEnvironment = {
   production: true,
   apiBaseUrl: 'http://localhost:5000',
   useMockBackend: false,
+  realtimeEnabled: false,
 };
-

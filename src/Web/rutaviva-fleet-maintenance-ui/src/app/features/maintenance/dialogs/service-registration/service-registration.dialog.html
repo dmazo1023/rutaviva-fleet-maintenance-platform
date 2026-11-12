@@ -1,0 +1,67 @@
+@if (routine(); as r) {
+  <div class="modal-backdrop">
+    <dialog open class="service-dialog" tabindex="-1" aria-labelledby="service-dlg-title">
+      <form (submit)="onSubmit($event)" novalidate>
+        <div class="service-dialog__head">
+          <div>
+            <h2 id="service-dlg-title" class="service-dialog__title">
+              {{ texts.serviceDialogTitle }}
+            </h2>
+            <p class="service-dialog__sub">{{ r.plate }} · {{ r.name }}</p>
+          </div>
+          <button
+            type="button"
+            class="icon-btn"
+            [attr.aria-label]="texts.closeAria"
+            (click)="onCancel()"
+          >
+            <span class="ms" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <div class="service-dialog__body">
+          <div class="service-dialog__grid">
+            <label class="service-dialog__field">
+              <span>{{ texts.serviceKmLabel }} ({{ texts.kmUnit }})</span>
+              <input
+                type="number"
+                min="0"
+                class="input service-dialog__input-km"
+                [value]="kmInput()"
+                (input)="onKmInput($event)"
+              />
+            </label>
+
+            <label class="service-dialog__field">
+              <span>{{ texts.serviceDateLabel }}</span>
+              <input
+                type="date"
+                class="input service-dialog__input-date"
+                [value]="dateInput()"
+                (input)="onDateInput($event)"
+              />
+            </label>
+          </div>
+
+          @if (validationError() ?? serverError(); as err) {
+            <p class="service-dialog__error" role="alert">{{ err }}</p>
+          }
+        </div>
+
+        <div class="service-dialog__foot">
+          <button type="button" class="btn btn--ghost" (click)="onCancel()">
+            {{ texts.cancel }}
+          </button>
+          <button
+            type="submit"
+            class="btn btn--primary service-dialog__confirm-btn"
+            [disabled]="busy()"
+            [attr.aria-busy]="busy() ? 'true' : null"
+          >
+            {{ busy() ? texts.serviceRegistering : texts.serviceConfirm }}
+          </button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+}

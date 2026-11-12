@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SessionStore } from '../../../../core/context/session.store';
+import { ShowToastOptions, ToastStore } from '../../../../core/feedback/toast.store';
 import { ViewRefreshService } from '../../../../core/shell/view-refresh.service';
 import { EmptyStateComponent } from '../../../../shared/empty-state/empty-state.component';
 import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
@@ -23,9 +24,11 @@ import { StatusPillComponent } from '../../../../shared/status-pill/status-pill.
 import { SwitchComponent } from '../../../../shared/switch/switch.component';
 import { OdometerReadingsComponent } from '../../../maintenance/components/odometer-readings/odometer-readings.component';
 import { RoutineRowComponent } from '../../../maintenance/components/routine-row/routine-row.component';
+import { ServiceRegistrationHostComponent } from '../../../maintenance/components/service-registration-host/service-registration-host.component';
 import { UpdateRoutineParametersRequest } from '../../../maintenance/data/maintenance.api';
 import { RoutineParamsDialogComponent } from '../../../maintenance/dialogs/routine-params/routine-params.dialog';
 import { RoutineVm } from '../../../maintenance/models/maintenance.vm';
+import { ServiceRegistrationStore } from '../../../maintenance/state/service-registration.store';
 import { DeactivateVehicleDialogComponent } from '../../dialogs/deactivate-vehicle/deactivate-vehicle.dialog';
 import { FleetFacade } from '../../fleet.facade';
 import { FLEET_TEXTS } from '../../fleet.texts';
@@ -33,6 +36,12 @@ import { VehicleDetailVm } from '../../models/fleet.vm';
 
 export type VehicleDetailTab = 'rutinas' | 'ordenes' | 'lecturas';
 
+const NO_OPEN_ORDERS = 0;
+const OPERATION_ERROR_TOAST: ShowToastOptions = {
+  message: FLEET_TEXTS.operationErrorMessage,
+  tone: 'danger',
+  isError: true,
+};
 const TAB_ORDER: readonly VehicleDetailTab[] = ['rutinas', 'ordenes', 'lecturas'];
 const NUMBER_FORMATTER: Intl.NumberFormat = new Intl.NumberFormat('es-CO');
 
@@ -47,6 +56,7 @@ const NUMBER_FORMATTER: Intl.NumberFormat = new Intl.NumberFormat('es-CO');
     EmptyStateComponent,
     ErrorStateComponent,
     RoutineRowComponent,
+    ServiceRegistrationHostComponent,
     OdometerReadingsComponent,
     RoutineParamsDialogComponent,
     DeactivateVehicleDialogComponent,
@@ -61,6 +71,8 @@ export class VehicleDetailPageComponent {
   private readonly router: Router = inject(Router);
   private readonly route: ActivatedRoute = inject(ActivatedRoute);
   private readonly viewRefresh: ViewRefreshService = inject(ViewRefreshService);
+  private readonly serviceRegistration: ServiceRegistrationStore = inject(ServiceRegistrationStore);
+  private readonly toastStore: ToastStore = inject(ToastStore);
 
   readonly plate: InputSignal<string> = input.required<string>();
   readonly tab: InputSignal<string | undefined> = input<string | undefined>(undefined);
@@ -71,7 +83,6 @@ export class VehicleDetailPageComponent {
   readonly detailLoadable = this.facade.detailLoadable;
   readonly planLoadable = this.facade.planLoadable;
   readonly readingsLoadable = this.facade.readingsLoadable;
-  readonly ordersLoadable = this.facade.ordersLoadable;
   readonly flashedRoutineIds = this.facade.flashedRoutineIds;
 
   readonly activeTab: WritableSignal<VehicleDetailTab> = signal<VehicleDetailTab>('rutinas');
@@ -87,10 +98,11 @@ export class VehicleDetailPageComponent {
     return routines.filter((r: RoutineVm) => r.state === 'Active').length;
   });
 
-  readonly openOrdersCount: Signal<number> = computed(() => {
-    const orders = this.ordersLoadable().data;
-    return orders.filter((o) => o.status !== 'Completed' && o.status !== 'Cancelled').length;
-  });
+  readonly openOrdersCount: number = NO_OPEN_ORDERS;
+
+  readonly currentOdometerKm: Signal<number | null> = computed(
+    () => this.planLoadable().data?.odometerKm ?? this.detailLoadable().data?.initialOdometerKm ?? null
+  );
 
   constructor() {
     effect(() => {
@@ -111,7 +123,10 @@ export class VehicleDetailPageComponent {
     });
   }
 
-  formatKm(km: number): string {
+  formatKm(km: number | null): string {
+    if (km === null) {
+      return this.texts.emptyValue;
+    }
     return `${NUMBER_FORMATTER.format(km)}\u00A0${this.texts.kmUnit}`;
   }
 
@@ -151,18 +166,21 @@ export class VehicleDetailPageComponent {
       this.deactivateDialogOpen.set(true);
       return;
     }
-    this.facade.updateVehicleStatus(vehicle.vehicleId, 'Active').subscribe();
+    this.facade.updateVehicleStatus(vehicle, 'Active').subscribe({
+      error: () => this.toastStore.show(OPERATION_ERROR_TOAST),
+    });
   }
 
   onConfirmDeactivate(vehicle: VehicleDetailVm): void {
     this.deactivatingVehicle.set(true);
-    this.facade.updateVehicleStatus(vehicle.vehicleId, 'Inactive').subscribe({
+    this.facade.updateVehicleStatus(vehicle, 'Inactive').subscribe({
       next: () => {
         this.deactivatingVehicle.set(false);
         this.deactivateDialogOpen.set(false);
       },
       error: () => {
         this.deactivatingVehicle.set(false);
+        this.toastStore.show(OPERATION_ERROR_TOAST);
       },
     });
   }
@@ -200,16 +218,8 @@ export class VehicleDetailPageComponent {
     });
   }
 
-  onCreateManualOrder(routine: RoutineVm): void {
-    this.facade.createManualOrder(routine.vehicleId, routine.routineId).subscribe({
-      next: (created) => {
-        void this.router.navigate(['/ordenes', created.id]);
-      },
-    });
-  }
-
-  onOpenOrder(orderId: string): void {
-    void this.router.navigate(['/ordenes', orderId]);
+  onRegisterService(routine: RoutineVm): void {
+    this.serviceRegistration.open(routine);
   }
 
   onRetry(): void {

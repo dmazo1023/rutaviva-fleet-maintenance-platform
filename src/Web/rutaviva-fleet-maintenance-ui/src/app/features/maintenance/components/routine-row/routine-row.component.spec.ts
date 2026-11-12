@@ -57,7 +57,7 @@ describe('RoutineRowComponent', () => {
     }).compileComponents();
   });
 
-  it('should render tracks, create order button when canCreateOrder is true, and emit toggleState on switch click', () => {
+  it('should render tracks, disabled next-phase order button, and emit toggleState on switch click', () => {
     const fixture: ComponentFixture<RoutineRowComponent> =
       TestBed.createComponent(RoutineRowComponent);
     fixture.componentRef.setInput('routine', baseRoutine);
@@ -65,7 +65,9 @@ describe('RoutineRowComponent', () => {
 
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
     expect(host.querySelectorAll('app-routine-track').length).toBe(2);
-    expect(host.querySelector('.routine-row__create-btn')?.textContent).toContain('Crear orden');
+    const createBtn: HTMLButtonElement | null = host.querySelector('.routine-row__create-btn');
+    expect(createBtn?.textContent).toContain('Próxima fase');
+    expect(createBtn?.disabled).toBe(true);
 
     let toggled: RoutineVm | undefined;
     fixture.componentInstance.toggleState.subscribe((val: RoutineVm) => {
@@ -92,5 +94,31 @@ describe('RoutineRowComponent', () => {
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
     expect(host.querySelector('.routine-row__create-btn')).toBeNull();
     expect(host.querySelector('.routine-row__order-link')?.textContent).toContain('OS-2026-001');
+  });
+
+  it('should emit registerService from the service button when the routine is DueSoon', () => {
+    const fixture: ComponentFixture<RoutineRowComponent> =
+      TestBed.createComponent(RoutineRowComponent);
+    fixture.componentRef.setInput('routine', baseRoutine);
+    fixture.detectChanges();
+
+    let registered: RoutineVm | undefined;
+    fixture.componentInstance.registerService.subscribe((val: RoutineVm) => {
+      registered = val;
+    });
+
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    host.querySelector<HTMLButtonElement>('.routine-row__service-btn')?.click();
+    expect(registered?.routineId).toBe('RT-RVA101-OIL');
+  });
+
+  it('should hide the service button when the routine is UpToDate', () => {
+    const fixture: ComponentFixture<RoutineRowComponent> =
+      TestBed.createComponent(RoutineRowComponent);
+    fixture.componentRef.setInput('routine', { ...baseRoutine, dueStatus: 'UpToDate' });
+    fixture.detectChanges();
+
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('.routine-row__service-btn')).toBeNull();
   });
 });

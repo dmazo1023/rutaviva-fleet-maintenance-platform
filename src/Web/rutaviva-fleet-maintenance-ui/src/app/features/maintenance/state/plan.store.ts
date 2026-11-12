@@ -6,8 +6,14 @@ import {
   createReadyLoadable,
   Loadable,
 } from '../../../shared/state/loadable';
-import { VehicleServiceOrderSummaryDto } from '../../fleet/data/fleet.api';
-import { MaintenancePlanDetailVm, OdometerReadingVm, RoutineVm } from '../models/maintenance.vm';
+import {
+  MaintenancePlanDetailVm,
+  OdometerReadingVm,
+  PlanOrderSummaryVm,
+  RoutineVm,
+} from '../models/maintenance.vm';
+
+const FLASH_DURATION_MS = 600;
 
 @Injectable({
   providedIn: 'root',
@@ -18,8 +24,8 @@ export class PlanStore {
   private readonly readingsLoadableSignal: WritableSignal<Loadable<readonly OdometerReadingVm[]>> =
     signal<Loadable<readonly OdometerReadingVm[]>>(createIdleLoadable([]));
   private readonly ordersLoadableSignal: WritableSignal<
-    Loadable<readonly VehicleServiceOrderSummaryDto[]>
-  > = signal<Loadable<readonly VehicleServiceOrderSummaryDto[]>>(createIdleLoadable([]));
+    Loadable<readonly PlanOrderSummaryVm[]>
+  > = signal<Loadable<readonly PlanOrderSummaryVm[]>>(createIdleLoadable([]));
   private readonly flashedRoutineIdsSignal: WritableSignal<ReadonlySet<string>> =
     signal<ReadonlySet<string>>(new Set<string>());
 
@@ -27,7 +33,7 @@ export class PlanStore {
     this.planLoadableSignal.asReadonly();
   readonly readingsLoadable: Signal<Loadable<readonly OdometerReadingVm[]>> =
     this.readingsLoadableSignal.asReadonly();
-  readonly ordersLoadable: Signal<Loadable<readonly VehicleServiceOrderSummaryDto[]>> =
+  readonly ordersLoadable: Signal<Loadable<readonly PlanOrderSummaryVm[]>> =
     this.ordersLoadableSignal.asReadonly();
   readonly flashedRoutineIds: Signal<ReadonlySet<string>> =
     this.flashedRoutineIdsSignal.asReadonly();
@@ -80,22 +86,22 @@ export class PlanStore {
   }
 
   setOrdersLoading(): void {
-    this.ordersLoadableSignal.update((prev: Loadable<readonly VehicleServiceOrderSummaryDto[]>) =>
+    this.ordersLoadableSignal.update((prev: Loadable<readonly PlanOrderSummaryVm[]>) =>
       createLoadingLoadable(prev.data)
     );
   }
 
-  setOrdersReady(orders: readonly VehicleServiceOrderSummaryDto[]): void {
+  setOrdersReady(orders: readonly PlanOrderSummaryVm[]): void {
     this.ordersLoadableSignal.set(createReadyLoadable(orders));
   }
 
   setOrdersError(message: string): void {
-    this.ordersLoadableSignal.update((prev: Loadable<readonly VehicleServiceOrderSummaryDto[]>) =>
+    this.ordersLoadableSignal.update((prev: Loadable<readonly PlanOrderSummaryVm[]>) =>
       createErrorLoadable(prev.data, message)
     );
   }
 
-  markRoutineFlashed(routineId: string, durationMs = 600): void {
+  markRoutineFlashed(routineId: string, durationMs = FLASH_DURATION_MS): void {
     this.flashedRoutineIdsSignal.update((prev: ReadonlySet<string>) => {
       const next: Set<string> = new Set<string>(prev);
       next.add(routineId);

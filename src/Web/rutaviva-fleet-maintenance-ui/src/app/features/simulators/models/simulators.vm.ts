@@ -5,7 +5,7 @@ import {
 
 export interface OdometerSimulationResultVm {
   readonly plate: string;
-  readonly kilometers: number;
+  readonly odometerKm: number;
   readonly readAt: string;
   readonly outcome: OdometerReadingOutcome;
   readonly ignoredReason: OdometerReadingIgnoredReason | null;
@@ -14,8 +14,7 @@ export interface OdometerSimulationResultVm {
 export interface TimeEvaluationResultVm {
   readonly asOfDate: string;
   readonly evaluatedPlans: number;
-  readonly dueSoonRoutines: number;
-  readonly overdueRoutines: number;
-  readonly requestedOrders: number;
+  readonly dueSoon: number;
+  readonly overdue: number;
+  readonly ordersRequested: number;
 }
-

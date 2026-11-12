@@ -2,6 +2,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, Subject } from 'rxjs';
+import { AlertsQuery } from '../../../../core/api/api-routes';
 import { SessionStore } from '../../../../core/context/session.store';
 import { NotificationsService } from '../../../../core/realtime/notifications.service';
 import { AlertChangedEvent } from '../../../../core/realtime/realtime-events';
@@ -24,7 +25,6 @@ describe('AlertsInboxPageComponent', () => {
         customerId: 'CUST-1',
         routineId: 'RT-1',
         routineName: 'Cambio de aceite',
-        routineTypeCode: 'OIL_CHANGE',
         type: 'DueSoon',
         triggeredBy: 'Distance',
         status: 'Active',
@@ -39,7 +39,6 @@ describe('AlertsInboxPageComponent', () => {
         customerId: 'CUST-1',
         routineId: 'RT-2',
         routineName: 'Frenos',
-        routineTypeCode: 'BRAKES',
         type: 'Overdue',
         triggeredBy: 'Time',
         status: 'Resolved',
@@ -49,15 +48,11 @@ describe('AlertsInboxPageComponent', () => {
       },
     ];
 
-    acknowledgeSpy = vi.fn((alertId: string, acknowledgedBy: string) => {
-      const updated: AlertVm = {
-        ...currentAlerts[0]!,
-        alertId,
-        status: 'Acknowledged',
-        acknowledgedBy,
-      };
-      currentAlerts = [updated, currentAlerts[1]!];
-      return of(updated);
+    acknowledgeSpy = vi.fn((alertId: string) => {
+      currentAlerts = currentAlerts.map((a: AlertVm) =>
+        a.alertId === alertId ? { ...a, status: 'Acknowledged', acknowledgedBy: 'Operador' } : a
+      );
+      return of(undefined);
     });
 
     await TestBed.configureTestingModule({
@@ -68,7 +63,12 @@ describe('AlertsInboxPageComponent', () => {
         {
           provide: MaintenanceApi,
           useValue: {
-            getAlerts: () => of(currentAlerts),
+            getAlerts: (query: AlertsQuery) => {
+              const items: AlertVm[] = currentAlerts.filter(
+                (a: AlertVm) => a.status === query.status
+              );
+              return of({ items, totalCount: items.length });
+            },
             acknowledgeAlert: acknowledgeSpy,
           },
         },
@@ -97,7 +97,7 @@ describe('AlertsInboxPageComponent', () => {
     ackBtn?.click();
     fixture.detectChanges();
 
-    expect(acknowledgeSpy).toHaveBeenCalledWith('ALT-01', 'Operador');
+    expect(acknowledgeSpy).toHaveBeenCalledWith('ALT-01');
     expect(sessionStore.activeAlertsCount()).toBe(0);
 
     fixture.componentInstance.onFilterChange('Resolved');
@@ -113,7 +113,6 @@ describe('AlertsInboxPageComponent', () => {
         customerId: 'CUST-1',
         routineId: 'RT-3',
         routineName: 'Llantas',
-        routineTypeCode: 'TIRES',
         type: 'Overdue',
         triggeredBy: 'DistanceAndTime',
         status: 'Active',

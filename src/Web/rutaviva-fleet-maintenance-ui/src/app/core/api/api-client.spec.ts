@@ -63,8 +63,8 @@ describe('ApiClient and problemDetailsInterceptor', () => {
     const req = httpMock.expectOne('/api/v1/service-orders/OS-0001/approve');
     req.flush(
       {
-        title: 'Transición no permitida',
-        detail: 'La orden tiene líneas pendientes de precio.',
+        title: 'InvalidTransition',
+        detail: 'Order has lines pending price.',
         code: 'ServiceOrder.InvalidTransition',
       },
       { status: 422, statusText: 'Unprocessable Entity' }
@@ -72,8 +72,8 @@ describe('ApiClient and problemDetailsInterceptor', () => {
 
     expect(failed).toBe(true);
     expect(toastStore.toasts().length).toBe(1);
-    expect(toastStore.toasts()[0]?.message).toBe('Transición no permitida');
-    expect(toastStore.toasts()[0]?.detail).toBe('La orden tiene líneas pendientes de precio.');
+    expect(toastStore.toasts()[0]?.message).toBe('No se pudo completar la operación');
+    expect(toastStore.toasts()[0]?.detail).toBe('Revisa los datos e inténtalo de nuevo.');
   });
 
   it('should show toast and emit reload event on 409 conflict for a service order', () => {
@@ -87,15 +87,18 @@ describe('ApiClient and problemDetailsInterceptor', () => {
     const req = httpMock.expectOne('/api/v1/service-orders/OS-0004/approve');
     req.flush(
       {
-        title: 'Conflicto de concurrencia',
-        detail: 'La orden cambió mientras la revisabas.',
+        title: 'Conflict',
+        detail: 'Order changed.',
         code: 'Concurrency.Conflict',
       },
       { status: 409, statusText: 'Conflict' }
     );
 
     expect(toastStore.toasts().length).toBe(1);
-    expect(toastStore.toasts()[0]?.message).toBe('Conflicto de concurrencia');
+    expect(toastStore.toasts()[0]?.message).toBe('No se pudo completar la operación');
+    expect(toastStore.toasts()[0]?.detail).toBe(
+      'El registro cambió mientras lo editabas. Recarga e inténtalo de nuevo.'
+    );
     expect(conflicts).toEqual(['OS-0004']);
   });
 });

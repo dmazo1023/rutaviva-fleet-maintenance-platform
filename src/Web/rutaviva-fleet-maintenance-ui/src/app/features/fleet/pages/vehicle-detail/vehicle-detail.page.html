@@ -7,6 +7,8 @@
     [retryLabel]="texts.retry"
     (retryClicked)="onRetry()"
   />
+} @else if (detailLoadable().status === 'ready' && !detailLoadable().data) {
+  <app-empty-state icon="search_off" [title]="texts.notFoundTitle" [message]="texts.notFoundMessage" />
 } @else if (detailLoadable().data; as vehicle) {
   <div class="vehicle-detail">
     <header class="vehicle-detail__header">
@@ -25,7 +27,7 @@
             {{ vehicle.brand }} {{ vehicle.model }} · {{ vehicle.modelYear }}
           </span>
           <span class="vehicle-detail__odo">
-            {{ formatKm(vehicle.odometerKm) }} · {{ vehicle.lastReadingText }}
+            {{ formatKm(currentOdometerKm()) }}
           </span>
         </div>
       </div>
@@ -121,8 +123,7 @@
                     [flashed]="isRoutineFlashed(routine.routineId)"
                     (toggleState)="onToggleRoutine($event)"
                     (editParams)="onOpenRoutineParams($event)"
-                    (createOrder)="onCreateManualOrder($event)"
-                    (openOrder)="onOpenOrder($event)"
+                    (registerService)="onRegisterService($event)"
                   />
                 }
               </div>
@@ -137,21 +138,11 @@
             aria-labelledby="tab-ordenes"
             class="vehicle-detail__panel"
           >
-            @if (ordersLoadable().data.length === 0) {
-              <app-empty-state icon="assignment" [title]="texts.noOrdersTitle" />
-            } @else {
-              <div class="vehicle-detail__orders">
-                @for (ord of ordersLoadable().data; track ord.id) {
-                  <a class="vehicle-detail__order-card" [routerLink]="['/ordenes', ord.id]">
-                    <div class="vehicle-detail__order-left">
-                      <span class="vehicle-detail__order-num">{{ ord.number }}</span>
-                      <span class="vehicle-detail__order-routine">{{ ord.routineName }}</span>
-                    </div>
-                    <app-status-pill [status]="ord.status" />
-                  </a>
-                }
-              </div>
-            }
+            <app-empty-state
+              icon="assignment"
+              [title]="texts.ordersNextPhaseTitle"
+              [message]="texts.ordersNextPhaseMessage"
+            />
           </section>
         }
 
@@ -188,16 +179,18 @@
     <app-routine-params-dialog
       [open]="editingRoutine() !== null"
       [routine]="editingRoutine()"
-      [currentOdometerKm]="vehicle.odometerKm"
+      [currentOdometerKm]="currentOdometerKm() ?? vehicle.initialOdometerKm"
       [busy]="savingRoutineParams()"
       (saved)="onSaveRoutineParams($event)"
       (closed)="onCloseRoutineParams()"
     />
 
+    <app-service-registration-host />
+
     <app-deactivate-vehicle-dialog
       [open]="deactivateDialogOpen()"
       [plate]="vehicle.plate"
-      [openOrdersCount]="openOrdersCount()"
+      [openOrdersCount]="openOrdersCount"
       [activeRoutinesCount]="activeRoutinesCount()"
       [busy]="deactivatingVehicle()"
       (confirmed)="onConfirmDeactivate(vehicle)"

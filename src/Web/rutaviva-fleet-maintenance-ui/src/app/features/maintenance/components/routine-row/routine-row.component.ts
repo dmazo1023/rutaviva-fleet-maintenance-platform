@@ -29,12 +29,24 @@ export class RoutineRowComponent {
 
   readonly toggleState: OutputEmitterRef<RoutineVm> = output<RoutineVm>();
   readonly editParams: OutputEmitterRef<RoutineVm> = output<RoutineVm>();
-  readonly createOrder: OutputEmitterRef<RoutineVm> = output<RoutineVm>();
+  readonly registerService: OutputEmitterRef<RoutineVm> = output<RoutineVm>();
   readonly openOrder: OutputEmitterRef<string> = output<string>();
 
   readonly texts: typeof MAINTENANCE_TEXTS = MAINTENANCE_TEXTS;
 
   readonly isActive: Signal<boolean> = computed(() => this.routine().state === 'Active');
+
+  readonly canRegisterService: Signal<boolean> = computed(
+    () =>
+      this.isActive() &&
+      this.vehicleActive() &&
+      this.canManage() &&
+      this.routine().dueStatus !== 'UpToDate'
+  );
+
+  readonly canShowCreateOrder: Signal<boolean> = computed(
+    () => this.isActive() && this.vehicleActive() && this.canManage()
+  );
 
   readonly thresholdLabel: Signal<string> = computed(() => {
     const r: RoutineVm = this.routine();
@@ -53,8 +65,8 @@ export class RoutineRowComponent {
     this.editParams.emit(this.routine());
   }
 
-  onCreateOrder(): void {
-    this.createOrder.emit(this.routine());
+  onRegisterService(): void {
+    this.registerService.emit(this.routine());
   }
 
   onOpenOrder(): void {

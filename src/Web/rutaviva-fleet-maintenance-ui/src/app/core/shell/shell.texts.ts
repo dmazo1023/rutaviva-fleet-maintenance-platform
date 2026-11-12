@@ -6,6 +6,7 @@ export const SHELL_TEXTS = {
   wordmarkHighlight: 'viva',
   liveOnline: 'En vivo',
   liveReconnecting: 'Reconectando…',
+  liveUnavailable: 'Sin tiempo real',
   refreshAria: 'Reevaluar con los parámetros vigentes',
   refreshTooltip: 'Actualizar',
   refreshBusyText: 'Actualizando…',

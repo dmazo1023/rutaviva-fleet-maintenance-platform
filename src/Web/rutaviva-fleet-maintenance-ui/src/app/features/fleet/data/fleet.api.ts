@@ -1,26 +1,53 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, of, switchMap, throwError } from 'rxjs';
 import { ApiClient } from '../../../core/api/api-client';
 import { ApiRoutes, VehiclesQuery } from '../../../core/api/api-routes';
 import { ServiceOrderStatus, VehicleStatus } from '../../../core/models/enums';
-import { VehicleDetailVm } from '../models/fleet.vm';
+import { VehicleDetailVm, VehicleSummaryVm } from '../models/fleet.vm';
 
-export interface VehicleDto {
+export const VEHICLES_PAGE_SIZE = 200;
+const HTTP_NOT_FOUND = 404;
+
+export interface PagedResultDto<T> {
+  readonly items: readonly T[];
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+}
+
+export interface VehicleSummaryDto {
   readonly id: string;
   readonly plate: string;
   readonly vin: string | null;
   readonly brand: string;
   readonly model: string;
   readonly modelYear: number;
+  readonly status: VehicleStatus;
   readonly customerId: string;
-  readonly customerName: string;
+  readonly ownerName: string;
   readonly workshopId: string;
   readonly workshopName: string;
   readonly responsibleApproverId: string | null;
-  readonly responsibleApproverName: string | null;
+  readonly responsibleName: string | null;
+}
+
+export interface VehicleDetailDto {
+  readonly id: string;
+  readonly plate: string;
+  readonly vin: string | null;
+  readonly brand: string;
+  readonly model: string;
+  readonly modelYear: number;
+  readonly initialOdometerKm: number;
   readonly status: VehicleStatus;
-  readonly odometerKm: number;
-  readonly lastReadingText?: string;
+  readonly owner: { readonly id: string; readonly name: string; readonly taxId: string };
+  readonly workshop: { readonly id: string; readonly name: string };
+  readonly responsible: {
+    readonly id: string;
+    readonly name: string;
+    readonly email: string;
+  } | null;
 }
 
 export interface VehicleServiceOrderSummaryDto {
@@ -37,24 +64,53 @@ export interface VehicleServiceOrderSummaryDto {
   readonly appointmentAt: string | null;
 }
 
-export function mapVehicleDtoToDetailVm(dto: VehicleDto): VehicleDetailVm {
+export function mapVehicleSummaryDtoToVm(dto: VehicleSummaryDto): VehicleSummaryVm {
   return {
     vehicleId: dto.id,
     plate: dto.plate,
-    vin: dto.vin,
+    vin: dto.vin ?? null,
     brand: dto.brand,
     model: dto.model,
     modelYear: dto.modelYear,
-    customerId: dto.customerId,
-    customerName: dto.customerName,
-    workshopId: dto.workshopId,
-    workshopName: dto.workshopName,
-    responsibleApproverId: dto.responsibleApproverId,
-    responsibleApproverName: dto.responsibleApproverName,
     status: dto.status,
-    odometerKm: dto.odometerKm,
-    lastReadingText: dto.lastReadingText ?? 'hace 3 min',
+    customerId: dto.customerId,
+    customerName: dto.ownerName ?? '',
+    workshopId: dto.workshopId,
+    workshopName: dto.workshopName ?? '',
+    responsibleApproverId: dto.responsibleApproverId ?? null,
+    responsibleApproverName: dto.responsibleName ?? null,
   };
+}
+
+export function mapVehicleDetailDtoToVm(dto: VehicleDetailDto): VehicleDetailVm {
+  return {
+    vehicleId: dto.id,
+    plate: dto.plate,
+    vin: dto.vin ?? null,
+    brand: dto.brand,
+    model: dto.model,
+    modelYear: dto.modelYear,
+    customerId: dto.owner.id,
+    customerName: dto.owner.name,
+    workshopId: dto.workshop.id,
+    workshopName: dto.workshop.name,
+    responsibleApproverId: dto.responsible?.id ?? null,
+    responsibleApproverName: dto.responsible?.name ?? null,
+    status: dto.status,
+    initialOdometerKm: dto.initialOdometerKm,
+  };
+}
+
+function withPageSize(url: string): string {
+  const separator: string = url.includes('?') ? '&' : '?';
+  return `${url}${separator}pageSize=${VEHICLES_PAGE_SIZE}`;
+}
+
+function notFoundToNull(error: unknown): Observable<null> {
+  if (error instanceof HttpErrorResponse && error.status === HTTP_NOT_FOUND) {
+    return of(null);
+  }
+  return throwError(() => error);
 }
 
 @Injectable({
@@ -63,41 +119,32 @@ export function mapVehicleDtoToDetailVm(dto: VehicleDto): VehicleDetailVm {
 export class FleetApi {
   private readonly apiClient: ApiClient = inject(ApiClient);
 
-  getVehicles(query?: VehiclesQuery): Observable<readonly VehicleDetailVm[]> {
+  getVehicles(query?: VehiclesQuery): Observable<readonly VehicleSummaryVm[]> {
     return this.apiClient
-      .get<readonly VehicleDto[]>(ApiRoutes.fleet.vehicles(query))
-      .pipe(map((dtos: readonly VehicleDto[]) => dtos.map(mapVehicleDtoToDetailVm)));
+      .get<PagedResultDto<VehicleSummaryDto>>(withPageSize(ApiRoutes.fleet.vehicles(query)))
+      .pipe(
+        map((page: PagedResultDto<VehicleSummaryDto>) =>
+          (page.items ?? []).map(mapVehicleSummaryDtoToVm)
+        )
+      );
   }
 
   getVehicleByPlate(plate: string): Observable<VehicleDetailVm | null> {
-    return this.apiClient
-      .get<VehicleDto | null>(ApiRoutes.fleet.vehicleByPlate(plate))
-      .pipe(map((dto: VehicleDto | null) => (dto ? mapVehicleDtoToDetailVm(dto) : null)));
-  }
-
-  updateVehicleStatus(vehicleId: string, status: VehicleStatus): Observable<VehicleDetailVm> {
-    return this.apiClient
-      .patch<{ readonly status: VehicleStatus }, VehicleDto>(
-        ApiRoutes.fleet.vehicleStatus(vehicleId),
-        { status }
-      )
-      .pipe(map(mapVehicleDtoToDetailVm));
-  }
-
-  getVehicleOrders(vehicleId: string): Observable<readonly VehicleServiceOrderSummaryDto[]> {
-    return this.apiClient.get<readonly VehicleServiceOrderSummaryDto[]>(
-      ApiRoutes.serviceOrders.list({ vehicleId })
+    return this.apiClient.get<VehicleDetailDto>(ApiRoutes.fleet.vehicleByPlate(plate)).pipe(
+      map(mapVehicleDetailDtoToVm),
+      catchError(notFoundToNull)
     );
   }
 
-  createManualServiceOrder(
+  updateVehicleStatus(
     vehicleId: string,
-    routineId: string
-  ): Observable<{ readonly id: string; readonly number: string }> {
-    return this.apiClient.post<
-      { readonly vehicleId: string; readonly routineId: string },
-      { readonly id: string; readonly number: string }
-    >(ApiRoutes.serviceOrders.create(), { vehicleId, routineId });
+    plate: string,
+    status: VehicleStatus
+  ): Observable<VehicleDetailVm | null> {
+    return this.apiClient
+      .patch<{ readonly status: VehicleStatus }, void>(ApiRoutes.fleet.vehicleStatus(vehicleId), {
+        status,
+      })
+      .pipe(switchMap(() => this.getVehicleByPlate(plate)));
   }
 }
-

@@ -7,35 +7,24 @@ import { ParametersPageComponent } from './parameters.page';
 
 describe('ParametersPageComponent', () => {
   let updateRoutineSpy: ReturnType<typeof vi.fn>;
-  let updatePolicySpy: ReturnType<typeof vi.fn>;
+  let getRoutineTypesSpy: ReturnType<typeof vi.fn>;
+  let getPolicySpy: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
-    updateRoutineSpy = vi.fn((id: string) =>
-      of({
-        id,
-        code: 'OIL_CHANGE',
-        name: 'Cambio de aceite',
-        icon: 'oil_barrel',
-        defaultIntervalKm: 12000,
-        defaultIntervalMonths: 6,
-        dueSoonThresholdPercent: 10,
-        status: 'Active' as const,
-      })
-    );
-    updatePolicySpy = vi.fn((amount: number, createdBy: string) =>
-      of({
-        currentAmount: amount,
-        currency: 'COP',
-        history: [
-          {
-            id: 'POL-2',
-            currency: 'COP',
-            autoApprovalMaxAmount: amount,
-            effectiveFrom: '12/11/2026 09:00',
-            createdBy,
-          },
-        ],
-      })
+    updateRoutineSpy = vi.fn(() => of(undefined));
+    getPolicySpy = vi.fn();
+    getRoutineTypesSpy = vi.fn(() =>
+      of([
+        {
+          id: 'RT-OIL',
+          code: 'OIL_CHANGE',
+          name: 'Cambio de aceite',
+          defaultIntervalKm: 10000,
+          defaultIntervalMonths: 6,
+          dueSoonThresholdPercent: 10,
+          status: 'Active',
+        },
+      ])
     );
 
     await TestBed.configureTestingModule({
@@ -45,34 +34,16 @@ describe('ParametersPageComponent', () => {
         {
           provide: AdministrationApi,
           useValue: {
-            getRoutineTypes: () =>
-              of([
-                {
-                  id: 'RT-OIL',
-                  code: 'OIL_CHANGE',
-                  name: 'Cambio de aceite',
-                  icon: 'oil_barrel',
-                  defaultIntervalKm: 10000,
-                  defaultIntervalMonths: 6,
-                  dueSoonThresholdPercent: 10,
-                  status: 'Active',
-                },
-              ]),
+            getRoutineTypes: getRoutineTypesSpy,
             updateRoutineType: updateRoutineSpy,
-            getApprovalPolicy: () =>
-              of({
-                currentAmount: 1500000,
-                currency: 'COP',
-                history: [],
-              }),
-            updateApprovalPolicy: updatePolicySpy,
+            getApprovalPolicy: getPolicySpy,
           },
         },
       ],
     }).compileComponents();
   });
 
-  it('should allow Operator to save routine type and approval policy and switch to read-only for Approver', () => {
+  it('should send the real contract with actor, reload after 204 and show the next phase state for the approval policy', () => {
     const sessionStore: SessionStore = TestBed.inject(SessionStore);
     sessionStore.setProfile('Operator');
 
@@ -81,20 +52,28 @@ describe('ParametersPageComponent', () => {
     fixture.detectChanges();
 
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
-    const saveTypeBtn: HTMLButtonElement | null = host.querySelector('.parameters-table__save-btn');
-    saveTypeBtn?.click();
-    expect(updateRoutineSpy).toHaveBeenCalled();
+    host.querySelector<HTMLButtonElement>('.parameters-table__save-btn')?.click();
 
-    const savePolicyBtn: HTMLButtonElement | null = host.querySelector(
-      '.parameters-policy__save-btn'
-    );
-    savePolicyBtn?.click();
-    expect(updatePolicySpy).toHaveBeenCalled();
+    expect(updateRoutineSpy).toHaveBeenCalledWith('RT-OIL', {
+      intervalKm: 10000,
+      intervalMonths: 6,
+      dueSoonThresholdPercent: 10,
+      updatedBy: sessionStore.currentActorName(),
+    });
+    expect(getRoutineTypesSpy).toHaveBeenCalledTimes(2);
+    expect(getPolicySpy).not.toHaveBeenCalled();
+    expect(host.textContent).toContain('Próxima fase');
+  });
 
+  it('should switch to read-only for Approver', () => {
+    const sessionStore: SessionStore = TestBed.inject(SessionStore);
     sessionStore.setProfile('Approver');
+    const fixture: ComponentFixture<ParametersPageComponent> =
+      TestBed.createComponent(ParametersPageComponent);
     fixture.detectChanges();
+
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
     expect(host.querySelector('.parameters-page__readonly')).not.toBeNull();
     expect(host.querySelector('.parameters-table__save-btn')).toBeNull();
   });
 });
-

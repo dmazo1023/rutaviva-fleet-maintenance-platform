@@ -3,13 +3,22 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router, withComponentInputBinding } from '@angular/router';
 import { App } from './app';
+import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 import { BROWSER_STORAGE } from './core/context/session.store';
 import { mockBackendInterceptor } from './core/mocks/mock-backend.interceptor';
 import { HUB_CONNECTION_FACTORY } from './core/realtime/notifications.service';
 
 describe('App and Router', () => {
+  let originalFlag: boolean;
+
+  afterEach(() => {
+    Object.assign(environment, { useMockBackend: originalFlag });
+  });
+
   beforeEach(async () => {
+    originalFlag = environment.useMockBackend;
+    Object.assign(environment, { useMockBackend: true });
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [

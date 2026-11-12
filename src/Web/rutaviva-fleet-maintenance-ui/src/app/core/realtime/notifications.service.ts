@@ -13,7 +13,7 @@ import {
   VehicleChangedEvent,
 } from './realtime-events';
 
-export type RealtimeConnectionState = 'connected' | 'reconnecting' | 'disconnected';
+export type RealtimeConnectionState = 'connected' | 'reconnecting' | 'disconnected' | 'unavailable';
 
 export interface HubConnectionLike {
   start(): Promise<void>;
@@ -31,7 +31,7 @@ export const HUB_CONNECTION_FACTORY = new InjectionToken<() => HubConnectionLike
     providedIn: 'root',
     factory: (): (() => HubConnectionLike | null) => {
       return (): HubConnectionLike | null => {
-        if (environment.useMockBackend) {
+        if (!environment.realtimeEnabled) {
           return null;
         }
         const url: string = `${environment.apiBaseUrl}${HubMethods.endpoint}`;
@@ -57,7 +57,7 @@ export class NotificationsService {
   private started = false;
 
   private readonly connectionStateSignal = signal<RealtimeConnectionState>(
-    environment.useMockBackend ? 'connected' : 'disconnected'
+    environment.realtimeEnabled ? 'disconnected' : 'unavailable'
   );
 
   private readonly reconnectedSubject = new Subject<void>();
@@ -92,7 +92,7 @@ export class NotificationsService {
     this.hubConnection = this.connectionFactory();
 
     if (!this.hubConnection) {
-      this.connectionStateSignal.set('connected');
+      this.connectionStateSignal.set('unavailable');
       return;
     }
 

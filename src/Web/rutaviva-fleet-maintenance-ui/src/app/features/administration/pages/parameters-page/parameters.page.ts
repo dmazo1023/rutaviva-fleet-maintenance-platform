@@ -11,8 +11,10 @@ import {
 import { SessionStore } from '../../../../core/context/session.store';
 import { ToastStore } from '../../../../core/feedback/toast.store';
 import { ViewRefreshService } from '../../../../core/shell/view-refresh.service';
+import { EmptyStateComponent } from '../../../../shared/empty-state/empty-state.component';
+import { APPROVAL_POLICY_FEATURE_ENABLED } from '../../administration.feature';
 import { ADMINISTRATION_TEXTS } from '../../administration.texts';
-import { AdministrationApi } from '../../data/administration.api';
+import { AdministrationApi, UpdateRoutineTypeRequest } from '../../data/administration.api';
 import { ApprovalPolicyVm, RoutineTypeVm } from '../../models/administration.vm';
 
 interface RoutineTypeDraft {
@@ -21,10 +23,40 @@ interface RoutineTypeDraft {
   readonly percent: string;
 }
 
+type DraftField = keyof RoutineTypeDraft;
+
+const DEFAULT_DUE_SOON_PERCENT = 10;
 const COP_FORMATTER: Intl.NumberFormat = new Intl.NumberFormat('es-CO');
+const EMPTY_DRAFT: RoutineTypeDraft = {
+  km: '',
+  months: '',
+  percent: String(DEFAULT_DUE_SOON_PERCENT),
+};
+
+function numberToText(value: number | null): string {
+  return value === null ? '' : String(value);
+}
+
+function textToNumberOrNull(value: string): number | null {
+  const trimmed: string = value.trim();
+  return trimmed === '' ? null : Number(trimmed);
+}
+
+function toDraft(item: RoutineTypeVm): RoutineTypeDraft {
+  return {
+    km: numberToText(item.defaultIntervalKm),
+    months: numberToText(item.defaultIntervalMonths),
+    percent: String(item.dueSoonThresholdPercent),
+  };
+}
+
+function toDrafts(types: readonly RoutineTypeVm[]): Readonly<Record<string, RoutineTypeDraft>> {
+  return Object.fromEntries(types.map((item: RoutineTypeVm) => [item.id, toDraft(item)]));
+}
 
 @Component({
   selector: 'app-parameters-page',
+  imports: [EmptyStateComponent],
   templateUrl: './parameters.page.html',
   styleUrl: './parameters.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +68,7 @@ export class ParametersPageComponent implements OnInit {
   private readonly viewRefresh: ViewRefreshService = inject(ViewRefreshService);
 
   readonly texts: typeof ADMINISTRATION_TEXTS = ADMINISTRATION_TEXTS;
+  readonly policyEnabled: boolean = APPROVAL_POLICY_FEATURE_ENABLED;
 
   readonly routineTypes: WritableSignal<readonly RoutineTypeVm[]> = signal<
     readonly RoutineTypeVm[]
@@ -45,6 +78,7 @@ export class ParametersPageComponent implements OnInit {
   >({});
   readonly policy: WritableSignal<ApprovalPolicyVm | null> = signal<ApprovalPolicyVm | null>(null);
   readonly policyInput: WritableSignal<string> = signal<string>('');
+  readonly loadFailed: WritableSignal<boolean> = signal<boolean>(false);
 
   readonly isOperator: Signal<boolean> = computed(
     () => this.sessionStore.profile() === 'Operator'
@@ -56,23 +90,8 @@ export class ParametersPageComponent implements OnInit {
   }
 
   loadData(): void {
-    this.api.getRoutineTypes().subscribe((types: readonly RoutineTypeVm[]) => {
-      this.routineTypes.set(types);
-      const nextDrafts: Record<string, RoutineTypeDraft> = {};
-      for (const item of types) {
-        nextDrafts[item.id] = {
-          km: item.defaultIntervalKm !== null ? String(item.defaultIntervalKm) : '',
-          months: item.defaultIntervalMonths !== null ? String(item.defaultIntervalMonths) : '',
-          percent: String(item.dueSoonThresholdPercent),
-        };
-      }
-      this.drafts.set(nextDrafts);
-    });
-
-    this.api.getApprovalPolicy().subscribe((pol: ApprovalPolicyVm) => {
-      this.policy.set(pol);
-      this.policyInput.set(String(pol.currentAmount));
-    });
+    this.loadRoutineTypes();
+    this.loadPolicy();
   }
 
   formatCop(amount: number): string {
@@ -80,18 +99,15 @@ export class ParametersPageComponent implements OnInit {
   }
 
   getDraft(id: string): RoutineTypeDraft {
-    return this.drafts()[id] ?? { km: '', months: '', percent: '10' };
+    return this.drafts()[id] ?? EMPTY_DRAFT;
   }
 
-  onDraftFieldChange(id: string, field: 'km' | 'months' | 'percent', event: Event): void {
+  onDraftFieldChange(id: string, field: DraftField, event: Event): void {
     const target: HTMLInputElement = event.target as HTMLInputElement;
     const current: RoutineTypeDraft = this.getDraft(id);
     this.drafts.update((prev) => ({
       ...prev,
-      [id]: {
-        ...current,
-        [field]: target.value,
-      },
+      [id]: { ...current, [field]: target.value },
     }));
   }
 
@@ -99,25 +115,10 @@ export class ParametersPageComponent implements OnInit {
     if (!this.isOperator()) {
       return;
     }
-    const draft: RoutineTypeDraft = this.getDraft(item.id);
-    const defaultIntervalKm: number | null =
-      draft.km.trim() !== '' ? Number(draft.km.trim()) : null;
-    const defaultIntervalMonths: number | null =
-      draft.months.trim() !== '' ? Number(draft.months.trim()) : null;
-    const dueSoonThresholdPercent: number = Number(draft.percent.trim() || 10);
-
-    this.api
-      .updateRoutineType(item.id, {
-        defaultIntervalKm,
-        defaultIntervalMonths,
-        dueSoonThresholdPercent,
-      })
-      .subscribe((updated: RoutineTypeVm) => {
-        this.routineTypes.update((list: readonly RoutineTypeVm[]) =>
-          list.map((r: RoutineTypeVm) => (r.id === updated.id ? updated : r))
-        );
-        this.toastStore.show({ message: this.texts.savedToast });
-      });
+    this.api.updateRoutineType(item.id, this.buildUpdateRequest(item.id)).subscribe({
+      next: () => this.onRoutineTypeSaved(),
+      error: () => this.toastStore.show({ message: this.texts.saveErrorToast }),
+    });
   }
 
   onPolicyInputChange(event: Event): void {
@@ -141,5 +142,40 @@ export class ParametersPageComponent implements OnInit {
         this.toastStore.show({ message: this.texts.policySavedToast });
       });
   }
-}
 
+  private loadRoutineTypes(): void {
+    this.api.getRoutineTypes().subscribe({
+      next: (types: readonly RoutineTypeVm[]) => {
+        this.loadFailed.set(false);
+        this.routineTypes.set(types);
+        this.drafts.set(toDrafts(types));
+      },
+      error: () => this.loadFailed.set(true),
+    });
+  }
+
+  private loadPolicy(): void {
+    if (!this.policyEnabled) {
+      return;
+    }
+    this.api.getApprovalPolicy().subscribe((pol: ApprovalPolicyVm) => {
+      this.policy.set(pol);
+      this.policyInput.set(String(pol.currentAmount));
+    });
+  }
+
+  private buildUpdateRequest(id: string): UpdateRoutineTypeRequest {
+    const draft: RoutineTypeDraft = this.getDraft(id);
+    return {
+      intervalKm: textToNumberOrNull(draft.km),
+      intervalMonths: textToNumberOrNull(draft.months),
+      dueSoonThresholdPercent: textToNumberOrNull(draft.percent) ?? DEFAULT_DUE_SOON_PERCENT,
+      updatedBy: this.sessionStore.currentActorName(),
+    };
+  }
+
+  private onRoutineTypeSaved(): void {
+    this.toastStore.show({ message: this.texts.savedToast });
+    this.loadRoutineTypes();
+  }
+}

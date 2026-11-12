@@ -6,7 +6,7 @@ import { SessionStore } from '../context/session.store';
 import { ToastStore } from '../feedback/toast.store';
 import { ENUM_LABELS } from '../models/enum-labels';
 import { PROFILE_VALUES, Profile } from '../models/enums';
-import { NotificationsService } from '../realtime/notifications.service';
+import { NotificationsService, RealtimeConnectionState } from '../realtime/notifications.service';
 import { SHELL_TEXTS } from './shell.texts';
 import { ViewRefreshService } from './view-refresh.service';
 
@@ -42,9 +42,15 @@ export class TopBarComponent {
     () => this.notifications.connectionState() === 'connected'
   );
 
-  protected readonly liveLabel = computed<string>(() =>
-    this.isLiveConnected() ? this.texts.liveOnline : this.texts.liveReconnecting
-  );
+  protected readonly liveLabel = computed<string>(() => {
+    const labels: Readonly<Record<RealtimeConnectionState, string>> = {
+      connected: this.texts.liveOnline,
+      reconnecting: this.texts.liveReconnecting,
+      disconnected: this.texts.liveReconnecting,
+      unavailable: this.texts.liveUnavailable,
+    };
+    return labels[this.notifications.connectionState()];
+  });
 
   protected readonly refreshButtonLabel = computed<string>(() =>
     this.isRefreshing() ? this.texts.refreshBusyText : this.texts.refreshTooltip

@@ -4,8 +4,9 @@ import { ApiClient } from '../api/api-client';
 import { ApiRoutes } from '../api/api-routes';
 import { ApproverStatus, CustomerStatus, Profile, WorkshopStatus } from '../models/enums';
 import { NotificationsService } from '../realtime/notifications.service';
+import { SESSION_TEXTS } from './session.texts';
 
-export const SESSION_STORAGE_KEY = 'rutaviva.crm.session.v1';
+export const SESSION_STORAGE_KEY = 'rutaviva.crm.session.v2';
 
 export interface StorageLike {
   getItem(key: string): string | null;
@@ -47,10 +48,32 @@ export interface WorkshopOption {
   readonly status: WorkshopStatus;
 }
 
+type CustomerSummary = Omit<CustomerOption, 'approvers'> & {
+  readonly approvers?: readonly ApproverOption[];
+};
+
+interface CustomerDetail {
+  readonly approvers?: readonly Partial<ApproverOption>[];
+}
+
 interface PersistedSession {
   readonly customerId: string;
   readonly profile: Profile;
   readonly actorId: string | null;
+}
+
+function withApprovers(customer: CustomerSummary): CustomerOption {
+  return { ...customer, approvers: customer.approvers ?? [] };
+}
+
+function toApprover(approver: Partial<ApproverOption>, customerId: string): ApproverOption {
+  return {
+    id: approver.id ?? '',
+    customerId: approver.customerId ?? customerId,
+    fullName: approver.fullName ?? '',
+    email: approver.email ?? '',
+    status: approver.status ?? 'Active',
+  };
 }
 
 @Injectable({
@@ -102,15 +125,15 @@ export class SessionStore {
       const approver: ApproverOption | undefined = this.availableApprovers().find(
         (a: ApproverOption) => a.id === actorId
       );
-      return approver?.fullName ?? 'Laura Gómez';
+      return approver?.fullName ?? SESSION_TEXTS.approverActorName;
     }
     if (profile === 'Workshop') {
       const workshop: WorkshopOption | undefined = this.workshopsSignal().find(
         (w: WorkshopOption) => w.id === actorId
       );
-      return workshop?.name ?? 'Taller';
+      return workshop?.name ?? SESSION_TEXTS.workshopActorName;
     }
-    return 'Operador';
+    return SESSION_TEXTS.operatorActorName;
   });
 
   constructor() {
@@ -120,13 +143,15 @@ export class SessionStore {
   async loadContextCatalogs(): Promise<void> {
     try {
       const [customers, workshops] = await Promise.all([
-        firstValueFrom(this.apiClient.get<readonly CustomerOption[]>(ApiRoutes.customers.list())),
+        firstValueFrom(this.apiClient.get<readonly CustomerSummary[]>(ApiRoutes.customers.list())),
         firstValueFrom(
           this.apiClient.get<readonly WorkshopOption[]>(ApiRoutes.workshops.list('Active'))
         ),
       ]);
-      this.customersSignal.set(customers);
+      this.customersSignal.set(customers.map(withApprovers));
       this.workshopsSignal.set(workshops);
+      this.discardUnknownCustomer();
+      await this.loadApprovers(this.customerIdSignal());
       this.ensureValidActor();
       await this.notifications.syncSession(
         this.customerIdSignal(),
@@ -142,6 +167,7 @@ export class SessionStore {
     this.customerIdSignal.set(customerId);
     this.ensureValidActor();
     this.persistToStorage();
+    void this.loadApprovers(customerId).then(() => this.refreshActor());
     void this.notifications.syncSession(
       this.customerIdSignal(),
       this.profileSignal(),
@@ -176,6 +202,44 @@ export class SessionStore {
 
   setPendingApprovalsCount(count: number): void {
     this.pendingApprovalsCountSignal.set(count);
+  }
+
+  private refreshActor(): void {
+    this.ensureValidActor();
+    this.persistToStorage();
+    void this.notifications.syncSession(
+      this.customerIdSignal(),
+      this.profileSignal(),
+      this.actorIdSignal()
+    );
+  }
+
+  private discardUnknownCustomer(): void {
+    const id: string = this.customerIdSignal();
+    if (!id || this.customersSignal().some((c: CustomerOption) => c.id === id)) {
+      return;
+    }
+    this.customerIdSignal.set('');
+    this.persistToStorage();
+  }
+
+  private async loadApprovers(customerId: string): Promise<void> {
+    if (!customerId) {
+      return;
+    }
+    try {
+      const detail: CustomerDetail = await firstValueFrom(
+        this.apiClient.get<CustomerDetail>(ApiRoutes.customers.byId(customerId))
+      );
+      const approvers: readonly ApproverOption[] = (detail.approvers ?? []).map(
+        (a: Partial<ApproverOption>) => toApprover(a, customerId)
+      );
+      this.customersSignal.update((list: readonly CustomerOption[]) =>
+        list.map((c: CustomerOption) => (c.id === customerId ? { ...c, approvers } : c))
+      );
+    } catch {
+      return;
+    }
   }
 
   private ensureValidActor(): void {

@@ -13,9 +13,12 @@ import {
   createReadyLoadable,
   Loadable,
 } from '../../../shared/state/loadable';
-import { MaintenanceApi } from '../data/maintenance.api';
+import { forkJoin } from 'rxjs';
+import { ALERT_STATUSES_TO_COUNT, MaintenanceApi } from '../data/maintenance.api';
 import { MAINTENANCE_TEXTS } from '../maintenance.texts';
-import { AlertVm } from '../models/maintenance.vm';
+import { AlertsPageVm, AlertVm } from '../models/maintenance.vm';
+
+const FLASH_DURATION_MS = 600;
 
 @Injectable({
   providedIn: 'root',
@@ -33,6 +36,9 @@ export class AlertsStore {
   >(createIdleLoadable([]));
   private readonly activeStatusSignal: WritableSignal<AlertStatus> =
     signal<AlertStatus>('Active');
+  private readonly countsSignal: WritableSignal<Readonly<Record<AlertStatus, number>>> = signal<
+    Readonly<Record<AlertStatus, number>>
+  >({ Active: 0, Acknowledged: 0, Resolved: 0 });
   private readonly flashedAlertIdsSignal: WritableSignal<ReadonlySet<string>> = signal<
     ReadonlySet<string>
   >(new Set<string>());
@@ -48,28 +54,8 @@ export class AlertsStore {
     return this.alertsLoadableSignal().data.filter((a: AlertVm) => a.status === status);
   });
 
-  readonly countsByStatus: Signal<Readonly<Record<AlertStatus, number>>> = computed(() => {
-    const items: readonly AlertVm[] = this.alertsLoadableSignal().data;
-    let active = 0;
-    let acknowledged = 0;
-    let resolved = 0;
-
-    for (const item of items) {
-      if (item.status === 'Active') {
-        active += 1;
-      } else if (item.status === 'Acknowledged') {
-        acknowledged += 1;
-      } else {
-        resolved += 1;
-      }
-    }
-
-    return {
-      Active: active,
-      Acknowledged: acknowledged,
-      Resolved: resolved,
-    };
-  });
+  readonly countsByStatus: Signal<Readonly<Record<AlertStatus, number>>> =
+    this.countsSignal.asReadonly();
 
   constructor() {
     this.notifications.alertChanged$
@@ -92,12 +78,12 @@ export class AlertsStore {
       createLoadingLoadable(prev.data)
     );
 
-    this.maintenanceApi.getAlerts({ customerId }).subscribe({
-      next: (alerts: readonly AlertVm[]) => {
-        this.alertsLoadableSignal.set(createReadyLoadable(alerts));
-        const activeCount: number = alerts.filter((a: AlertVm) => a.status === 'Active').length;
-        this.sessionStore.setActiveAlertsCount(activeCount);
-      },
+    forkJoin(
+      ALERT_STATUSES_TO_COUNT.map((status: AlertStatus) =>
+        this.maintenanceApi.getAlerts({ customerId, status })
+      )
+    ).subscribe({
+      next: (pages: readonly AlertsPageVm[]) => this.applyPages(pages),
       error: () => {
         this.alertsLoadableSignal.update((prev: Loadable<readonly AlertVm[]>) =>
           createErrorLoadable(prev.data, MAINTENANCE_TEXTS.alertsErrorMessage)
@@ -111,23 +97,18 @@ export class AlertsStore {
   }
 
   acknowledge(alertId: string): void {
-    const actor: string = this.sessionStore.currentActorName();
-    this.maintenanceApi.acknowledgeAlert(alertId, actor).subscribe({
-      next: (updated: AlertVm) => {
-        this.alertsLoadableSignal.update((prev: Loadable<readonly AlertVm[]>) => {
-          const nextList: readonly AlertVm[] = prev.data.map((a: AlertVm) =>
-            a.alertId === updated.alertId ? updated : a
-          );
-          const activeCount: number = nextList.filter((a: AlertVm) => a.status === 'Active').length;
-          this.sessionStore.setActiveAlertsCount(activeCount);
-          return createReadyLoadable(nextList);
-        });
+    this.maintenanceApi.acknowledgeAlert(alertId).subscribe({
+      next: () => {
         this.toastStore.show({ message: MAINTENANCE_TEXTS.acknowledgedToast });
+        this.loadAlerts();
+      },
+      error: () => {
+        this.toastStore.show({ message: MAINTENANCE_TEXTS.acknowledgeErrorToast, isError: true });
       },
     });
   }
 
-  markAlertFlashed(alertId: string, durationMs = 600): void {
+  markAlertFlashed(alertId: string, durationMs = FLASH_DURATION_MS): void {
     this.flashedAlertIdsSignal.update((prev: ReadonlySet<string>) => {
       const next: Set<string> = new Set<string>(prev);
       next.add(alertId);
@@ -143,5 +124,16 @@ export class AlertsStore {
       }, durationMs);
     }
   }
-}
 
+  private applyPages(pages: readonly AlertsPageVm[]): void {
+    const counts: Record<AlertStatus, number> = { Active: 0, Acknowledged: 0, Resolved: 0 };
+    ALERT_STATUSES_TO_COUNT.forEach((status: AlertStatus, index: number) => {
+      counts[status] = pages[index]?.totalCount ?? 0;
+    });
+    this.countsSignal.set(counts);
+    this.alertsLoadableSignal.set(
+      createReadyLoadable(pages.flatMap((page: AlertsPageVm) => page.items))
+    );
+    this.sessionStore.setActiveAlertsCount(counts.Active);
+  }
+}

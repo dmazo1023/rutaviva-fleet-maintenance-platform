@@ -127,9 +127,4 @@ export class FleetPageComponent implements OnInit {
   onSelectVehicle(plate: string): void {
     void this.router.navigate(['/flota', plate]);
   }
-
-  onSelectOrder(orderId: string): void {
-    void this.router.navigate(['/ordenes', orderId]);
-  }
 }
-

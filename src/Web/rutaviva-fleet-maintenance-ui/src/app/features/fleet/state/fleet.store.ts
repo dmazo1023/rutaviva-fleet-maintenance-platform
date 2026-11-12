@@ -17,8 +17,17 @@ const URGENCY_RANK: Readonly<Record<string, number>> = {
   Inactive: 3,
 };
 
+const FLASH_DURATION_MS = 600;
 const INACTIVE_RANK = 3;
 const UP_TO_DATE_RANK = 2;
+
+type SearchableField = 'plate' | 'brand' | 'model' | 'customerName';
+
+const SEARCHABLE_FIELDS: readonly SearchableField[] = ['plate', 'brand', 'model', 'customerName'];
+
+function containsQuery(value: string | null | undefined, query: string): boolean {
+  return (value ?? '').toLowerCase().includes(query);
+}
 
 export function getVehicleUrgencyRank(vehicle: VehicleListItemVm): number {
   if (vehicle.status === 'Inactive') {
@@ -38,7 +47,7 @@ export function sortVehiclesByUrgency(
     if (rankDiff !== 0) {
       return rankDiff;
     }
-    const percentDiff: number = b.worstConsumedPercent - a.worstConsumedPercent;
+    const percentDiff: number = b.maxConsumedPercent - a.maxConsumedPercent;
     if (percentDiff !== 0) {
       return percentDiff;
     }
@@ -85,11 +94,8 @@ export class FleetStore {
       if (!query) {
         return true;
       }
-      return (
-        item.plate.toLowerCase().includes(query) ||
-        item.brand.toLowerCase().includes(query) ||
-        item.model.toLowerCase().includes(query) ||
-        item.customerName.toLowerCase().includes(query)
+      return SEARCHABLE_FIELDS.some((field: SearchableField) =>
+        containsQuery(item[field], query)
       );
     });
   });
@@ -167,7 +173,7 @@ export class FleetStore {
     this.activeFilterSignal.set('All');
   }
 
-  markVehicleFlashed(vehicleId: string, durationMs = 600): void {
+  markVehicleFlashed(vehicleId: string, durationMs = FLASH_DURATION_MS): void {
     this.flashedVehicleIdsSignal.update((prev: ReadonlySet<string>) => {
       const next: Set<string> = new Set<string>(prev);
       next.add(vehicleId);

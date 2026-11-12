@@ -108,5 +108,14 @@ describe('NotificationsService', () => {
       { method: HubMethods.client.joinApprover, args: ['approver-laura'] },
     ]);
   });
-});
 
+  it('should stay unavailable without connecting when realtime is disabled', async () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({});
+    const disabledService: NotificationsService = TestBed.inject(NotificationsService);
+
+    await disabledService.start();
+
+    expect(disabledService.connectionState()).toBe('unavailable');
+  });
+});

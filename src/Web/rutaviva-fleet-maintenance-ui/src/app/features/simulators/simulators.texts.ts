@@ -18,5 +18,7 @@ export const SIMULATORS_TEXTS = {
   dueSoonLabel: 'Rutinas por vencer',
   overdueLabel: 'Rutinas vencidas',
   requestedOrdersLabel: 'Órdenes solicitadas',
+  asOfDateResultLabel: 'Corte aplicado',
+  submitErrorMessage: 'No se pudo completar la simulación. Revisa los datos e intenta de nuevo.',
 } as const;
 

@@ -4,7 +4,6 @@ export interface RoutineTypeVm {
   readonly id: string;
   readonly code: string;
   readonly name: string;
-  readonly icon: string;
   readonly defaultIntervalKm: number | null;
   readonly defaultIntervalMonths: number | null;
   readonly dueSoonThresholdPercent: number;

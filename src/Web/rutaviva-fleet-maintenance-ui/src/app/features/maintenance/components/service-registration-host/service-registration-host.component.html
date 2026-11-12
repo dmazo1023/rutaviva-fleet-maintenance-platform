@@ -1,0 +1,8 @@
+<app-service-registration-dialog
+  [routine]="store.routine()"
+  [planOdometerKm]="planOdometerKm()"
+  [busy]="store.busy()"
+  [serverError]="store.errorMessage()"
+  (confirmed)="onConfirmed($event)"
+  (closed)="store.close()"
+/>

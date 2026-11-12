@@ -18,6 +18,7 @@ import {
   OdometerSimulationResultVm,
   TimeEvaluationResultVm,
 } from '../../models/simulators.vm';
+import { currentDateInput, currentDateTimeLocal, toBogotaIso } from '../../simulators-datetime';
 import { SIMULATORS_TEXTS } from '../../simulators.texts';
 
 @Component({
@@ -33,12 +34,14 @@ export class SimulatorsPageComponent implements OnInit {
   private readonly viewRefresh: ViewRefreshService = inject(ViewRefreshService);
 
   readonly texts: typeof SIMULATORS_TEXTS = SIMULATORS_TEXTS;
-  readonly labels = ENUM_LABELS;
+  readonly labels: typeof ENUM_LABELS = ENUM_LABELS;
 
   readonly plateInput: WritableSignal<string> = signal<string>('RVA101');
   readonly kmInput: WritableSignal<string> = signal<string>('50200');
-  readonly readAtInput: WritableSignal<string> = signal<string>('12/11/2026 09:00');
-  readonly asOfDateInput: WritableSignal<string> = signal<string>('2026-11-12');
+  readonly readAtInput: WritableSignal<string> = signal<string>(currentDateTimeLocal());
+  readonly asOfDateInput: WritableSignal<string> = signal<string>(currentDateInput());
+
+  readonly errorMessage: WritableSignal<string | null> = signal<string | null>(null);
 
   readonly odometerResult: WritableSignal<OdometerSimulationResultVm | null> =
     signal<OdometerSimulationResultVm | null>(null);
@@ -86,14 +89,14 @@ export class SimulatorsPageComponent implements OnInit {
       return;
     }
     const plate: string = this.plateInput().trim().toUpperCase();
-    const kilometers: number = Number(this.kmInput().trim());
-    const readAt: string = this.readAtInput().trim();
+    const odometerKm: number = Number(this.kmInput().trim());
+    const readAt: string = toBogotaIso(this.readAtInput());
 
     this.api
-      .recordOdometerReading({ plate, kilometers, readAt })
-      .subscribe((res: OdometerSimulationResultVm) => {
-        this.odometerResult.set(res);
-        this.viewRefresh.requestRefresh();
+      .recordOdometerReading({ plate, odometerKm, readAt })
+      .subscribe({
+        next: (res: OdometerSimulationResultVm) => this.onOdometerResult(res),
+        error: () => this.onSubmitFailed(),
       });
   }
 
@@ -103,10 +106,26 @@ export class SimulatorsPageComponent implements OnInit {
       return;
     }
     const asOfDate: string = this.asOfDateInput().trim();
-    this.api.runTimeEvaluation(asOfDate).subscribe((res: TimeEvaluationResultVm) => {
-      this.timeResult.set(res);
-      this.viewRefresh.requestRefresh();
+    this.api.runTimeEvaluation(asOfDate).subscribe({
+      next: (res: TimeEvaluationResultVm) => this.onTimeResult(res),
+      error: () => this.onSubmitFailed(),
     });
+  }
+
+  private onOdometerResult(res: OdometerSimulationResultVm): void {
+    this.errorMessage.set(null);
+    this.odometerResult.set(res);
+    this.viewRefresh.requestRefresh();
+  }
+
+  private onTimeResult(res: TimeEvaluationResultVm): void {
+    this.errorMessage.set(null);
+    this.timeResult.set(res);
+    this.viewRefresh.requestRefresh();
+  }
+
+  private onSubmitFailed(): void {
+    this.errorMessage.set(this.texts.submitErrorMessage);
   }
 }
 
