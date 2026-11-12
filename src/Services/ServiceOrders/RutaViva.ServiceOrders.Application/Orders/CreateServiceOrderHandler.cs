@@ -11,6 +11,11 @@ public sealed class CreateServiceOrderHandler(IServiceOrderRepository orders, IU
 {
     public async Task<Result<ServiceOrderId>> HandleAsync(CreateServiceOrderCommand command, CancellationToken cancellationToken)
     {
+        if (await orders.HasOpenOrderForRoutineAsync(command.Reference.RoutineId, cancellationToken))
+        {
+            return ServiceOrderErrors.OpenOrderExists;
+        }
+
         Result<ServiceOrder> order = ServiceOrder.Create(command.Reference, command.CreatedBy);
         if (order.IsFailure)
         {

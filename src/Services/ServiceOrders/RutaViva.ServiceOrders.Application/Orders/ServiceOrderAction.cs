@@ -6,5 +6,6 @@ public enum ServiceOrderAction
     Approve = 2,
     Reject = 3,
     Start = 4,
-    Complete = 5
+    Complete = 5,
+    Cancel = 6
 }

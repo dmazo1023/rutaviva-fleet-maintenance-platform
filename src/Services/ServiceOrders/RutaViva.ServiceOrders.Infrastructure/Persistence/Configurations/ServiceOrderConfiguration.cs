@@ -11,6 +11,8 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
     private const string HistoryForeignKey = "ServiceOrderId";
     private const string NumberIndexName = "UX_ServiceOrders_Number";
     private const string VehicleIndexName = "IX_ServiceOrders_VehicleId";
+    private const string OpenRoutineIndexName = "UX_ServiceOrders_OpenRoutine";
+    private const string OpenRoutineFilter = "[Status] IN ('Created', 'Quoted', 'PendingApproval', 'Approved', 'InProgress')";
     private const string VehicleIdColumn = "VehicleId";
     private const string PlateColumn = "Plate";
     private const string CustomerIdColumn = "CustomerId";
@@ -69,6 +71,7 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
         reference.Property(value => value.RoutineName).HasColumnName(RoutineNameColumn).HasMaxLength(ServiceOrder.MaxTextLength).IsRequired();
         reference.Property(value => value.RoutineTypeCode).HasColumnName(RoutineTypeCodeColumn).HasMaxLength(ServiceOrder.MaxRoutineTypeCodeLength).IsRequired();
         reference.HasIndex(value => value.VehicleId).HasDatabaseName(VehicleIndexName);
+        reference.HasIndex(value => value.RoutineId).IsUnique().HasFilter(OpenRoutineFilter).HasDatabaseName(OpenRoutineIndexName);
     }
 
     private static void ConfigureHistory(EntityTypeBuilder<ServiceOrder> builder)

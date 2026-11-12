@@ -41,6 +41,7 @@ public sealed class ExecuteServiceOrderActionHandler(
         ServiceOrderAction.Reject => order.Reject(command.Actor),
         ServiceOrderAction.Start => order.Start(command.Actor),
         ServiceOrderAction.Complete => order.Complete(command.ServicedKm ?? 0, command.Actor),
+        ServiceOrderAction.Cancel => order.Cancel(command.Actor),
         _ => Result.Failure(ServiceOrderErrors.InvalidTransition)
     };
 }
