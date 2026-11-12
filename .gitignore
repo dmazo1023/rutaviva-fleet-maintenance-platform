@@ -24,3 +24,9 @@ test-results/
 .claude/harness/plan-context.local.json
 DEV I_Reto.md
 deploy/local/logs/
+
+*.bkp
+.$*
+DevI.code-workspace
+Activacion de servicios en unidades de camara Core.drawio
+arquitectura administracion de la oferta comercial ADO.drawio
