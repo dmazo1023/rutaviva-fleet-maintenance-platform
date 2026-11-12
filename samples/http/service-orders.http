@@ -1,23 +1,20 @@
 @serviceOrders = http://localhost:5105/api/v1/service-orders
 @vehicleId = 01a1cd76-71b3-76a2-b461-44374ef249fa
 @routineId = 01a1cd76-a755-70b0-9e97-08dead402bbe
+@approverId = 01a1cd75-e86f-761c-94dc-d07809270bda
 @orderId = PEGAR_AQUI_EL_ID_QUE_DEVUELVE_CREAR_LA_ORDEN
 
-### Crear la orden para una rutina vencida (perfil Operador)
+### Crear la orden manual para la rutina vencida de TAN202 (perfil Operador)
 POST {{serviceOrders}}
 Content-Type: application/json
 
-{
-  "vehicleId": "{{vehicleId}}",
-  "plate": "TAN202",
-  "customerId": "01a1cd75-d2a4-7dec-a40a-6af7cf13e13b",
-  "workshopId": "01a1cd75-c2e5-7ee9-8a52-0da73f5f353c",
-  "workshopName": "Lubricantes y Llantas Bogotá",
-  "routineId": "{{routineId}}",
-  "routineName": "Cambio de aceite",
-  "routineTypeCode": "OIL_CHANGE",
-  "createdBy": "Operador"
-}
+{ "vehicleId": "{{vehicleId}}", "routineId": "{{routineId}}", "createdBy": "Operador" }
+
+### Repetirla responde 409 ServiceOrder.OpenOrderExists (RN-3: una orden abierta por rutina)
+POST {{serviceOrders}}
+Content-Type: application/json
+
+{ "vehicleId": "{{vehicleId}}", "routineId": "{{routineId}}", "createdBy": "Operador" }
 
 ### Cotizar por encima del tope (1.000.000): queda pendiente de aprobación (RN-4)
 POST {{serviceOrders}}/{{orderId}}/quote
@@ -31,11 +28,11 @@ GET {{serviceOrders}}?statusGroup=PendingApproval
 ### Detalle con las acciones del aprobador
 GET {{serviceOrders}}/{{orderId}}?actor=Approver
 
-### Aprobar
+### Aprobar con un aprobador de Transportes Andinos, dueño de TAN202
 POST {{serviceOrders}}/{{orderId}}/approve
 Content-Type: application/json
 
-{ "approvedBy": "Camila Torres" }
+{ "approvedBy": "Camila Torres", "approverId": "{{approverId}}" }
 
 ### Iniciar el servicio en el taller
 POST {{serviceOrders}}/{{orderId}}/start
@@ -48,3 +45,12 @@ POST {{serviceOrders}}/{{orderId}}/complete
 Content-Type: application/json
 
 { "completedBy": "Lubricantes y Llantas Bogotá", "servicedKm": 19050 }
+
+### Cancelar una orden abierta (perfil Operador); libera la rutina para una nueva orden
+POST {{serviceOrders}}/{{orderId}}/cancel
+Content-Type: application/json
+
+{ "cancelledBy": "Operador" }
+
+### Orden automática: una lectura que deje vencida una rutina crea la orden sola (origen Automatic)
+GET {{serviceOrders}}?statusGroup=Open
