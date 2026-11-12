@@ -22,13 +22,8 @@ import { StatusPillComponent } from '../../../../shared/status-pill/status-pill.
 import { OrderActionsComponent } from '../../components/order-actions/order-actions.component';
 import { OrderHistoryComponent } from '../../components/order-history/order-history.component';
 import { OrderStepperComponent } from '../../components/order-stepper/order-stepper.component';
+import { ServiceLinesComponent } from '../../components/service-lines/service-lines.component';
 import {
-  PriceLineEvent,
-  ServiceLinesComponent,
-} from '../../components/service-lines/service-lines.component';
-import {
-  ACTION_FORMS,
-  ACTION_IMPACT,
   OrderFormDialogComponent,
   OrderFormSubmitEvent,
 } from '../../dialogs/order-form.dialog';
@@ -37,6 +32,17 @@ import { ServiceOrdersFacade } from '../../service-orders.facade';
 import { SERVICE_ORDERS_TEXTS } from '../../service-orders.texts';
 
 const COP_FORMATTER: Intl.NumberFormat = new Intl.NumberFormat('es-CO');
+
+type DirectAction = 'Approve' | 'Start';
+
+const DIRECT_ACTIONS: ReadonlySet<ServiceOrderAction> = new Set<ServiceOrderAction>([
+  'Approve',
+  'Start',
+]);
+
+function isDirectAction(action: ServiceOrderAction): action is DirectAction {
+  return DIRECT_ACTIONS.has(action);
+}
 
 @Component({
   selector: 'app-order-detail-page',
@@ -69,6 +75,7 @@ export class OrderDetailPageComponent {
   readonly dialogAction: WritableSignal<ServiceOrderAction | null> =
     signal<ServiceOrderAction | null>(null);
   readonly submittingAction: WritableSignal<boolean> = signal<boolean>(false);
+  readonly dialogInitialAmount: WritableSignal<number | null> = signal<number | null>(null);
 
   readonly isWorkshop: Signal<boolean> = computed(
     () => this.sessionStore.profile() === 'Workshop'
@@ -88,21 +95,12 @@ export class OrderDetailPageComponent {
     return `$ ${COP_FORMATTER.format(amount)}`;
   }
 
-  onActionTriggered(orderId: string, action: ServiceOrderAction): void {
-    if (ACTION_FORMS[action] || ACTION_IMPACT[action]) {
-      this.dialogAction.set(action);
+  onActionTriggered(order: ServiceOrderDetailVm, action: ServiceOrderAction): void {
+    if (isDirectAction(action)) {
+      this.runDirectAction(order.id, action);
       return;
     }
-
-    if (action === 'Approve') {
-      this.facade.approve(orderId).subscribe();
-    } else if (action === 'MarkOnSite') {
-      this.facade.markOnSite(orderId).subscribe();
-    } else if (action === 'Start') {
-      this.facade.start(orderId).subscribe();
-    } else if (action === 'Complete') {
-      this.facade.complete(orderId).subscribe();
-    }
+    this.openDialog(order, action);
   }
 
   onDialogClosed(): void {
@@ -110,32 +108,12 @@ export class OrderDetailPageComponent {
   }
 
   onDialogSubmitted(orderId: string, event: OrderFormSubmitEvent): void {
-    this.submittingAction.set(true);
-    let call$: Observable<ServiceOrderDetailVm> | null = null;
-
-    if (event.action === 'Quote' && event.amount !== undefined) {
-      call$ = this.facade.quote(orderId, event.amount);
-    } else if (event.action === 'ScheduleAppointment' && event.appointmentAt) {
-      call$ = this.facade.scheduleAppointment(orderId, event.appointmentAt);
-    } else if (
-      event.action === 'AddAdditionalService' &&
-      event.description &&
-      event.amount !== undefined
-    ) {
-      call$ = this.facade.addAdditionalService(orderId, event.description, event.amount);
-    } else if (event.action === 'RequestAdditionalService' && event.description) {
-      call$ = this.facade.requestAdditionalService(orderId, event.description);
-    } else if (event.action === 'Reject') {
-      call$ = this.facade.reject(orderId);
-    } else if (event.action === 'Cancel') {
-      call$ = this.facade.cancel(orderId);
-    }
-
+    const call$: Observable<ServiceOrderDetailVm> | null = this.mutationFor(orderId, event);
     if (!call$) {
-      this.submittingAction.set(false);
       return;
     }
 
+    this.submittingAction.set(true);
     call$.subscribe({
       next: () => {
         this.submittingAction.set(false);
@@ -147,8 +125,32 @@ export class OrderDetailPageComponent {
     });
   }
 
-  onPriceSaved(orderId: string, event: PriceLineEvent): void {
-    this.facade.priceAdditionalService(orderId, event.lineId, event.amount).subscribe();
+  private runDirectAction(orderId: string, action: DirectAction): void {
+    const call$: Observable<ServiceOrderDetailVm> =
+      action === 'Approve' ? this.facade.approve(orderId) : this.facade.start(orderId);
+    call$.subscribe();
+  }
+
+  private openDialog(order: ServiceOrderDetailVm, action: ServiceOrderAction): void {
+    this.dialogInitialAmount.set(null);
+    this.dialogAction.set(action);
+    if (action === 'Complete') {
+      this.facade
+        .vehicleOdometerKm(order.vehicleId)
+        .subscribe((km: number | null) => this.dialogInitialAmount.set(km));
+    }
+  }
+
+  private mutationFor(
+    orderId: string,
+    event: OrderFormSubmitEvent
+  ): Observable<ServiceOrderDetailVm> | null {
+    const mutations: Partial<Record<ServiceOrderAction, () => Observable<ServiceOrderDetailVm>>> = {
+      Quote: () => this.facade.quote(orderId, event.amount ?? 0),
+      Complete: () => this.facade.complete(orderId, event.amount ?? 0),
+      Reject: () => this.facade.reject(orderId),
+    };
+    return mutations[event.action]?.() ?? null;
   }
 
   onRetry(): void {

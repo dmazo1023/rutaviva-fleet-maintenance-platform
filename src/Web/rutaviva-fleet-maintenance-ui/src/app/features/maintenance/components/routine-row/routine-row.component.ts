@@ -52,6 +52,7 @@ export class RoutineRowComponent {
   readonly editParams: OutputEmitterRef<RoutineVm> = output<RoutineVm>();
   readonly registerService: OutputEmitterRef<RoutineVm> = output<RoutineVm>();
   readonly openOrder: OutputEmitterRef<string> = output<string>();
+  readonly createOrder: OutputEmitterRef<RoutineVm> = output<RoutineVm>();
 
   readonly texts: typeof MAINTENANCE_TEXTS = MAINTENANCE_TEXTS;
 
@@ -91,7 +92,7 @@ export class RoutineRowComponent {
     () =>
       !this.isOff() &&
       this.canManage() &&
-      this.routine().dueStatus === 'Overdue' &&
+      this.routine().dueStatus !== 'UpToDate' &&
       !this.routine().openServiceOrderId
   );
 
@@ -105,6 +106,10 @@ export class RoutineRowComponent {
 
   onRegisterService(): void {
     this.registerService.emit(this.routine());
+  }
+
+  onCreateOrder(): void {
+    this.createOrder.emit(this.routine());
   }
 
   onOpenOrder(): void {

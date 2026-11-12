@@ -27,6 +27,7 @@ import {
   SegmentedFilterOption,
 } from '../../../../shared/segmented-filter/segmented-filter.component';
 import { SkeletonComponent } from '../../../../shared/skeleton/skeleton.component';
+import { StatusPillComponent } from '../../../../shared/status-pill/status-pill.component';
 import { SwitchComponent } from '../../../../shared/switch/switch.component';
 import { OdometerReadingsComponent } from '../../../maintenance/components/odometer-readings/odometer-readings.component';
 import { RoutineRowComponent } from '../../../maintenance/components/routine-row/routine-row.component';
@@ -34,6 +35,7 @@ import { ServiceRegistrationHostComponent } from '../../../maintenance/component
 import { UpdateRoutineParametersRequest } from '../../../maintenance/data/maintenance.api';
 import { RoutineParamsDialogComponent } from '../../../maintenance/dialogs/routine-params/routine-params.dialog';
 import { RoutineVm } from '../../../maintenance/models/maintenance.vm';
+import { isOpenOrder, withOpenOrders } from '../../../maintenance/models/routine-orders';
 import { ServiceRegistrationStore } from '../../../maintenance/state/service-registration.store';
 import { DeactivateVehicleDialogComponent } from '../../dialogs/deactivate-vehicle/deactivate-vehicle.dialog';
 import { FleetFacade } from '../../fleet.facade';
@@ -45,7 +47,6 @@ import { VehicleMasterListComponent } from './vehicle-master-list/vehicle-master
 
 export type VehicleDetailTab = 'rutinas' | 'ordenes' | 'lecturas';
 
-const NO_OPEN_ORDERS = 0;
 const OPERATION_ERROR_TOAST: ShowToastOptions = {
   message: FLEET_TEXTS.operationErrorMessage,
   tone: 'danger',
@@ -76,6 +77,7 @@ export interface VehicleDetailTabItem {
     VehicleMasterListComponent,
     SwitchComponent,
     SkeletonComponent,
+    StatusPillComponent,
     EmptyStateComponent,
     ErrorStateComponent,
     RoutineRowComponent,
@@ -114,6 +116,7 @@ export class VehicleDetailPageComponent implements OnInit {
   readonly planLoadable = this.facade.planLoadable;
   readonly readingsLoadable = this.facade.readingsLoadable;
   readonly flashedRoutineIds = this.facade.flashedRoutineIds;
+  readonly ordersLoadable = this.facade.ordersLoadable;
 
   readonly activeTab: WritableSignal<VehicleDetailTab> = signal<VehicleDetailTab>('rutinas');
   readonly editingRoutine: WritableSignal<RoutineVm | null> = signal<RoutineVm | null>(null);
@@ -128,7 +131,13 @@ export class VehicleDetailPageComponent implements OnInit {
     return routines.filter((r: RoutineVm) => r.state === 'Active').length;
   });
 
-  readonly openOrdersCount: number = NO_OPEN_ORDERS;
+  readonly routines: Signal<readonly RoutineVm[]> = computed(() =>
+    withOpenOrders(this.planLoadable().data?.routines ?? [], this.ordersLoadable().data)
+  );
+
+  readonly openOrdersCount: Signal<number> = computed(
+    () => this.ordersLoadable().data.filter(isOpenOrder).length
+  );
 
   readonly filterOptions: Signal<readonly SegmentedFilterOption[]> = computed(() => {
     const counts = this.filterCounts();
@@ -162,7 +171,7 @@ export class VehicleDetailPageComponent implements OnInit {
       label: this.texts.tabRoutines,
       count: this.planLoadable().data?.routines.length ?? 0,
     },
-    { key: 'ordenes', label: this.texts.tabOrders, count: this.openOrdersCount },
+    { key: 'ordenes', label: this.texts.tabOrders, count: this.openOrdersCount() },
     { key: 'lecturas', label: this.texts.tabReadings, count: this.readingsLoadable().data.length },
   ]);
 
@@ -193,6 +202,20 @@ export class VehicleDetailPageComponent implements OnInit {
     if (this.listLoadable().status === 'idle') {
       this.facade.loadFleetList();
     }
+  }
+
+  onCreateOrder(routine: RoutineVm): void {
+    const vehicle: VehicleDetailVm | null = this.detailLoadable().data;
+    if (!vehicle) {
+      return;
+    }
+    this.facade
+      .createServiceOrder(vehicle, routine)
+      .subscribe((orderId: string) => this.openServiceOrder(orderId));
+  }
+
+  openServiceOrder(orderId: string): void {
+    void this.router.navigate(['/ordenes', orderId]);
   }
 
   formatNumber(value: number | null): string {

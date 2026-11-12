@@ -19,7 +19,8 @@ $Services = @(
     @{ Name = 'Maintenance.Api'; Api = 'src\Services\Maintenance\RutaViva.Maintenance.Api'; Infrastructure = 'src\Services\Maintenance\RutaViva.Maintenance.Infrastructure'; Context = 'MaintenanceDbContext'; Url = 'http://localhost:5101' },
     @{ Name = 'Fleet.Api'; Api = 'src\Services\Fleet\RutaViva.Fleet.Api'; Infrastructure = 'src\Services\Fleet\RutaViva.Fleet.Infrastructure'; Context = 'FleetDbContext'; Url = 'http://localhost:5102' },
     @{ Name = 'Customers.Api'; Api = 'src\Services\Customers\RutaViva.Customers.Api'; Infrastructure = 'src\Services\Customers\RutaViva.Customers.Infrastructure'; Context = 'CustomersDbContext'; Url = 'http://localhost:5103' },
-    @{ Name = 'Workshops.Api'; Api = 'src\Services\Workshops\RutaViva.Workshops.Api'; Infrastructure = 'src\Services\Workshops\RutaViva.Workshops.Infrastructure'; Context = 'WorkshopsDbContext'; Url = 'http://localhost:5104' }
+    @{ Name = 'Workshops.Api'; Api = 'src\Services\Workshops\RutaViva.Workshops.Api'; Infrastructure = 'src\Services\Workshops\RutaViva.Workshops.Infrastructure'; Context = 'WorkshopsDbContext'; Url = 'http://localhost:5104' },
+    @{ Name = 'ServiceOrders.Api'; Api = 'src\Services\ServiceOrders\RutaViva.ServiceOrders.Api'; Infrastructure = 'src\Services\ServiceOrders\RutaViva.ServiceOrders.Infrastructure'; Context = 'ServiceOrdersDbContext'; Url = 'http://localhost:5105' }
 )
 
 function Invoke-Step([string]$label, [scriptblock]$action) {

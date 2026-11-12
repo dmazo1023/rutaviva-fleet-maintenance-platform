@@ -101,6 +101,18 @@ export interface AlertVm {
   readonly resolutionReason: AlertResolutionReason | null;
 }
 
+export interface CreateServiceOrderRequest {
+  readonly vehicleId: string;
+  readonly plate: string;
+  readonly customerId: string;
+  readonly workshopId: string;
+  readonly workshopName: string;
+  readonly routineId: string;
+  readonly routineName: string;
+  readonly routineTypeCode: string;
+  readonly createdBy: string;
+}
+
 export interface PlanOrderSummaryVm {
   readonly id: string;
   readonly number: string;

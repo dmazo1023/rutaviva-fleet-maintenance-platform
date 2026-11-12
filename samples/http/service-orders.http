@@ -1,0 +1,50 @@
+@serviceOrders = http://localhost:5105/api/v1/service-orders
+@vehicleId = 01a1cd76-71b3-76a2-b461-44374ef249fa
+@routineId = 01a1cd76-a755-70b0-9e97-08dead402bbe
+@orderId = PEGAR_AQUI_EL_ID_QUE_DEVUELVE_CREAR_LA_ORDEN
+
+### Crear la orden para una rutina vencida (perfil Operador)
+POST {{serviceOrders}}
+Content-Type: application/json
+
+{
+  "vehicleId": "{{vehicleId}}",
+  "plate": "TAN202",
+  "customerId": "01a1cd75-d2a4-7dec-a40a-6af7cf13e13b",
+  "workshopId": "01a1cd75-c2e5-7ee9-8a52-0da73f5f353c",
+  "workshopName": "Lubricantes y Llantas Bogotá",
+  "routineId": "{{routineId}}",
+  "routineName": "Cambio de aceite",
+  "routineTypeCode": "OIL_CHANGE",
+  "createdBy": "Operador"
+}
+
+### Cotizar por encima del tope (1.000.000): queda pendiente de aprobación (RN-4)
+POST {{serviceOrders}}/{{orderId}}/quote
+Content-Type: application/json
+
+{ "amount": 1500000, "quotedBy": "Lubricantes y Llantas Bogotá" }
+
+### Bandeja del aprobador
+GET {{serviceOrders}}?statusGroup=PendingApproval
+
+### Detalle con las acciones del aprobador
+GET {{serviceOrders}}/{{orderId}}?actor=Approver
+
+### Aprobar
+POST {{serviceOrders}}/{{orderId}}/approve
+Content-Type: application/json
+
+{ "approvedBy": "Camila Torres" }
+
+### Iniciar el servicio en el taller
+POST {{serviceOrders}}/{{orderId}}/start
+Content-Type: application/json
+
+{ "startedBy": "Lubricantes y Llantas Bogotá" }
+
+### Completar: Maintenance reinicia la rutina y resuelve la alerta (RN-5)
+POST {{serviceOrders}}/{{orderId}}/complete
+Content-Type: application/json
+
+{ "completedBy": "Lubricantes y Llantas Bogotá", "servicedKm": 19050 }

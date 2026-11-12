@@ -57,7 +57,7 @@ describe('RoutineRowComponent', () => {
     }).compileComponents();
   });
 
-  it('should render tracks, next-phase create-order label when overdue, and emit toggleState on switch click', () => {
+  it('should render tracks, the create-order button when overdue, and emit toggleState on switch click', () => {
     const fixture: ComponentFixture<RoutineRowComponent> =
       TestBed.createComponent(RoutineRowComponent);
     fixture.componentRef.setInput('routine', { ...baseRoutine, dueStatus: 'Overdue' });
@@ -65,8 +65,15 @@ describe('RoutineRowComponent', () => {
 
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
     expect(host.querySelectorAll('app-routine-track').length).toBe(2);
-    const createLabel: HTMLElement | null = host.querySelector('.routine-row__create-btn');
-    expect(createLabel?.textContent).toContain('Próxima fase');
+    const createButton: HTMLButtonElement | null = host.querySelector('.routine-row__create-btn');
+    expect(createButton?.textContent).toContain('Crear orden');
+
+    let requested: RoutineVm | undefined;
+    fixture.componentInstance.createOrder.subscribe((val: RoutineVm) => {
+      requested = val;
+    });
+    createButton?.click();
+    expect(requested?.routineId).toBe('RT-RVA101-OIL');
 
     let toggled: RoutineVm | undefined;
     fixture.componentInstance.toggleState.subscribe((val: RoutineVm) => {
@@ -111,10 +118,10 @@ describe('RoutineRowComponent', () => {
     expect(registered?.routineId).toBe('RT-RVA101-OIL');
   });
 
-  it('should hide the create-order label unless the routine is overdue', () => {
+  it('should hide the create-order button when the routine is UpToDate', () => {
     const fixture: ComponentFixture<RoutineRowComponent> =
       TestBed.createComponent(RoutineRowComponent);
-    fixture.componentRef.setInput('routine', baseRoutine);
+    fixture.componentRef.setInput('routine', { ...baseRoutine, dueStatus: 'UpToDate' });
     fixture.detectChanges();
 
     const host: HTMLElement = fixture.nativeElement as HTMLElement;

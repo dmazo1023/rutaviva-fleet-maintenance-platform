@@ -13,7 +13,6 @@ const STEP_SEQUENCE: readonly ServiceOrderStatus[] = [
   'Created',
   'Quoted',
   'Approved',
-  'OnSite',
   'InProgress',
   'Completed',
 ];

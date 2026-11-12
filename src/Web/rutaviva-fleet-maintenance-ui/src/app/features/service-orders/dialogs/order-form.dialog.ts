@@ -20,47 +20,25 @@ import { SERVICE_ORDERS_TEXTS } from '../service-orders.texts';
 
 export interface OrderActionFormConfig {
   readonly title: string;
-  readonly showDescription: boolean;
-  readonly showAmount: boolean;
-  readonly showAppointmentDate: boolean;
   readonly amountLabel: string;
+  readonly invalidAmountMessage: string;
 }
 
 export interface OrderFormSubmitEvent {
   readonly action: ServiceOrderAction;
-  readonly description?: string;
   readonly amount?: number;
-  readonly appointmentAt?: string;
 }
 
 export const ACTION_FORMS: Readonly<Partial<Record<ServiceOrderAction, OrderActionFormConfig>>> = {
   Quote: {
     title: SERVICE_ORDERS_TEXTS.quoteDialogTitle,
-    showDescription: false,
-    showAmount: true,
-    showAppointmentDate: false,
     amountLabel: SERVICE_ORDERS_TEXTS.quoteAmountLabel,
+    invalidAmountMessage: SERVICE_ORDERS_TEXTS.validationPositiveAmount,
   },
-  ScheduleAppointment: {
-    title: SERVICE_ORDERS_TEXTS.scheduleDialogTitle,
-    showDescription: false,
-    showAmount: false,
-    showAppointmentDate: true,
-    amountLabel: '',
-  },
-  AddAdditionalService: {
-    title: SERVICE_ORDERS_TEXTS.addAdditionalDialogTitle,
-    showDescription: true,
-    showAmount: true,
-    showAppointmentDate: false,
-    amountLabel: SERVICE_ORDERS_TEXTS.additionalAmountLabel,
-  },
-  RequestAdditionalService: {
-    title: SERVICE_ORDERS_TEXTS.requestAdditionalDialogTitle,
-    showDescription: true,
-    showAmount: false,
-    showAppointmentDate: false,
-    amountLabel: '',
+  Complete: {
+    title: SERVICE_ORDERS_TEXTS.completeDialogTitle,
+    amountLabel: SERVICE_ORDERS_TEXTS.completeKmLabel,
+    invalidAmountMessage: SERVICE_ORDERS_TEXTS.validationPositiveKm,
   },
 };
 
@@ -74,14 +52,11 @@ export const ACTION_IMPACT: Readonly<
       { icon: 'replay', text: SERVICE_ORDERS_TEXTS.rejectImpactRoutineOpen },
     ],
   },
-  Cancel: {
-    title: SERVICE_ORDERS_TEXTS.cancelConfirmTitle,
-    items: [
-      { icon: 'block', text: SERVICE_ORDERS_TEXTS.cancelImpactOrderCancelled },
-      { icon: 'replay', text: SERVICE_ORDERS_TEXTS.cancelImpactRoutineOpen },
-    ],
-  },
 };
+
+function toInputValue(amount: number | null): string {
+  return amount === null ? '' : String(amount);
+}
 
 @Component({
   selector: 'app-order-form-dialog',
@@ -94,15 +69,14 @@ export class OrderFormDialogComponent {
   readonly open: InputSignal<boolean> = input.required<boolean>();
   readonly action: InputSignal<ServiceOrderAction | null> = input<ServiceOrderAction | null>(null);
   readonly busy: InputSignal<boolean> = input<boolean>(false);
+  readonly initialAmount: InputSignal<number | null> = input<number | null>(null);
 
   readonly submitted: OutputEmitterRef<OrderFormSubmitEvent> = output<OrderFormSubmitEvent>();
   readonly closed: OutputEmitterRef<void> = output<void>();
 
   readonly texts: typeof SERVICE_ORDERS_TEXTS = SERVICE_ORDERS_TEXTS;
 
-  readonly descriptionInput: WritableSignal<string> = signal<string>('');
   readonly amountInput: WritableSignal<string> = signal<string>('');
-  readonly dateInput: WritableSignal<string> = signal<string>('');
   readonly validationError: WritableSignal<string | null> = signal<string | null>(null);
 
   readonly formConfig: Signal<OrderActionFormConfig | null> = computed(() => {
@@ -125,29 +99,15 @@ export class OrderFormDialogComponent {
   constructor() {
     effect(() => {
       if (this.open()) {
-        this.descriptionInput.set('');
-        this.amountInput.set('');
-        this.dateInput.set('');
+        this.amountInput.set(toInputValue(this.initialAmount()));
         this.validationError.set(null);
       }
     });
   }
 
-  onDescriptionChange(event: Event): void {
-    const target: HTMLInputElement = event.target as HTMLInputElement;
-    this.descriptionInput.set(target.value);
-    this.validationError.set(null);
-  }
-
   onAmountChange(event: Event): void {
     const target: HTMLInputElement = event.target as HTMLInputElement;
     this.amountInput.set(target.value);
-    this.validationError.set(null);
-  }
-
-  onDateChange(event: Event): void {
-    const target: HTMLInputElement = event.target as HTMLInputElement;
-    this.dateInput.set(target.value);
     this.validationError.set(null);
   }
 
@@ -171,32 +131,13 @@ export class OrderFormDialogComponent {
       return;
     }
 
-    if (cfg.showDescription && this.descriptionInput().trim() === '') {
-      this.validationError.set(this.texts.validationRequiredDesc);
-      return;
-    }
-
-    let parsedAmount: number | undefined;
-    if (cfg.showAmount) {
-      const num: number = Number(this.amountInput().trim());
-      if (!Number.isFinite(num) || num <= 0) {
-        this.validationError.set(this.texts.validationPositiveAmount);
-        return;
-      }
-      parsedAmount = num;
-    }
-
-    if (cfg.showAppointmentDate && this.dateInput().trim() === '') {
-      this.validationError.set(this.texts.validationRequiredDate);
+    const amount: number = Number(this.amountInput().trim());
+    if (!Number.isFinite(amount) || amount <= 0) {
+      this.validationError.set(cfg.invalidAmountMessage);
       return;
     }
 
     this.validationError.set(null);
-    this.submitted.emit({
-      action: act,
-      description: cfg.showDescription ? this.descriptionInput().trim() : undefined,
-      amount: parsedAmount,
-      appointmentAt: cfg.showAppointmentDate ? this.dateInput().trim() : undefined,
-    });
+    this.submitted.emit({ action: act, amount });
   }
 }

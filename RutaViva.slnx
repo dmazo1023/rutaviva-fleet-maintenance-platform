@@ -37,6 +37,12 @@
     <Project Path="src/Services/Maintenance/RutaViva.Maintenance.Domain/RutaViva.Maintenance.Domain.csproj" />
     <Project Path="src/Services/Maintenance/RutaViva.Maintenance.Infrastructure/RutaViva.Maintenance.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/Services/ServiceOrders/">
+    <Project Path="src/Services/ServiceOrders/RutaViva.ServiceOrders.Api/RutaViva.ServiceOrders.Api.csproj" />
+    <Project Path="src/Services/ServiceOrders/RutaViva.ServiceOrders.Application/RutaViva.ServiceOrders.Application.csproj" />
+    <Project Path="src/Services/ServiceOrders/RutaViva.ServiceOrders.Domain/RutaViva.ServiceOrders.Domain.csproj" />
+    <Project Path="src/Services/ServiceOrders/RutaViva.ServiceOrders.Infrastructure/RutaViva.ServiceOrders.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/Services/Workshops/">
     <Project Path="src/Services/Workshops/RutaViva.Workshops.Api/RutaViva.Workshops.Api.csproj" />
     <Project Path="src/Services/Workshops/RutaViva.Workshops.Application/RutaViva.Workshops.Application.csproj" />
@@ -71,6 +77,10 @@
     <Project Path="tests/Services/Maintenance/RutaViva.Maintenance.Application.UnitTests/RutaViva.Maintenance.Application.UnitTests.csproj" />
     <Project Path="tests/Services/Maintenance/RutaViva.Maintenance.Domain.UnitTests/RutaViva.Maintenance.Domain.UnitTests.csproj" />
     <Project Path="tests/Services/Maintenance/RutaViva.Maintenance.IntegrationTests/RutaViva.Maintenance.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Services/ServiceOrders/">
+    <Project Path="tests/Services/ServiceOrders/RutaViva.ServiceOrders.Domain.UnitTests/RutaViva.ServiceOrders.Domain.UnitTests.csproj" />
+    <Project Path="tests/Services/ServiceOrders/RutaViva.ServiceOrders.IntegrationTests/RutaViva.ServiceOrders.IntegrationTests.csproj" />
   </Folder>
   <Folder Name="/tests/Services/Workshops/">
     <Project Path="tests/Services/Workshops/RutaViva.Workshops.Application.UnitTests/RutaViva.Workshops.Application.UnitTests.csproj" />

@@ -210,3 +210,37 @@
     }
   }
 }
+
+.vehicle-orders {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &__item {
+    display: flex;
+    gap: var(--s-3);
+    align-items: center;
+    width: 100%;
+    padding: var(--s-3) var(--s-4);
+    border: 0;
+    border-bottom: 1px solid var(--c-border);
+    background: transparent;
+    color: var(--c-text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--c-sunken);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--c-focus);
+      outline-offset: -2px;
+    }
+  }
+
+  &__routine {
+    flex: 1;
+  }
+}

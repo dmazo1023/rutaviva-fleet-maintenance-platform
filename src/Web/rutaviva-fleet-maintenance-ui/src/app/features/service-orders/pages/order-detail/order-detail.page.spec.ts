@@ -79,7 +79,7 @@ describe('OrderDetailPageComponent', () => {
     sessionStore = TestBed.inject(SessionStore);
   });
 
-  it('should render 6-step stepper with paused banner, inline price input for Workshop, waiting message for Created without lines, and collapsed history details', () => {
+  it('should render 5-step stepper with paused banner, inline price input for Workshop, waiting message for Created without lines, and collapsed history details', () => {
     sessionStore.setProfile('Workshop');
     store.setDetailReady(baseOrder);
 
@@ -89,7 +89,7 @@ describe('OrderDetailPageComponent', () => {
     fixture.detectChanges();
 
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
-    expect(host.querySelectorAll('.order-stepper__step').length).toBe(6);
+    expect(host.querySelectorAll('.order-stepper__step').length).toBe(5);
     expect(host.textContent).toContain('En pausa · En proceso');
     expect(host.querySelector('.service-lines__price-input')).not.toBeNull();
 

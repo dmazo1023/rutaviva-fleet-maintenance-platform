@@ -56,11 +56,15 @@
           }
         </button>
       } @else if (canShowCreateOrder()) {
-        <span class="routine-row__create-btn" [attr.title]="texts.createOrderNextPhaseHint">
+        <button
+          type="button"
+          class="btn btn--primary btn--s routine-row__create-btn"
+          [attr.aria-label]="texts.createOrderAriaPrefix + routine().name"
+          (click)="onCreateOrder()"
+        >
           <span class="ms ms--s" aria-hidden="true">add</span>
-          <span>{{ texts.createOrder }}</span>
-          <span class="routine-row__soon">{{ texts.createOrderNextPhase }}</span>
-        </span>
+          {{ texts.createOrder }}
+        </button>
       }
 
       @if (canRegisterService()) {

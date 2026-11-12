@@ -18,5 +18,10 @@
     "target": "http://localhost:5104",
     "secure": false,
     "changeOrigin": true
+  },
+  "/api/v1/service-orders": {
+    "target": "http://localhost:5105",
+    "secure": false,
+    "changeOrigin": true
   }
 }

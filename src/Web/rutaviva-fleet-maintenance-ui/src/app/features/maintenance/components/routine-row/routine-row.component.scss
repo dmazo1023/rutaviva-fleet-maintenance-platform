@@ -73,26 +73,6 @@
   }
 }
 
-.routine-row {
-  &__create-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--c-muted);
-  }
-
-  &__soon {
-    padding: 1px 8px;
-    border-radius: var(--r-chip);
-    background: var(--c-neutral-soft);
-    color: var(--c-neutral);
-    font-size: 12px;
-    font-weight: 700;
-  }
-}
-
 @media (width <= 760px) {
   .rt {
     grid-template-columns: 36px minmax(0, 1fr);
