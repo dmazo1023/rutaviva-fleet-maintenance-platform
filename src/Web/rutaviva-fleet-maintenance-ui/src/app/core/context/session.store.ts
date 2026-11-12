@@ -151,7 +151,7 @@ export class SessionStore {
       this.customersSignal.set(customers.map(withApprovers));
       this.workshopsSignal.set(workshops);
       this.discardUnknownCustomer();
-      await this.loadApprovers(this.customerIdSignal());
+      await this.loadApproversOf(this.approverScope());
       this.ensureValidActor();
       await this.notifications.syncSession(
         this.customerIdSignal(),
@@ -221,6 +221,15 @@ export class SessionStore {
     }
     this.customerIdSignal.set('');
     this.persistToStorage();
+  }
+
+  private approverScope(): readonly string[] {
+    const customerId: string = this.customerIdSignal();
+    return customerId ? [customerId] : this.customersSignal().map((c: CustomerOption) => c.id);
+  }
+
+  private async loadApproversOf(customerIds: readonly string[]): Promise<void> {
+    await Promise.all(customerIds.map((id: string) => this.loadApprovers(id)));
   }
 
   private async loadApprovers(customerId: string): Promise<void> {
